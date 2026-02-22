@@ -1,0 +1,43 @@
+name: Publish Artifacts
+
+on:
+  push:
+    branches: ['main']
+
+jobs:
+  publish-artifacts:
+    runs-on: ubuntu-latest
+
+    permissions:
+      checks: write
+      pull-requests: write
+      actions: read
+
+    steps:
+      - name: Checkout project sources
+        uses: actions/checkout@v4
+
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: 17
+          distribution: corretto
+          architecture: x64
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Run tests
+        run: ./gradlew test
+
+      - name: Publish test results
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: always()
+        with:
+          files: '**/build/test-results/test/TEST-*.xml'
+
+      - name: Publish artifacts
+        run: ./gradlew publish -ProxymcUsername=${{ env.REPO_USER }} -ProxymcPassword=${{ env.REPO_PASS }}
+        env:
+          REPO_USER: ${{ secrets.REPO_USERNAME }}
+          REPO_PASS: ${{ secrets.REPO_PASSWORD }}
