@@ -3,6 +3,10 @@ plugins {
     id("jserialize.base-conventions")
 }
 
+indra.configurePublications {
+    from(components["javaPlatform"])
+}
+
 dependencies.constraints {
     listOf(
         "annotations",
