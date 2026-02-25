@@ -19,7 +19,7 @@ import java.util.Iterator;
 import static net.roxymc.jserialize.adapter.bson.ObjectCodec.DEFAULT_DECODER_CONTEXT;
 import static net.roxymc.jserialize.adapter.bson.ObjectCodec.ID_PROPERTY_NAME;
 
-final class BsonReaderAdapter implements ReaderAdapter {
+final class BsonReaderAdapter implements ReaderAdapter<BsonValue> {
     private final ObjectCodec<?> codec;
     private final BsonReader reader;
     private final DecoderContext decoderCtx;
@@ -87,7 +87,7 @@ final class BsonReaderAdapter implements ReaderAdapter {
     }
 
     @Override
-    public Object readRawValue(String name) {
+    public BsonValue readRawValue(String name) {
         return decoderCtx.decodeWithChildContext(
                 codec.codecRegistry.get(ObjectCodec.RAW_TYPE), reader
         );

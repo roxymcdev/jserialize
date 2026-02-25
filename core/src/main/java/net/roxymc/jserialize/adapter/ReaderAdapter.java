@@ -7,7 +7,7 @@ import org.jspecify.annotations.Nullable;
 
 import java.lang.reflect.Type;
 
-public interface ReaderAdapter {
+public interface ReaderAdapter<R> {
     Iterable<Pair<String, @Nullable PropertyModel>> properties();
 
     default void readStart() throws Throwable {
@@ -15,7 +15,7 @@ public interface ReaderAdapter {
 
     PropertyValue<?> readValue(String name, Type type) throws Throwable;
 
-    Object readRawValue(String name) throws Throwable;
+    R readRawValue(String name) throws Throwable;
 
     default void skipValue() throws Throwable {
     }

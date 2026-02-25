@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-final class ConfigurateUtils implements FormatUtils {
+final class ConfigurateUtils implements FormatUtils<ConfigurationNode> {
     private final ConfigurationOptions options;
 
     ConfigurateUtils(ConfigurationOptions options) {
@@ -19,18 +19,18 @@ final class ConfigurateUtils implements FormatUtils {
     }
 
     @Override
-    public Class<?> rawType() {
+    public Class<ConfigurationNode> rawType() {
         return ObjectSerializer.RAW_TYPE;
     }
 
     @Override
-    public MapLike createMap(Type mapType) {
-        return new MapLike() {
+    public MapLike<ConfigurationNode> createMap(Type mapType) {
+        return new MapLike<>() {
             private final ConfigurationNode node = CommentedConfigurationNode.root(options);
 
             @Override
-            public void put(String key, Object value) {
-                node.node(key).from((ConfigurationNode) value);
+            public void put(String key, ConfigurationNode value) {
+                node.node(key).from(value);
             }
 
             @Override
@@ -47,7 +47,7 @@ final class ConfigurateUtils implements FormatUtils {
             }
 
             @Override
-            public Map<String, ?> asRawMap() {
+            public Map<String, ConfigurationNode> asRawMap() {
                 return node.childrenMap().entrySet().stream().collect(Collectors.toMap(
                         e -> String.valueOf(e.getKey()),
                         Map.Entry::getValue

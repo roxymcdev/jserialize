@@ -18,7 +18,7 @@ import java.io.UncheckedIOException;
 import java.lang.reflect.Type;
 import java.util.Iterator;
 
-final class GsonReaderAdapter implements ReaderAdapter {
+final class GsonReaderAdapter implements ReaderAdapter<JsonElement> {
     private final ObjectAdapter<?> adapter;
     private final JsonReader reader;
 
@@ -77,7 +77,7 @@ final class GsonReaderAdapter implements ReaderAdapter {
     }
 
     @Override
-    public Object readRawValue(String name) throws Throwable {
+    public JsonElement readRawValue(String name) throws Throwable {
         return adapter.gson.getAdapter(ObjectAdapter.RAW_TYPE).read(reader);
     }
 

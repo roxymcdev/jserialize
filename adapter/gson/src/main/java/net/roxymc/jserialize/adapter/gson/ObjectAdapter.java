@@ -15,7 +15,7 @@ import java.io.IOException;
 final class ObjectAdapter<T> extends TypeAdapter<T> {
     static final Class<JsonElement> RAW_TYPE = JsonElement.class;
 
-    final ObjectAdapterEngine<T> engine;
+    final ObjectAdapterEngine<T, JsonElement> engine;
     final ClassModel<T> classModel;
     final Gson gson;
 

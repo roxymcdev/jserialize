@@ -15,7 +15,7 @@ import org.spongepowered.configurate.serialize.TypeSerializer;
 
 import java.lang.reflect.Type;
 
-final class ConfigurateReaderAdapter implements ReaderAdapter {
+final class ConfigurateReaderAdapter implements ReaderAdapter<ConfigurationNode> {
     private final ConfigurationNode rootNode;
     private final ClassModel<?> classModel;
 
@@ -48,7 +48,7 @@ final class ConfigurateReaderAdapter implements ReaderAdapter {
     }
 
     private <U> PropertyValue<U> readPropertyValue(ConfigurationNode node, ClassModel<U> classModel) {
-        ObjectAdapterEngine<U> engine = new ObjectAdapterEngine<>(
+        ObjectAdapterEngine<U, ConfigurationNode> engine = new ObjectAdapterEngine<>(
                 classModel, new ConfigurateUtils(node.options())
         );
 
@@ -59,7 +59,7 @@ final class ConfigurateReaderAdapter implements ReaderAdapter {
     }
 
     @Override
-    public Object readRawValue(String name) {
+    public ConfigurationNode readRawValue(String name) {
         return rootNode.node(name);
     }
 }

@@ -15,23 +15,23 @@ import java.util.Map;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 
-public final class ObjectAdapterEngine<T> {
+public final class ObjectAdapterEngine<T, R> {
     private final ClassModel<T> classModel;
-    private final FormatUtils utils;
+    private final FormatUtils<R> utils;
 
-    public ObjectAdapterEngine(ClassModel<T> classModel, FormatUtils utils) {
+    public ObjectAdapterEngine(ClassModel<T> classModel, FormatUtils<R> utils) {
         this.classModel = classModel;
         this.utils = utils;
     }
 
-    public T read(ReaderAdapter reader, ReadContext<T> ctx) throws Throwable {
+    public T read(ReaderAdapter<R> reader, ReadContext<T> ctx) throws Throwable {
         reader.readStart();
 
         InstanceCreator.Builder<T> builder = InstanceCreator.builder(classModel)
                 .parent(ctx.parent);
 
         PropertyModel extrasProperty = classModel.properties().extrasProperty();
-        MapLike extrasMap = null;
+        MapLike<R> extrasMap = null;
 
         if (extrasProperty != null) {
             Type mapType = resolveReadType(extrasProperty, ctx);
@@ -73,7 +73,7 @@ public final class ObjectAdapterEngine<T> {
         return ctx.instance == null ? creator.createInstance() : creator.populate(ctx.instance);
     }
 
-    private @Nullable PropertyValue<?> readProperty(ReaderAdapter reader, PropertyModel property, ReadContext<T> ctx) throws Throwable {
+    private @Nullable PropertyValue<?> readProperty(ReaderAdapter<R> reader, PropertyModel property, ReadContext<T> ctx) throws Throwable {
         PropertyMeta meta = property.meta();
         if (meta != null && !meta.shouldDeserialize()) {
             return null;
@@ -137,13 +137,13 @@ public final class ObjectAdapterEngine<T> {
         Type propertyType = requireNonNull(property.getterType());
 
         if (meta != null && meta.extra()) {
-            MapLike extrasMap = utils.createMap(propertyType);
+            MapLike<R> extrasMap = utils.createMap(propertyType);
 
             // if it's an extras property, it never writes null
             assert value != null;
             extrasMap.putAll((Map<?, ?>) value);
 
-            for (Map.Entry<String, ?> entry : extrasMap.asRawMap().entrySet()) {
+            for (Map.Entry<String, R> entry : extrasMap.asRawMap().entrySet()) {
                 writer.writeProperty(entry.getKey(), utils.rawType(), entry.getValue());
             }
             return;

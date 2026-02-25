@@ -14,7 +14,7 @@ import java.util.Map;
 import static net.roxymc.jserialize.adapter.bson.ObjectCodec.DEFAULT_DECODER_CONTEXT;
 import static net.roxymc.jserialize.adapter.bson.ObjectCodec.ID_PROPERTY_NAME;
 
-final class BsonUtils implements FormatUtils {
+final class BsonUtils implements FormatUtils<BsonValue> {
     private final ObjectCodec<?> codec;
 
     public BsonUtils(ObjectCodec<?> codec) {
@@ -27,20 +27,20 @@ final class BsonUtils implements FormatUtils {
     }
 
     @Override
-    public Class<?> rawType() {
+    public Class<BsonValue> rawType() {
         return ObjectCodec.RAW_TYPE;
     }
 
     @Override
-    public MapLike createMap(Type mapType) {
+    public MapLike<BsonValue> createMap(Type mapType) {
         Codec<Map<?, ?>> mapCodec = codec.getCodec(mapType);
 
-        return new MapLike() {
+        return new MapLike<>() {
             private final BsonDocument document = new BsonDocument();
 
             @Override
-            public void put(String key, Object value) {
-                document.put(key, (BsonValue) value);
+            public void put(String key, BsonValue value) {
+                document.put(key, value);
             }
 
             @Override
@@ -54,7 +54,7 @@ final class BsonUtils implements FormatUtils {
             }
 
             @Override
-            public Map<String, ?> asRawMap() {
+            public Map<String, BsonValue> asRawMap() {
                 return Collections.unmodifiableMap(document);
             }
         };

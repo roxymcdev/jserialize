@@ -23,7 +23,7 @@ public final class ObjectSerializer implements TypeSerializer<Object> {
     public Object deserialize(Type type, ConfigurationNode node) throws SerializationException {
         try {
             ClassModel<?> classModel = factory.create(TypeUtils.rawType(type));
-            ObjectAdapterEngine<?> engine = new ObjectAdapterEngine<>(
+            ObjectAdapterEngine<?, ConfigurationNode> engine = new ObjectAdapterEngine<>(
                     classModel, new ConfigurateUtils(node.options())
             );
 
@@ -43,7 +43,7 @@ public final class ObjectSerializer implements TypeSerializer<Object> {
         try {
             @SuppressWarnings("unchecked")
             ClassModel<Object> classModel = (ClassModel<Object>) factory.create(TypeUtils.rawType(type));
-            ObjectAdapterEngine<Object> engine = new ObjectAdapterEngine<>(
+            ObjectAdapterEngine<Object, ConfigurationNode> engine = new ObjectAdapterEngine<>(
                     classModel, new ConfigurateUtils(node.options())
             );
 

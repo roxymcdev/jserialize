@@ -4,12 +4,12 @@ import org.jspecify.annotations.Nullable;
 
 import java.lang.reflect.Type;
 
-public interface FormatUtils {
+public interface FormatUtils<R> {
     default @Nullable String idPropertyName() {
         return null;
     }
 
-    Class<?> rawType();
+    Class<R> rawType();
 
-    MapLike createMap(Type mapType);
+    MapLike<R> createMap(Type mapType);
 }

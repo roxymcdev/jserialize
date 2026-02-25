@@ -18,7 +18,7 @@ final class ObjectCodec<T> implements Codec<T> {
     static final String ID_PROPERTY_NAME = "_id";
     static final DecoderContext DEFAULT_DECODER_CONTEXT = DecoderContext.builder().build();
 
-    final ObjectAdapterEngine<T> engine;
+    final ObjectAdapterEngine<T, BsonValue> engine;
     final ClassModel<T> classModel;
     final CodecRegistry codecRegistry;
 

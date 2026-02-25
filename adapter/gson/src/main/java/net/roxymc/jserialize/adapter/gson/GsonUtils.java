@@ -13,7 +13,7 @@ import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.Map;
 
-final class GsonUtils implements FormatUtils {
+final class GsonUtils implements FormatUtils<JsonElement> {
     private final ObjectAdapter<?> adapter;
 
     public GsonUtils(ObjectAdapter<?> adapter) {
@@ -21,21 +21,21 @@ final class GsonUtils implements FormatUtils {
     }
 
     @Override
-    public Class<?> rawType() {
+    public Class<JsonElement> rawType() {
         return ObjectAdapter.RAW_TYPE;
     }
 
     @Override
-    public MapLike createMap(Type mapType) {
+    public MapLike<JsonElement> createMap(Type mapType) {
         @SuppressWarnings("unchecked")
         TypeAdapter<Map<?, ?>> mapAdapter = (TypeAdapter<Map<?, ?>>) adapter.gson.getAdapter(TypeToken.get(mapType));
 
-        return new MapLike() {
+        return new MapLike<>() {
             private final JsonObject object = new JsonObject();
 
             @Override
-            public void put(String key, Object value) {
-                object.add(key, (JsonElement) value);
+            public void put(String key, JsonElement value) {
+                object.add(key, value);
             }
 
             @Override
@@ -53,7 +53,7 @@ final class GsonUtils implements FormatUtils {
             }
 
             @Override
-            public Map<String, ?> asRawMap() {
+            public Map<String, JsonElement> asRawMap() {
                 return Collections.unmodifiableMap(object.asMap());
             }
         };
