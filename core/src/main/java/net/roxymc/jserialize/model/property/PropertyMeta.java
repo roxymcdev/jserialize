@@ -28,6 +28,10 @@ public interface PropertyMeta {
 
     boolean injectParent();
 
+    default boolean shouldSerialize() {
+        return !(injectParent());
+    }
+
     default boolean shouldDeserialize() {
         return !(extra() || injectParent());
     }

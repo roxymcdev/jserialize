@@ -120,6 +120,9 @@ public final class ObjectAdapterEngine<T> {
         }
 
         PropertyMeta meta = property.meta();
+        if (meta != null && !meta.shouldSerialize()) {
+            return;
+        }
 
         MethodHandle getter = property.getter();
         if (getter == null) {
