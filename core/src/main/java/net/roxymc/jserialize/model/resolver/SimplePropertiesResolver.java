@@ -43,17 +43,20 @@ public class SimplePropertiesResolver implements PropertiesResolver {
     @Override
     public PropertyMap resolveProperties(Class<?> clazz, @Nullable ConstructorModel constructor) throws IllegalAccessException {
         PropertyMap.Builder properties = PropertyMap.builder();
+
         Set<MethodSignature> seenMethods = new HashSet<>(OBJECT_METHODS_SIGNATURES);
+        Set<Class<?>> seenInterfaces = new HashSet<>();
 
         while (clazz != Object.class) {
-            SimplePropertiesResolver resolver = this;
+            processClass(clazz, properties, seenMethods);
 
-            JSerializable annotation = clazz.getDeclaredAnnotation(JSerializable.class);
-            if (annotation != null) {
-                resolver = new SimplePropertiesResolver(annotation.fields(), annotation.methods());
+            for (Class<?> iface : clazz.getInterfaces()) {
+                if (!seenInterfaces.add(iface)) {
+                    continue;
+                }
+
+                processClass(iface, properties, seenMethods);
             }
-
-            resolver.resolveProperties(clazz, properties, seenMethods);
 
             clazz = clazz.getSuperclass();
         }
@@ -65,7 +68,18 @@ public class SimplePropertiesResolver implements PropertiesResolver {
         return properties.build();
     }
 
-    protected void resolveProperties(Class<?> clazz, PropertyMap.Builder properties, Set<MethodSignature> seenMethods) {
+    protected void processClass(Class<?> clazz, PropertyMap.Builder properties, Set<MethodSignature> seenMethods) {
+        SimplePropertiesResolver resolver = this;
+
+        JSerializable annotation = clazz.getDeclaredAnnotation(JSerializable.class);
+        if (annotation != null) {
+            resolver = new SimplePropertiesResolver(annotation.fields(), annotation.methods());
+        }
+
+        resolver.processMembers(clazz, properties, seenMethods);
+    }
+
+    protected void processMembers(Class<?> clazz, PropertyMap.Builder properties, Set<MethodSignature> seenMethods) {
         processFields(clazz.getDeclaredFields(), properties);
         processMethods(clazz.getDeclaredMethods(), properties, seenMethods);
     }
