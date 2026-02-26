@@ -4,37 +4,52 @@ import net.roxymc.jserialize.model.constructor.ParameterModel;
 import net.roxymc.jserialize.model.property.meta.PropertyKind;
 import net.roxymc.jserialize.model.property.meta.PropertyMeta;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Contract;
 import org.jspecify.annotations.Nullable;
 
-import java.lang.invoke.MethodHandle;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 
 @ApiStatus.NonExtendable
 public interface PropertyModel {
+    @Contract(pure = true)
     String name();
 
-    @Nullable MethodHandle getter();
+    @Contract(pure = true)
+    @Nullable GetterRef getter();
 
-    @Nullable Type getterType();
+    @Contract(pure = true)
+    default @Nullable Type getterType() {
+        MethodRef getter = getter();
+        return getter != null ? getter.valueType() : null;
+    }
 
-    @Nullable MethodHandle setter();
+    @Contract(pure = true)
+    @Nullable SetterRef setter();
 
-    @Nullable Type setterType();
+    @Contract(pure = true)
+    default @Nullable Type setterType() {
+        MethodRef setter = setter();
+        return setter != null ? setter.valueType() : null;
+    }
 
+    @Contract(pure = true)
     @Nullable ParameterModel parameter();
 
+    @Contract(pure = true)
     default @Nullable Type parameterType() {
         ParameterModel parameter = parameter();
         return parameter != null ? parameter.type() : null;
     }
 
+    @Contract(pure = true)
     default PropertyKind<?> kind() {
         PropertyMeta meta = meta();
         return meta != null ? meta.kind() : PropertyKind.PROPERTY;
     }
 
+    @Contract(pure = true)
     @Nullable PropertyMeta meta();
 
     @ApiStatus.NonExtendable

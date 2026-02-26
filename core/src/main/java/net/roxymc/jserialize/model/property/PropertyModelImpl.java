@@ -8,9 +8,11 @@ import net.roxymc.jserialize.util.PropertyUtils;
 import org.jspecify.annotations.Nullable;
 
 import java.lang.annotation.Annotation;
-import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
-import java.lang.reflect.*;
+import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.Map;
 import java.util.StringJoiner;
 
@@ -21,8 +23,8 @@ final class PropertyModelImpl implements PropertyModel {
     private static final MethodHandles.Lookup LOOKUP = MethodHandles.lookup();
 
     private final String name;
-    private final @Nullable MethodHandle getter, setter;
-    private final @Nullable Type getterType, setterType;
+    private final @Nullable GetterRef getter;
+    private final @Nullable SetterRef setter;
     private final @Nullable ParameterModel parameter;
     private final @Nullable PropertyMeta meta;
 
@@ -32,42 +34,54 @@ final class PropertyModelImpl implements PropertyModel {
         PropertyMeta meta = null;
 
         if (builder.getter != null) {
-            this.getter = LOOKUP.unreflect(builder.getter);
-            this.getterType = builder.getter.getGenericReturnType();
+            this.getter = new GetterRefImpl(
+                    builder.getter.getGenericReturnType(),
+                    builder.getter.getDeclaringClass(),
+                    LOOKUP.unreflect(builder.getter)
+            );
+
             meta = PropertyMeta.of(builder.getter);
         } else if (builder.field != null) {
-            this.getter = LOOKUP.unreflectGetter(builder.field);
-            this.getterType = builder.field.getGenericType();
+            this.getter = new GetterRefImpl(
+                    builder.field.getGenericType(),
+                    builder.field.getDeclaringClass(),
+                    LOOKUP.unreflectGetter(builder.field)
+            );
+
             meta = PropertyMeta.of(builder.field);
         } else {
             this.getter = null;
-            this.getterType = null;
         }
 
         if (builder.setter != null) {
-            this.setter = LOOKUP.unreflect(builder.setter);
-            this.setterType = builder.setter.getGenericParameterTypes()[0];
+            this.setter = new SetterRefImpl(
+                    builder.setter.getGenericParameterTypes()[0],
+                    builder.setter.getDeclaringClass(),
+                    LOOKUP.unreflect(builder.setter)
+            );
 
             if (meta == null) {
                 meta = PropertyMeta.of(builder.setter);
             }
         } else if (builder.field != null && !Modifier.isFinal(builder.field.getModifiers())) {
-            this.setter = LOOKUP.unreflectSetter(builder.field);
-            this.setterType = builder.field.getGenericType();
+            this.setter = new SetterRefImpl(
+                    builder.field.getGenericType(),
+                    builder.field.getDeclaringClass(),
+                    LOOKUP.unreflectSetter(builder.field)
+            );
         } else {
             this.setter = null;
-            this.setterType = null;
         }
 
         this.parameter = builder.parameter;
         this.meta = meta;
 
         if (meta != null && meta.kind() == PropertyKind.EXTRAS) {
-            if (getterType != null && !Map.class.isAssignableFrom(GenericTypeReflector.erase(getterType))) {
+            if (getter != null && !Map.class.isAssignableFrom(GenericTypeReflector.erase(getter.valueType()))) {
                 throw new IllegalStateException("@ExtraProperties property getter type must assignable to Map");
             }
 
-            if (setterType != null && !Map.class.isAssignableFrom(GenericTypeReflector.erase(setterType))) {
+            if (getter != null && !Map.class.isAssignableFrom(GenericTypeReflector.erase(getter.valueType()))) {
                 throw new IllegalStateException("@ExtraProperties property setter type must assignable to Map");
             }
         }
@@ -79,23 +93,13 @@ final class PropertyModelImpl implements PropertyModel {
     }
 
     @Override
-    public @Nullable MethodHandle getter() {
+    public @Nullable GetterRef getter() {
         return getter;
     }
 
     @Override
-    public @Nullable Type getterType() {
-        return getterType;
-    }
-
-    @Override
-    public @Nullable MethodHandle setter() {
+    public @Nullable SetterRef setter() {
         return setter;
-    }
-
-    @Override
-    public @Nullable Type setterType() {
-        return setterType;
     }
 
     @Override

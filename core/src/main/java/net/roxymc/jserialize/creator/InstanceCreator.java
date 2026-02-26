@@ -8,7 +8,6 @@ import net.roxymc.jserialize.model.property.meta.PropertyKind;
 import net.roxymc.jserialize.model.property.meta.PropertyMeta;
 import org.jspecify.annotations.Nullable;
 
-import java.lang.invoke.MethodHandle;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -86,11 +85,9 @@ public final class InstanceCreator<T> {
             String name = property.name();
             PropertyMeta meta = property.meta();
 
-            MethodHandle getter = property.getter();
-            MethodHandle setter = property.setter();
+            boolean canMutate = meta != null && meta.mutate() && property.getter() != null;
 
-            boolean canMutate = meta != null && meta.mutate() && getter != null;
-            if (!canMutate && setter == null) {
+            if (!canMutate && property.setter() == null) {
                 continue;
             }
 
@@ -104,11 +101,11 @@ public final class InstanceCreator<T> {
                 Object value = lazyValue.get(instance, null);
                 validateValue(name, value, meta);
 
-                setter.invoke(instance, value);
+                property.setter().set(instance, value);
                 continue;
             }
 
-            Object currentValue = getter.invoke(instance);
+            Object currentValue = property.getter().get(instance);
 
             if (currentValue instanceof Collection<?> || currentValue instanceof Map<?, ?>) {
                 Object value = lazyValue.get(instance, null);

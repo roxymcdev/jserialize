@@ -4,18 +4,18 @@ import io.leangen.geantyref.GenericTypeReflector;
 import net.roxymc.jserialize.creator.InstanceCreator;
 import net.roxymc.jserialize.creator.PropertyValue;
 import net.roxymc.jserialize.model.ClassModel;
+import net.roxymc.jserialize.model.property.GetterRef;
+import net.roxymc.jserialize.model.property.MethodRef;
 import net.roxymc.jserialize.model.property.PropertyModel;
 import net.roxymc.jserialize.model.property.meta.PropertyKind;
 import net.roxymc.jserialize.model.property.meta.PropertyMeta;
 import net.roxymc.jserialize.util.Pair;
 import org.jspecify.annotations.Nullable;
 
-import java.lang.invoke.MethodHandle;
 import java.lang.reflect.Type;
 import java.util.Map;
 
 import static java.lang.String.format;
-import static java.util.Objects.requireNonNull;
 
 public final class ObjectAdapterEngine<T, R> {
     private final ClassModel<T> classModel;
@@ -93,19 +93,25 @@ public final class ObjectAdapterEngine<T, R> {
 
     private @Nullable Type resolveReadType(PropertyModel property, ReadContext<?> ctx) {
         PropertyMeta meta = property.meta();
-        Type propertyType = ctx.instance == null ? property.parameterType() : null;
 
-        if (propertyType == null) {
-            Type getterType = property.getterType();
-
-            if (meta != null && meta.mutate() && getterType != null) {
-                propertyType = getterType;
-            } else {
-                propertyType = property.setterType();
-            }
+        if (ctx.instance == null && property.parameterType() != null) {
+            return GenericTypeReflector.resolveType(property.parameterType(), type);
         }
 
-        return propertyType != null ? GenericTypeReflector.resolveType(propertyType, type) : null;
+        MethodRef ref = null;
+
+        if (meta != null && meta.mutate() && property.getter() != null) {
+            ref = property.getter();
+        } else if (property.setter() != null) {
+            ref = property.setter();
+        }
+
+        if (ref == null) {
+            return null;
+        }
+
+        Type supertype = GenericTypeReflector.getExactSuperType(type, ref.declaringClass());
+        return GenericTypeReflector.resolveType(ref.valueType(), supertype);
     }
 
     public void write(WriterAdapter writer, T instance) throws Throwable {
@@ -124,23 +130,19 @@ public final class ObjectAdapterEngine<T, R> {
         }
 
         PropertyMeta meta = property.meta();
-        if (meta != null && !meta.shouldSerialize()) {
+        GetterRef getter = property.getter();
+
+        if (meta != null && !meta.shouldSerialize() || getter == null) {
             return;
         }
 
-        MethodHandle getter = property.getter();
-        if (getter == null) {
-            return;
-        }
-
-        Object value = getter.invoke(instance);
+        Object value = getter.get(instance);
         if (value == null && meta != null && !meta.writeNull()) {
             return;
         }
 
-        Type propertyType = GenericTypeReflector.resolveType(
-                requireNonNull(property.getterType()), type
-        );
+        Type supertype = GenericTypeReflector.getExactSuperType(type, getter.declaringClass());
+        Type propertyType = GenericTypeReflector.resolveType(getter.valueType(), supertype);
 
         if (meta != null && meta.kind() == PropertyKind.EXTRAS) {
             MapLike<R> extrasMap = utils.createMap(propertyType);
