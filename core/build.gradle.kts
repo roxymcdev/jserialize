@@ -4,4 +4,5 @@ plugins {
 
 dependencies {
     api(project(":jserialize-annotations"))
+    api(libs.geantyref)
 }

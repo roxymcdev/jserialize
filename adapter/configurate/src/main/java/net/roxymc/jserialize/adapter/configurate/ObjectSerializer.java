@@ -1,8 +1,9 @@
 package net.roxymc.jserialize.adapter.configurate;
 
-import net.roxymc.jserialize.adapter.*;
+import io.leangen.geantyref.GenericTypeReflector;
+import net.roxymc.jserialize.adapter.ObjectAdapterEngine;
+import net.roxymc.jserialize.adapter.ReadContext;
 import net.roxymc.jserialize.model.ClassModel;
-import net.roxymc.jserialize.util.TypeUtils;
 import org.jspecify.annotations.Nullable;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.serialize.SerializationException;
@@ -22,9 +23,9 @@ public final class ObjectSerializer implements TypeSerializer<Object> {
     @Override
     public Object deserialize(Type type, ConfigurationNode node) throws SerializationException {
         try {
-            ClassModel<?> classModel = factory.create(TypeUtils.rawType(type));
+            ClassModel<?> classModel = factory.create(GenericTypeReflector.erase(type));
             ObjectAdapterEngine<?, ConfigurationNode> engine = new ObjectAdapterEngine<>(
-                    classModel, new ConfigurateUtils(node.options())
+                    classModel, type, new ConfigurateUtils(node.options())
             );
 
             return engine.read(new ConfigurateReaderAdapter(node, classModel), ReadContext.empty());
@@ -42,9 +43,9 @@ public final class ObjectSerializer implements TypeSerializer<Object> {
 
         try {
             @SuppressWarnings("unchecked")
-            ClassModel<Object> classModel = (ClassModel<Object>) factory.create(TypeUtils.rawType(type));
+            ClassModel<Object> classModel = (ClassModel<Object>) factory.create(GenericTypeReflector.erase(type));
             ObjectAdapterEngine<Object, ConfigurationNode> engine = new ObjectAdapterEngine<>(
-                    classModel, new ConfigurateUtils(node.options())
+                    classModel, type, new ConfigurateUtils(node.options())
             );
 
             engine.write(new ConfigurateWriterAdapter(node), value);

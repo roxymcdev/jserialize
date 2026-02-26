@@ -6,11 +6,13 @@ import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
 import com.google.gson.stream.JsonWriter;
-import net.roxymc.jserialize.adapter.*;
+import net.roxymc.jserialize.adapter.ObjectAdapterEngine;
+import net.roxymc.jserialize.adapter.ReadContext;
 import net.roxymc.jserialize.model.ClassModel;
 import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 
 final class ObjectAdapter<T> extends TypeAdapter<T> {
     static final Class<JsonElement> RAW_TYPE = JsonElement.class;
@@ -19,8 +21,8 @@ final class ObjectAdapter<T> extends TypeAdapter<T> {
     final ClassModel<T> classModel;
     final Gson gson;
 
-    ObjectAdapter(ClassModel<T> classModel, Gson gson) {
-        this.engine = new ObjectAdapterEngine<>(classModel, new GsonUtils(this));
+    ObjectAdapter(ClassModel<T> classModel, Type type, Gson gson) {
+        this.engine = new ObjectAdapterEngine<>(classModel, type, new GsonUtils(this));
         this.classModel = classModel;
         this.gson = gson;
     }

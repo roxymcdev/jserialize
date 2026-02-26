@@ -1,9 +1,12 @@
 package net.roxymc.jserialize.adapter.bson;
 
-import net.roxymc.jserialize.adapter.*;
+import io.leangen.geantyref.GenericTypeReflector;
+import net.roxymc.jserialize.adapter.ObjectAdapterEngine;
+import net.roxymc.jserialize.adapter.ReadContext;
 import net.roxymc.jserialize.model.ClassModel;
-import net.roxymc.jserialize.util.TypeUtils;
+import org.bson.BsonReader;
 import org.bson.BsonValue;
+import org.bson.BsonWriter;
 import org.bson.codecs.Codec;
 import org.bson.codecs.DecoderContext;
 import org.bson.codecs.EncoderContext;
@@ -22,15 +25,15 @@ final class ObjectCodec<T> implements Codec<T> {
     final ClassModel<T> classModel;
     final CodecRegistry codecRegistry;
 
-    ObjectCodec(ClassModel<T> classModel, CodecRegistry codecRegistry) {
-        this.engine = new ObjectAdapterEngine<>(classModel, new BsonUtils(this));
+    ObjectCodec(ClassModel<T> classModel, Type type, CodecRegistry codecRegistry) {
+        this.engine = new ObjectAdapterEngine<>(classModel, type, new BsonUtils(this));
         this.classModel = classModel;
         this.codecRegistry = codecRegistry;
     }
 
     <U> Codec<U> getCodec(Type type) {
         @SuppressWarnings("unchecked")
-        Class<U> rawType = (Class<U>) TypeUtils.rawType(type);
+        Class<U> rawType = (Class<U>) GenericTypeReflector.erase(type);
 
         if (type instanceof ParameterizedType) {
             ParameterizedType parameterizedType = (ParameterizedType) type;
@@ -41,7 +44,7 @@ final class ObjectCodec<T> implements Codec<T> {
     }
 
     @Override
-    public T decode(org.bson.BsonReader reader, DecoderContext ctx) {
+    public T decode(BsonReader reader, DecoderContext ctx) {
         try {
             return engine.read(new BsonReaderAdapter(this, reader, ctx), ReadContext.empty());
         } catch (Throwable e) {
@@ -50,7 +53,7 @@ final class ObjectCodec<T> implements Codec<T> {
     }
 
     @Override
-    public void encode(org.bson.BsonWriter writer, T value, EncoderContext ctx) {
+    public void encode(BsonWriter writer, T value, EncoderContext ctx) {
         try {
             engine.write(new BsonWriterAdapter(this, writer, ctx), value);
         } catch (Throwable e) {

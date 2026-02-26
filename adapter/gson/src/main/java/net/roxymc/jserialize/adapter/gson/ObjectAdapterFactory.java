@@ -19,7 +19,7 @@ public final class ObjectAdapterFactory implements TypeAdapterFactory {
             @SuppressWarnings("unchecked")
             ClassModel<T> classModel = (ClassModel<T>) factory.create(type.getRawType());
 
-            return new ObjectAdapter<>(classModel, gson);
+            return new ObjectAdapter<>(classModel, type.getType(), gson);
         } catch (IllegalAccessException e) {
             throw new RuntimeException(e);
         }

@@ -1,5 +1,6 @@
 package net.roxymc.jserialize.adapter;
 
+import io.leangen.geantyref.GenericTypeReflector;
 import net.roxymc.jserialize.creator.InstanceCreator;
 import net.roxymc.jserialize.creator.PropertyValue;
 import net.roxymc.jserialize.model.ClassModel;
@@ -18,10 +19,12 @@ import static java.util.Objects.requireNonNull;
 
 public final class ObjectAdapterEngine<T, R> {
     private final ClassModel<T> classModel;
+    private final Type type;
     private final FormatUtils<R> utils;
 
-    public ObjectAdapterEngine(ClassModel<T> classModel, FormatUtils<R> utils) {
+    public ObjectAdapterEngine(ClassModel<T> classModel, Type type, FormatUtils<R> utils) {
         this.classModel = classModel;
+        this.type = type;
         this.utils = utils;
     }
 
@@ -90,19 +93,19 @@ public final class ObjectAdapterEngine<T, R> {
 
     private @Nullable Type resolveReadType(PropertyModel property, ReadContext<?> ctx) {
         PropertyMeta meta = property.meta();
-        Type type = ctx.instance == null ? property.parameterType() : null;
+        Type propertyType = ctx.instance == null ? property.parameterType() : null;
 
-        if (type == null) {
+        if (propertyType == null) {
             Type getterType = property.getterType();
 
             if (meta != null && meta.mutate() && getterType != null) {
-                type = getterType;
+                propertyType = getterType;
             } else {
-                type = property.setterType();
+                propertyType = property.setterType();
             }
         }
 
-        return type;
+        return propertyType != null ? GenericTypeReflector.resolveType(propertyType, type) : null;
     }
 
     public void write(WriterAdapter writer, T instance) throws Throwable {
@@ -135,7 +138,9 @@ public final class ObjectAdapterEngine<T, R> {
             return;
         }
 
-        Type propertyType = requireNonNull(property.getterType());
+        Type propertyType = GenericTypeReflector.resolveType(
+                requireNonNull(property.getterType()), type
+        );
 
         if (meta != null && meta.kind() == PropertyKind.EXTRAS) {
             MapLike<R> extrasMap = utils.createMap(propertyType);

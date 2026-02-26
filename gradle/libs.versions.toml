@@ -1,6 +1,7 @@
 [versions]
 bson = "5.6.3"
 configurate = "4.2.0"
+geantyref = "2.0.1"
 gson = "2.13.2"
 indra = "4.0.0"
 jetbrainsAnnotations = "26.0.2-1"
@@ -9,6 +10,7 @@ jspecify = "1.0.0"
 [libraries]
 bson = { module = "org.mongodb:bson", version.ref = "bson" }
 configurate-core = { module = "org.spongepowered:configurate-core", version.ref = "configurate" }
+geantyref = { module = "io.leangen.geantyref:geantyref", version.ref = "geantyref" }
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 jetbrains-annotations = { module = "org.jetbrains:annotations", version.ref = "jetbrainsAnnotations" }
 jspecify = { module = "org.jspecify:jspecify", version.ref = "jspecify" }

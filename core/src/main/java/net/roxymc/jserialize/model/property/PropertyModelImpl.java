@@ -1,5 +1,6 @@
 package net.roxymc.jserialize.model.property;
 
+import io.leangen.geantyref.GenericTypeReflector;
 import net.roxymc.jserialize.model.constructor.ParameterModel;
 import net.roxymc.jserialize.model.property.meta.PropertyKind;
 import net.roxymc.jserialize.model.property.meta.PropertyMeta;
@@ -15,7 +16,6 @@ import java.util.StringJoiner;
 
 import static java.lang.String.format;
 import static net.roxymc.jserialize.util.ObjectUtils.nonNull;
-import static net.roxymc.jserialize.util.TypeUtils.rawType;
 
 final class PropertyModelImpl implements PropertyModel {
     private static final MethodHandles.Lookup LOOKUP = MethodHandles.lookup();
@@ -63,11 +63,11 @@ final class PropertyModelImpl implements PropertyModel {
         this.meta = meta;
 
         if (meta != null && meta.kind() == PropertyKind.EXTRAS) {
-            if (getterType != null && !Map.class.isAssignableFrom(rawType(getterType))) {
+            if (getterType != null && !Map.class.isAssignableFrom(GenericTypeReflector.erase(getterType))) {
                 throw new IllegalStateException("@ExtraProperties property getter type must assignable to Map");
             }
 
-            if (setterType != null && !Map.class.isAssignableFrom(rawType(setterType))) {
+            if (setterType != null && !Map.class.isAssignableFrom(GenericTypeReflector.erase(setterType))) {
                 throw new IllegalStateException("@ExtraProperties property setter type must assignable to Map");
             }
         }

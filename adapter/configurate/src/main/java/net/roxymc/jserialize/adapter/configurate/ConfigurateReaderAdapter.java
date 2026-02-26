@@ -1,5 +1,6 @@
 package net.roxymc.jserialize.adapter.configurate;
 
+import io.leangen.geantyref.GenericTypeReflector;
 import net.roxymc.jserialize.adapter.ObjectAdapterEngine;
 import net.roxymc.jserialize.adapter.ReadContext;
 import net.roxymc.jserialize.adapter.ReaderAdapter;
@@ -8,7 +9,6 @@ import net.roxymc.jserialize.model.ClassModel;
 import net.roxymc.jserialize.model.property.PropertyModel;
 import net.roxymc.jserialize.util.Pair;
 import net.roxymc.jserialize.util.TransformingIterator;
-import net.roxymc.jserialize.util.TypeUtils;
 import org.jspecify.annotations.Nullable;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.serialize.TypeSerializer;
@@ -39,17 +39,17 @@ final class ConfigurateReaderAdapter implements ReaderAdapter<ConfigurationNode>
 
         if (serializer instanceof ObjectSerializer) {
             ObjectSerializer objectSerializer = (ObjectSerializer) serializer;
-            ClassModel<?> classModel = objectSerializer.factory.create(TypeUtils.rawType(type));
+            ClassModel<?> classModel = objectSerializer.factory.create(GenericTypeReflector.erase(type));
 
-            return readPropertyValue(node, classModel);
+            return readValue(node, classModel, type);
         }
 
         return PropertyValue.of(node.get(type));
     }
 
-    private <U> PropertyValue<U> readPropertyValue(ConfigurationNode node, ClassModel<U> classModel) {
+    private <U> PropertyValue<U> readValue(ConfigurationNode node, ClassModel<U> classModel, Type type) {
         ObjectAdapterEngine<U, ConfigurationNode> engine = new ObjectAdapterEngine<>(
-                classModel, new ConfigurateUtils(node.options())
+                classModel, type, new ConfigurateUtils(node.options())
         );
 
         return (parent, instance) -> engine.read(
