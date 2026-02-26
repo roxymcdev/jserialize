@@ -1,5 +1,6 @@
 package net.roxymc.jserialize.model.property;
 
+import net.roxymc.jserialize.model.property.meta.PropertyKind;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -15,19 +16,15 @@ public interface PropertyMap {
 
     Iterable<PropertyModel> values();
 
-    default @Nullable PropertyModel get(String name) {
-        return get(name, false);
-    }
+    @Nullable PropertyModel get(String name);
 
-    @Nullable PropertyModel get(String name, boolean excludeId);
-
-    @Nullable PropertyModel idProperty();
-
-    @Nullable PropertyModel extrasProperty();
+    @Nullable PropertyModel get(PropertyKind<?> kind);
 
     @ApiStatus.NonExtendable
     interface Builder {
-        Builder withProperty(String name, Consumer<PropertyModel.Builder> builder);
+        Builder withProperty(String name, Consumer<PropertyModel.Builder> action);
+
+        Builder withProperty(PropertyKind<?> kind, String fallbackName, Consumer<PropertyModel.Builder> action);
 
         PropertyMap build() throws IllegalAccessException;
     }

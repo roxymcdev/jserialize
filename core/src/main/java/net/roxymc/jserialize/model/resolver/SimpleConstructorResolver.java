@@ -1,9 +1,8 @@
 package net.roxymc.jserialize.model.resolver;
 
 import net.roxymc.jserialize.annotation.Creator;
-import net.roxymc.jserialize.annotation.ExtraProperties;
-import net.roxymc.jserialize.annotation.Property;
 import net.roxymc.jserialize.model.constructor.ConstructorModel;
+import net.roxymc.jserialize.util.PropertyUtils;
 import org.jspecify.annotations.Nullable;
 
 import java.lang.reflect.Executable;
@@ -71,30 +70,15 @@ public class SimpleConstructorResolver implements ConstructorResolver {
 
     protected void processParameters(Parameter[] parameters, ConstructorModel.Builder builder) {
         for (Parameter parameter : parameters) {
-            builder.parameter(resolvePropertyName(parameter), parameter);
+            String propertyName = PropertyUtils.getPropertyName(parameter, () -> {
+                if (!parameter.isNamePresent()) {
+                    throw new IllegalStateException("Parameter has no name");
+                }
+
+                return parameter.getName();
+            });
+
+            builder.parameter(propertyName, parameter);
         }
-    }
-
-    protected String resolvePropertyName(Parameter parameter) {
-        Property property = parameter.getAnnotation(Property.class);
-        ExtraProperties extraProperties = parameter.getAnnotation(ExtraProperties.class);
-
-        if (property != null && extraProperties != null) {
-            throw new IllegalStateException("@Property and @ExtraProperties cannot be used with each other");
-        }
-
-        if (property != null && !property.value().isEmpty()) {
-            return property.value();
-        }
-
-        if (extraProperties != null && !extraProperties.value().isEmpty()) {
-            return extraProperties.value();
-        }
-
-        if (!parameter.isNamePresent()) {
-            throw new IllegalStateException("Parameter has no name");
-        }
-
-        return parameter.getName();
     }
 }

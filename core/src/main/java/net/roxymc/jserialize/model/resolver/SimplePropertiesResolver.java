@@ -1,32 +1,27 @@
 package net.roxymc.jserialize.model.resolver;
 
-import net.roxymc.jserialize.annotation.*;
+import net.roxymc.jserialize.annotation.JSerializable;
+import net.roxymc.jserialize.annotation.Transient;
 import net.roxymc.jserialize.model.constructor.ConstructorModel;
 import net.roxymc.jserialize.model.constructor.ParameterModel;
 import net.roxymc.jserialize.model.property.PropertyMap;
 import net.roxymc.jserialize.util.PropertyResolution;
+import net.roxymc.jserialize.util.PropertyUtils;
 import org.jspecify.annotations.Nullable;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
-import java.util.Set;
 
 import static java.lang.String.format;
 import static java.lang.reflect.Modifier.isStatic;
 import static java.lang.reflect.Modifier.isTransient;
-import static java.util.Objects.requireNonNullElse;
-import static java.util.Objects.requireNonNullElseGet;
 import static net.roxymc.jserialize.util.StringUtils.decapitalize;
 import static net.roxymc.jserialize.util.StringUtils.hasPrefix;
 
 public class SimplePropertiesResolver implements PropertiesResolver {
     public static final SimplePropertiesResolver INSTANCE = new SimplePropertiesResolver();
-    protected static final Set<Class<? extends Annotation>> PROPERTY_ANNOTATIONS = Set.of(
-            Id.class, Property.class, ExtraProperties.class
-    );
 
     private final PropertyResolution fieldResolution, methodResolution;
 
@@ -72,25 +67,6 @@ public class SimplePropertiesResolver implements PropertiesResolver {
         return member.isSynthetic() || isStatic(member.getModifiers()) || isTransient(member.getModifiers()) || member.isAnnotationPresent(Transient.class);
     }
 
-    protected @Nullable String resolveAnnotatedName(AnnotatedElement element) {
-        Property property = element.getAnnotation(Property.class);
-        ExtraProperties extraProperties = element.getAnnotation(ExtraProperties.class);
-
-        if (property != null && extraProperties != null) {
-            throw new IllegalStateException("@Property and @ExtraProperties cannot be used with each other");
-        }
-
-        if (property != null && !property.value().isEmpty()) {
-            return property.value();
-        }
-
-        if (extraProperties != null && !extraProperties.value().isEmpty()) {
-            return extraProperties.value();
-        }
-
-        return null;
-    }
-
     protected void processFields(Field[] fields, PropertyMap.Builder properties) {
         if (fieldResolution == PropertyResolution.NEVER) {
             return;
@@ -101,7 +77,7 @@ public class SimplePropertiesResolver implements PropertiesResolver {
                 continue;
             }
 
-            if (fieldResolution == PropertyResolution.ANNOTATED_ONLY && PROPERTY_ANNOTATIONS.stream().noneMatch(field::isAnnotationPresent)) {
+            if (fieldResolution == PropertyResolution.ANNOTATED_ONLY && PropertyUtils.hasPropertyAnnotation(field)) {
                 continue;
             }
 
@@ -112,15 +88,11 @@ public class SimplePropertiesResolver implements PropertiesResolver {
     protected void processField(Field field, PropertyMap.Builder properties) {
         field.setAccessible(true);
 
-        String name = resolvePropertyName(field);
+        String name = PropertyUtils.getPropertyName(field, field::getName);
 
         properties.withProperty(name, property -> property
                 .field(field)
         );
-    }
-
-    protected String resolvePropertyName(Field field) {
-        return requireNonNullElse(resolveAnnotatedName(field), field.getName());
     }
 
     protected void processMethods(Method[] methods, PropertyMap.Builder properties) {
@@ -133,7 +105,7 @@ public class SimplePropertiesResolver implements PropertiesResolver {
                 continue;
             }
 
-            if (methodResolution == PropertyResolution.ANNOTATED_ONLY && PROPERTY_ANNOTATIONS.stream().noneMatch(method::isAnnotationPresent)) {
+            if (methodResolution == PropertyResolution.ANNOTATED_ONLY && PropertyUtils.hasPropertyAnnotation(method)) {
                 continue;
             }
 
@@ -144,7 +116,7 @@ public class SimplePropertiesResolver implements PropertiesResolver {
     protected void processMethod(Method method, PropertyMap.Builder properties) {
         method.setAccessible(true);
 
-        String name = resolvePropertyName(method);
+        String name = getPropertyName(method);
 
         properties.withProperty(name, property -> {
             switch (method.getParameterCount()) {
@@ -165,8 +137,8 @@ public class SimplePropertiesResolver implements PropertiesResolver {
         });
     }
 
-    protected String resolvePropertyName(Method method) {
-        return requireNonNullElseGet(resolveAnnotatedName(method), () -> {
+    protected String getPropertyName(Method method) {
+        return PropertyUtils.getPropertyName(method, () -> {
             String methodName = method.getName();
 
             switch (method.getParameterCount()) {
@@ -194,7 +166,7 @@ public class SimplePropertiesResolver implements PropertiesResolver {
                 continue;
             }
 
-            properties.withProperty(parameter.name(), property -> property
+            properties.withProperty(parameter.meta().kind(), parameter.name(), property -> property
                     .parameter(parameter)
             );
         }

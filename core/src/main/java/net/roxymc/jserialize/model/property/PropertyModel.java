@@ -1,6 +1,8 @@
 package net.roxymc.jserialize.model.property;
 
 import net.roxymc.jserialize.model.constructor.ParameterModel;
+import net.roxymc.jserialize.model.property.meta.PropertyKind;
+import net.roxymc.jserialize.model.property.meta.PropertyMeta;
 import org.jetbrains.annotations.ApiStatus;
 import org.jspecify.annotations.Nullable;
 
@@ -11,10 +13,6 @@ import java.lang.reflect.Type;
 
 @ApiStatus.NonExtendable
 public interface PropertyModel {
-    static Builder builder(String name) {
-        return new PropertyModelImpl.BuilderImpl(name);
-    }
-
     String name();
 
     @Nullable MethodHandle getter();
@@ -30,6 +28,11 @@ public interface PropertyModel {
     default @Nullable Type parameterType() {
         ParameterModel parameter = parameter();
         return parameter != null ? parameter.type() : null;
+    }
+
+    default PropertyKind<?> kind() {
+        PropertyMeta meta = meta();
+        return meta != null ? meta.kind() : PropertyKind.PROPERTY;
     }
 
     @Nullable PropertyMeta meta();

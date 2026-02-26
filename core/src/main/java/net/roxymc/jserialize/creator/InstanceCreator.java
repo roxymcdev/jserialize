@@ -3,8 +3,9 @@ package net.roxymc.jserialize.creator;
 import net.roxymc.jserialize.model.ClassModel;
 import net.roxymc.jserialize.model.constructor.ConstructorModel;
 import net.roxymc.jserialize.model.constructor.ParameterModel;
-import net.roxymc.jserialize.model.property.PropertyMeta;
 import net.roxymc.jserialize.model.property.PropertyModel;
+import net.roxymc.jserialize.model.property.meta.PropertyKind;
+import net.roxymc.jserialize.model.property.meta.PropertyMeta;
 import org.jspecify.annotations.Nullable;
 
 import java.lang.invoke.MethodHandle;
@@ -44,7 +45,7 @@ public final class InstanceCreator<T> {
             String name = parameter.name();
             PropertyMeta meta = parameter.meta();
 
-            PropertyValue<?> lazyValue = getValue(name, meta);
+            PropertyValue<?> lazyValue = getValue(name, meta.kind());
             if (lazyValue == null) {
                 validateValue(name, null, meta);
                 continue;
@@ -93,7 +94,7 @@ public final class InstanceCreator<T> {
                 continue;
             }
 
-            PropertyValue<?> lazyValue = getValue(name, meta);
+            PropertyValue<?> lazyValue = getValue(name, property.kind());
             if (lazyValue == null) {
                 validateValue(name, null, meta);
                 continue;
@@ -134,12 +135,22 @@ public final class InstanceCreator<T> {
         return instance;
     }
 
-    private @Nullable PropertyValue<?> getValue(String name, @Nullable PropertyMeta meta) {
-        if (meta != null && meta.injectParent()) {
+    private @Nullable PropertyValue<?> getValue(String name, PropertyKind<?> kind) {
+        if (kind == PropertyKind.PROPERTY) {
+            return properties.get(name);
+        } else if (kind == PropertyKind.PARENT) {
             return PropertyValue.of(parent);
         }
 
-        return properties.get(name);
+        PropertyModel property = classModel.properties().get(kind);
+        if (property == null) {
+            throw new IllegalStateException(format(
+                    "No property of kind %s found",
+                    kind
+            ));
+        }
+
+        return properties.get(property.name());
     }
 
     private void validateValue(String name, @Nullable Object value, @Nullable PropertyMeta meta) {

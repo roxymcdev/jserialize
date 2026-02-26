@@ -1,6 +1,6 @@
 package net.roxymc.jserialize.model.constructor;
 
-import net.roxymc.jserialize.model.property.PropertyMeta;
+import net.roxymc.jserialize.model.property.meta.PropertyMeta;
 
 import java.lang.reflect.Type;
 

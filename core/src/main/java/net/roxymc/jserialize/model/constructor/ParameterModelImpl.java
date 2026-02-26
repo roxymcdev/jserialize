@@ -1,6 +1,7 @@
 package net.roxymc.jserialize.model.constructor;
 
-import net.roxymc.jserialize.model.property.PropertyMeta;
+import net.roxymc.jserialize.model.property.meta.PropertyKind;
+import net.roxymc.jserialize.model.property.meta.PropertyMeta;
 
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
@@ -21,9 +22,9 @@ final class ParameterModelImpl implements ParameterModel {
         this.implicit = parameter.isImplicit();
 
         Class<?> declaringClass = parameter.getDeclaringExecutable().getDeclaringClass();
-        boolean injectParent = index == 0 && implicit && declaringClass.isMemberClass() && !Modifier.isStatic(declaringClass.getModifiers());
+        boolean implicitParent = index == 0 && parameter.isImplicit() && declaringClass.isMemberClass() && !Modifier.isStatic(declaringClass.getModifiers());
 
-        this.meta = PropertyMeta.of(parameter, injectParent);
+        this.meta = implicitParent ? PropertyKind.PARENT.createMeta(null) : PropertyMeta.of(parameter);
     }
 
     @Override

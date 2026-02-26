@@ -4,6 +4,7 @@ import net.roxymc.jserialize.adapter.ReadContext;
 import net.roxymc.jserialize.adapter.ReaderAdapter;
 import net.roxymc.jserialize.creator.PropertyValue;
 import net.roxymc.jserialize.model.property.PropertyModel;
+import net.roxymc.jserialize.model.property.meta.PropertyKind;
 import net.roxymc.jserialize.util.Pair;
 import org.bson.BsonReader;
 import org.bson.BsonType;
@@ -44,9 +45,13 @@ final class BsonReaderAdapter implements ReaderAdapter<BsonValue> {
                 PropertyModel property;
 
                 if (ID_PROPERTY_NAME.equals(name)) {
-                    property = codec.classModel.properties().idProperty();
+                    property = codec.classModel.properties().get(PropertyKind.ID);
                 } else {
-                    property = codec.classModel.properties().get(name, true);
+                    property = codec.classModel.properties().get(name);
+
+                    if (property != null && property.kind() == PropertyKind.ID) {
+                        property = null;
+                    }
                 }
 
                 return new Pair<>(name, property);

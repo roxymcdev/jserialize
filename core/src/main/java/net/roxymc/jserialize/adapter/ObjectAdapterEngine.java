@@ -3,8 +3,9 @@ package net.roxymc.jserialize.adapter;
 import net.roxymc.jserialize.creator.InstanceCreator;
 import net.roxymc.jserialize.creator.PropertyValue;
 import net.roxymc.jserialize.model.ClassModel;
-import net.roxymc.jserialize.model.property.PropertyMeta;
 import net.roxymc.jserialize.model.property.PropertyModel;
+import net.roxymc.jserialize.model.property.meta.PropertyKind;
+import net.roxymc.jserialize.model.property.meta.PropertyMeta;
 import net.roxymc.jserialize.util.Pair;
 import org.jspecify.annotations.Nullable;
 
@@ -30,7 +31,7 @@ public final class ObjectAdapterEngine<T, R> {
         InstanceCreator.Builder<T> builder = InstanceCreator.builder(classModel)
                 .parent(ctx.parent);
 
-        PropertyModel extrasProperty = classModel.properties().extrasProperty();
+        PropertyModel extrasProperty = classModel.properties().get(PropertyKind.EXTRAS);
         MapLike<R> extrasMap = null;
 
         if (extrasProperty != null) {
@@ -136,7 +137,7 @@ public final class ObjectAdapterEngine<T, R> {
 
         Type propertyType = requireNonNull(property.getterType());
 
-        if (meta != null && meta.extra()) {
+        if (meta != null && meta.kind() == PropertyKind.EXTRAS) {
             MapLike<R> extrasMap = utils.createMap(propertyType);
 
             // if it's an extras property, it never writes null
@@ -160,8 +161,7 @@ public final class ObjectAdapterEngine<T, R> {
             return property.name();
         }
 
-        PropertyMeta meta = property.meta();
-        if (meta != null && meta.id()) {
+        if (property.kind() == PropertyKind.ID) {
             return idPropertyName;
         }
 

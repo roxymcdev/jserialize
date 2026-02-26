@@ -1,17 +1,19 @@
 package net.roxymc.jserialize.model.property;
 
 import net.roxymc.jserialize.model.constructor.ParameterModel;
+import net.roxymc.jserialize.model.property.meta.PropertyKind;
+import net.roxymc.jserialize.model.property.meta.PropertyMeta;
+import net.roxymc.jserialize.util.PropertyUtils;
 import org.jspecify.annotations.Nullable;
 
+import java.lang.annotation.Annotation;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.Type;
+import java.lang.reflect.*;
 import java.util.Map;
 import java.util.StringJoiner;
 
+import static java.lang.String.format;
 import static net.roxymc.jserialize.util.ObjectUtils.nonNull;
 import static net.roxymc.jserialize.util.TypeUtils.rawType;
 
@@ -60,7 +62,7 @@ final class PropertyModelImpl implements PropertyModel {
         this.parameter = builder.parameter;
         this.meta = meta;
 
-        if (meta != null && meta.extra()) {
+        if (meta != null && meta.kind() == PropertyKind.EXTRAS) {
             if (getterType != null && !Map.class.isAssignableFrom(rawType(getterType))) {
                 throw new IllegalStateException("@ExtraProperties property getter type must assignable to Map");
             }
@@ -112,7 +114,7 @@ final class PropertyModelImpl implements PropertyModel {
                 .add("name='" + name + "'")
                 .add("getter=" + getter)
                 .add("setter=" + setter)
-                .add("parameterIndex=" + parameter)
+                .add("parameter=" + parameter)
                 .add("meta=" + meta)
                 .toString();
     }
@@ -122,9 +124,31 @@ final class PropertyModelImpl implements PropertyModel {
         private @Nullable Field field;
         private @Nullable Method getter, setter;
         private @Nullable ParameterModel parameter;
+        @Nullable PropertyKind<?> kind;
 
         BuilderImpl(String name) {
             this.name = nonNull(name, "name");
+        }
+
+        private void checkKind(AnnotatedElement element) {
+            Annotation annotation = PropertyUtils.getPropertyAnnotation(element);
+            Class<? extends Annotation> annotationType = annotation != null ? annotation.annotationType() : null;
+
+            checkKind(PropertyKind.get(annotationType));
+        }
+
+        private void checkKind(PropertyKind<?> kind) {
+            if (this.kind == null) {
+                this.kind = kind;
+                return;
+            }
+
+            if (this.kind != kind) {
+                throw new IllegalStateException(format(
+                        "Expected kind: %s, but found: %s",
+                        kind, this.kind
+                ));
+            }
         }
 
         @Override
@@ -132,6 +156,8 @@ final class PropertyModelImpl implements PropertyModel {
             if (this.field != null) {
                 throw new IllegalStateException("field is already set");
             }
+
+            checkKind(field);
 
             this.field = nonNull(field, "field");
             return this;
@@ -143,6 +169,8 @@ final class PropertyModelImpl implements PropertyModel {
                 throw new IllegalStateException("getter is already set");
             }
 
+            checkKind(getter);
+
             this.getter = nonNull(getter, "getter");
             return this;
         }
@@ -153,6 +181,8 @@ final class PropertyModelImpl implements PropertyModel {
                 throw new IllegalStateException("setter is already set");
             }
 
+            checkKind(setter);
+
             this.setter = nonNull(setter, "setter");
             return this;
         }
@@ -162,6 +192,8 @@ final class PropertyModelImpl implements PropertyModel {
             if (this.parameter != null) {
                 throw new IllegalStateException("parameter is already set");
             }
+
+            checkKind(parameter.meta().kind());
 
             this.parameter = parameter;
             return this;
