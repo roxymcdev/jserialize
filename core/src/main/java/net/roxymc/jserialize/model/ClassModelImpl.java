@@ -2,9 +2,8 @@ package net.roxymc.jserialize.model;
 
 import net.roxymc.jserialize.model.constructor.ConstructorModel;
 import net.roxymc.jserialize.model.property.PropertyMap;
+import net.roxymc.jserialize.util.ObjectUtils;
 import org.jspecify.annotations.Nullable;
-
-import java.util.StringJoiner;
 
 import static net.roxymc.jserialize.util.ObjectUtils.nonNull;
 
@@ -36,7 +35,7 @@ final class ClassModelImpl<T> implements ClassModel<T> {
 
     @Override
     public String toString() {
-        return new StringJoiner(", ", "ClassModelImpl[", "]")
+        return ObjectUtils.toString(this)
                 .add("clazz=" + clazz)
                 .add("constructor=" + constructor)
                 .add("properties=" + properties.values())

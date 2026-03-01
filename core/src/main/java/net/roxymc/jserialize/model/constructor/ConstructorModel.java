@@ -1,8 +1,8 @@
 package net.roxymc.jserialize.model.constructor;
 
 import org.jetbrains.annotations.ApiStatus;
+import org.jspecify.annotations.Nullable;
 
-import java.lang.invoke.MethodHandle;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Parameter;
 
@@ -12,7 +12,7 @@ public interface ConstructorModel {
         return new ConstructorModelImpl.BuilderImpl(constructor);
     }
 
-    MethodHandle constructor();
+    Object invoke(@Nullable Object... args) throws Throwable;
 
     ParameterModel[] parameters();
 

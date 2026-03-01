@@ -2,11 +2,11 @@ package net.roxymc.jserialize.model.constructor;
 
 import net.roxymc.jserialize.model.property.meta.PropertyKind;
 import net.roxymc.jserialize.model.property.meta.PropertyMeta;
+import net.roxymc.jserialize.util.ObjectUtils;
 
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
-import java.util.StringJoiner;
 
 final class ParameterModelImpl implements ParameterModel {
     private final String name;
@@ -54,7 +54,7 @@ final class ParameterModelImpl implements ParameterModel {
 
     @Override
     public String toString() {
-        return new StringJoiner(", ", "ParameterModelImpl[", "]")
+        return ObjectUtils.toString(this)
                 .add("name=" + name)
                 .add("index=" + index)
                 .add("type=" + type)

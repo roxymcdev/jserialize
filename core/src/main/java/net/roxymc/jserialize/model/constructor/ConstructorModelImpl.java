@@ -1,5 +1,8 @@
 package net.roxymc.jserialize.model.constructor;
 
+import net.roxymc.jserialize.util.ObjectUtils;
+import org.jspecify.annotations.Nullable;
+
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Constructor;
@@ -9,14 +12,13 @@ import java.lang.reflect.Parameter;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.StringJoiner;
 
 import static net.roxymc.jserialize.util.ObjectUtils.nonNull;
 
 final class ConstructorModelImpl implements ConstructorModel {
     private static final MethodHandles.Lookup LOOKUP = MethodHandles.lookup();
 
-    private final MethodHandle constructor;
+    private final MethodHandle handle;
     private final ParameterModel[] parameters;
 
     private ConstructorModelImpl(BuilderImpl builder) throws IllegalAccessException {
@@ -30,12 +32,12 @@ final class ConstructorModelImpl implements ConstructorModel {
             constructor = LOOKUP.unreflect((Method) builder.constructor);
         }
 
-        this.constructor = constructor.asSpreader(Object[].class, parameters.length);
+        this.handle = constructor.asSpreader(Object[].class, parameters.length);
     }
 
     @Override
-    public MethodHandle constructor() {
-        return constructor;
+    public Object invoke(@Nullable Object... args) throws Throwable {
+        return handle.invoke(args);
     }
 
     @Override
@@ -45,8 +47,7 @@ final class ConstructorModelImpl implements ConstructorModel {
 
     @Override
     public String toString() {
-        return new StringJoiner(", ", "ConstructorModelImpl[", "]")
-                .add("constructor=" + constructor)
+        return ObjectUtils.toString(this)
                 .add("parameters=" + Arrays.toString(parameters))
                 .toString();
     }

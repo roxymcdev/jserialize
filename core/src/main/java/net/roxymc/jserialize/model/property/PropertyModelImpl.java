@@ -4,6 +4,7 @@ import io.leangen.geantyref.GenericTypeReflector;
 import net.roxymc.jserialize.model.constructor.ParameterModel;
 import net.roxymc.jserialize.model.property.meta.PropertyKind;
 import net.roxymc.jserialize.model.property.meta.PropertyMeta;
+import net.roxymc.jserialize.util.ObjectUtils;
 import net.roxymc.jserialize.util.PropertyUtils;
 import org.jspecify.annotations.Nullable;
 
@@ -14,7 +15,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Map;
-import java.util.StringJoiner;
 
 import static java.lang.String.format;
 import static net.roxymc.jserialize.util.ObjectUtils.nonNull;
@@ -114,7 +114,7 @@ final class PropertyModelImpl implements PropertyModel {
 
     @Override
     public String toString() {
-        return new StringJoiner(", ", "PropertyModelImpl[", "]")
+        return ObjectUtils.toString(this)
                 .add("name='" + name + "'")
                 .add("getter=" + getter)
                 .add("setter=" + setter)

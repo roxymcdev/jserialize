@@ -57,7 +57,7 @@ public final class InstanceCreator<T> {
         }
 
         @SuppressWarnings("unchecked")
-        T instance = (T) constructor.constructor().invoke(values);
+        T instance = (T) constructor.invoke(values);
 
         return populate(instance, true);
     }

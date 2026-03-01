@@ -1,9 +1,9 @@
 package net.roxymc.jserialize.model.property.meta;
 
+import net.roxymc.jserialize.util.ObjectUtils;
 import org.jspecify.annotations.Nullable;
 
 import java.lang.annotation.Annotation;
-import java.util.StringJoiner;
 
 abstract class AbstractPropertyMeta<A extends Annotation> implements PropertyMeta {
     final @Nullable A annotation;
@@ -21,7 +21,8 @@ abstract class AbstractPropertyMeta<A extends Annotation> implements PropertyMet
 
     @Override
     public String toString() {
-        return new StringJoiner(", ", getClass().getSimpleName() + "[", "]")
+        return ObjectUtils.toString(this)
+                .add("kind=" + kind())
                 .add("required=" + required())
                 .add("writeNull=" + writeNull())
                 .add("mutate=" + mutate())
