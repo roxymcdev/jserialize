@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 import static java.lang.String.format;
 import static java.lang.reflect.Modifier.isStatic;
 import static java.lang.reflect.Modifier.isTransient;
+import static net.roxymc.jserialize.util.PropertyUtils.hasPropertyAnnotation;
 import static net.roxymc.jserialize.util.StringUtils.decapitalize;
 import static net.roxymc.jserialize.util.StringUtils.hasPrefix;
 
@@ -40,55 +41,61 @@ public class SimplePropertiesResolver implements PropertiesResolver {
         this.methodResolution = methodResolution;
     }
 
-    @Override
-    public PropertyMap resolveProperties(Class<?> clazz, @Nullable ConstructorModel constructor) throws IllegalAccessException {
-        PropertyMap.Builder properties = PropertyMap.builder();
-
-        Set<MethodSignature> seenMethods = new HashSet<>(OBJECT_METHODS_SIGNATURES);
-        Set<Class<?>> seenInterfaces = new HashSet<>();
-
-        while (clazz != Object.class) {
-            processClass(clazz, properties, seenMethods);
-
-            for (Class<?> iface : clazz.getInterfaces()) {
-                if (!seenInterfaces.add(iface)) {
-                    continue;
-                }
-
-                processClass(iface, properties, seenMethods);
-            }
-
-            clazz = clazz.getSuperclass();
-        }
-
-        if (constructor != null) {
-            processParameters(constructor.parameters(), properties);
-        }
-
-        return properties.build();
+    protected SimplePropertiesResolver createResolver(PropertyResolution fieldResolution, PropertyResolution methodResolutions) {
+        return new SimplePropertiesResolver(fieldResolution, methodResolutions);
     }
 
-    protected void processClass(Class<?> clazz, PropertyMap.Builder properties, Set<MethodSignature> seenMethods) {
+    protected Context createContext(PropertyMap.Builder properties) {
+        return new Context(properties);
+    }
+
+    @Override
+    public PropertyMap resolveProperties(Class<?> clazz, @Nullable ConstructorModel constructor) throws IllegalAccessException {
+        Context ctx = createContext(PropertyMap.builder());
+
+        processClass(clazz, ctx);
+
+        if (constructor != null) {
+            processParameters(constructor.parameters(), ctx);
+        }
+
+        return ctx.properties.build();
+    }
+
+    protected void processClass(Class<?> clazz, Context ctx) {
         SimplePropertiesResolver resolver = this;
 
         JSerializable annotation = clazz.getDeclaredAnnotation(JSerializable.class);
         if (annotation != null) {
-            resolver = new SimplePropertiesResolver(annotation.fields(), annotation.methods());
+            resolver = createResolver(annotation.fields(), annotation.methods());
         }
 
-        resolver.processMembers(clazz, properties, seenMethods);
+        resolver.processMembers(clazz, ctx);
+
+        Class<?> superclass = clazz.getSuperclass();
+        if (superclass != null && superclass != Object.class) {
+            processClass(superclass, ctx);
+        }
+
+        for (Class<?> iface : clazz.getInterfaces()) {
+            if (!ctx.seenInterfaces.add(iface)) {
+                continue;
+            }
+
+            processClass(iface, ctx);
+        }
     }
 
-    protected void processMembers(Class<?> clazz, PropertyMap.Builder properties, Set<MethodSignature> seenMethods) {
-        processFields(clazz.getDeclaredFields(), properties);
-        processMethods(clazz.getDeclaredMethods(), properties, seenMethods);
+    protected void processMembers(Class<?> clazz, Context ctx) {
+        processFields(clazz.getDeclaredFields(), ctx);
+        processMethods(clazz.getDeclaredMethods(), ctx);
     }
 
     protected <M extends Member & AnnotatedElement> boolean shouldIgnore(M member) {
         return member.isSynthetic() || isStatic(member.getModifiers()) || isTransient(member.getModifiers()) || member.isAnnotationPresent(Transient.class);
     }
 
-    protected void processFields(Field[] fields, PropertyMap.Builder properties) {
+    protected void processFields(Field[] fields, Context ctx) {
         if (fieldResolution == PropertyResolution.NEVER) {
             return;
         }
@@ -98,25 +105,25 @@ public class SimplePropertiesResolver implements PropertiesResolver {
                 continue;
             }
 
-            if (fieldResolution == PropertyResolution.ANNOTATED_ONLY && !PropertyUtils.hasPropertyAnnotation(field)) {
+            if (fieldResolution == PropertyResolution.ANNOTATED_ONLY && !hasPropertyAnnotation(field)) {
                 continue;
             }
 
-            processField(field, properties);
+            processField(field, ctx);
         }
     }
 
-    protected void processField(Field field, PropertyMap.Builder properties) {
+    protected void processField(Field field, Context ctx) {
         field.setAccessible(true);
 
         String name = PropertyUtils.getPropertyName(field, field::getName);
 
-        properties.withProperty(name, property -> property
+        ctx.properties.withProperty(name, property -> property
                 .field(field)
         );
     }
 
-    protected void processMethods(Method[] methods, PropertyMap.Builder properties, Set<MethodSignature> seenMethods) {
+    protected void processMethods(Method[] methods, Context ctx) {
         if (methodResolution == PropertyResolution.NEVER) {
             return;
         }
@@ -126,24 +133,24 @@ public class SimplePropertiesResolver implements PropertiesResolver {
                 continue;
             }
 
-            if (methodResolution == PropertyResolution.ANNOTATED_ONLY && !PropertyUtils.hasPropertyAnnotation(method)) {
+            if (methodResolution == PropertyResolution.ANNOTATED_ONLY && !hasPropertyAnnotation(method)) {
                 continue;
             }
 
-            if (!seenMethods.add(new MethodSignature(method))) {
+            if (!ctx.seenMethods.add(new MethodSignature(method))) {
                 continue;
             }
 
-            processMethod(method, properties);
+            processMethod(method, ctx);
         }
     }
 
-    protected void processMethod(Method method, PropertyMap.Builder properties) {
+    protected void processMethod(Method method, Context ctx) {
         method.setAccessible(true);
 
         String name = getPropertyName(method);
 
-        properties.withProperty(name, property -> {
+        ctx.properties.withProperty(name, property -> {
             switch (method.getParameterCount()) {
                 case 0:
                     property.getter(method);
@@ -185,15 +192,26 @@ public class SimplePropertiesResolver implements PropertiesResolver {
         });
     }
 
-    protected void processParameters(ParameterModel[] parameters, PropertyMap.Builder properties) {
+    protected void processParameters(ParameterModel[] parameters, Context ctx) {
         for (ParameterModel parameter : parameters) {
             if (parameter.implicit()) {
                 continue;
             }
 
-            properties.withProperty(parameter.meta().kind(), parameter.name(), property -> property
+            ctx.properties.withProperty(parameter.meta().kind(), parameter.name(), property -> property
                     .parameter(parameter)
             );
+        }
+    }
+
+    protected static class Context {
+        protected final Set<MethodSignature> seenMethods = new HashSet<>(OBJECT_METHODS_SIGNATURES);
+        protected final Set<Class<?>> seenInterfaces = new HashSet<>();
+
+        protected final PropertyMap.Builder properties;
+
+        protected Context(PropertyMap.Builder properties) {
+            this.properties = properties;
         }
     }
 
