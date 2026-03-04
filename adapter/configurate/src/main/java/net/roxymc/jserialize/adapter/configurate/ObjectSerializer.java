@@ -28,7 +28,7 @@ public final class ObjectSerializer implements TypeSerializer<Object> {
                     classModel, type, new ConfigurateUtils(node.options())
             );
 
-            return engine.read(new ConfigurateReaderAdapter(node, classModel), ReadContext.empty());
+            return engine.read(new ConfigurateReaderAdapter(node), ReadContext.empty());
         } catch (Throwable e) {
             throw new SerializationException(e);
         }

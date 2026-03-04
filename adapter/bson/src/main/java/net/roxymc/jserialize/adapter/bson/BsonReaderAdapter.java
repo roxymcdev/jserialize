@@ -3,22 +3,17 @@ package net.roxymc.jserialize.adapter.bson;
 import net.roxymc.jserialize.adapter.ReadContext;
 import net.roxymc.jserialize.adapter.ReaderAdapter;
 import net.roxymc.jserialize.creator.PropertyValue;
-import net.roxymc.jserialize.model.property.PropertyModel;
-import net.roxymc.jserialize.model.property.meta.PropertyKind;
-import net.roxymc.jserialize.util.Pair;
 import org.bson.BsonReader;
 import org.bson.BsonType;
 import org.bson.BsonValue;
 import org.bson.RawBsonDocument;
 import org.bson.codecs.Codec;
 import org.bson.codecs.DecoderContext;
-import org.jspecify.annotations.Nullable;
 
 import java.lang.reflect.Type;
 import java.util.Iterator;
 
 import static net.roxymc.jserialize.adapter.bson.ObjectCodec.DEFAULT_DECODER_CONTEXT;
-import static net.roxymc.jserialize.adapter.bson.ObjectCodec.ID_PROPERTY_NAME;
 
 final class BsonReaderAdapter implements ReaderAdapter<BsonValue> {
     private final ObjectCodec<?> codec;
@@ -32,7 +27,7 @@ final class BsonReaderAdapter implements ReaderAdapter<BsonValue> {
     }
 
     @Override
-    public Iterable<Pair<String, @Nullable PropertyModel>> properties() {
+    public Iterable<String> propertyNames() {
         return () -> new Iterator<>() {
             @Override
             public boolean hasNext() {
@@ -40,21 +35,8 @@ final class BsonReaderAdapter implements ReaderAdapter<BsonValue> {
             }
 
             @Override
-            public Pair<String, @Nullable PropertyModel> next() {
-                String name = reader.readName();
-                PropertyModel property;
-
-                if (ID_PROPERTY_NAME.equals(name)) {
-                    property = codec.classModel.properties().get(PropertyKind.ID);
-                } else {
-                    property = codec.classModel.properties().get(name);
-
-                    if (property != null && property.kind() == PropertyKind.ID) {
-                        property = null;
-                    }
-                }
-
-                return new Pair<>(name, property);
+            public String next() {
+                return reader.readName();
             }
         };
     }
@@ -77,10 +59,10 @@ final class BsonReaderAdapter implements ReaderAdapter<BsonValue> {
             return readValue((ObjectCodec<?>) codec);
         }
 
-        return PropertyValue.of(decoderCtx.decodeWithChildContext(codec, reader));
+        return PropertyValue.single(decoderCtx.decodeWithChildContext(codec, reader));
     }
 
-    private <U> PropertyValue<U> readValue(ObjectCodec<U> codec) {
+    private <U> PropertyValue.Mutating<U> readValue(ObjectCodec<U> codec) {
         RawBsonDocument document = decoderCtx.decodeWithChildContext(
                 this.codec.codecRegistry.get(RawBsonDocument.class), reader
         );

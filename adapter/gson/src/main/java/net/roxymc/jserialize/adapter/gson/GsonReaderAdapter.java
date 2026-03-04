@@ -9,9 +9,6 @@ import com.google.gson.stream.JsonToken;
 import net.roxymc.jserialize.adapter.ReadContext;
 import net.roxymc.jserialize.adapter.ReaderAdapter;
 import net.roxymc.jserialize.creator.PropertyValue;
-import net.roxymc.jserialize.model.property.PropertyModel;
-import net.roxymc.jserialize.util.Pair;
-import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -28,7 +25,7 @@ final class GsonReaderAdapter implements ReaderAdapter<JsonElement> {
     }
 
     @Override
-    public Iterable<Pair<String, @Nullable PropertyModel>> properties() {
+    public Iterable<String> propertyNames() {
         return () -> new Iterator<>() {
             @Override
             public boolean hasNext() {
@@ -40,10 +37,9 @@ final class GsonReaderAdapter implements ReaderAdapter<JsonElement> {
             }
 
             @Override
-            public Pair<String, @Nullable PropertyModel> next() {
+            public String next() {
                 try {
-                    String name = reader.nextName();
-                    return new Pair<>(name, adapter.classModel.properties().get(name));
+                    return reader.nextName();
                 } catch (IOException e) {
                     throw new UncheckedIOException(e);
                 }
@@ -64,10 +60,10 @@ final class GsonReaderAdapter implements ReaderAdapter<JsonElement> {
             return readValue((ObjectAdapter<?>) adapter);
         }
 
-        return PropertyValue.of(adapter.nullSafe().read(reader));
+        return PropertyValue.single(adapter.nullSafe().read(reader));
     }
 
-    private <U> PropertyValue<U> readValue(ObjectAdapter<U> adapter) throws Throwable {
+    private <U> PropertyValue.Mutating<U> readValue(ObjectAdapter<U> adapter) throws Throwable {
         JsonElement element = this.adapter.gson.getAdapter(ObjectAdapter.RAW_TYPE).read(reader);
 
         return (parent, instance) -> adapter.engine.read(

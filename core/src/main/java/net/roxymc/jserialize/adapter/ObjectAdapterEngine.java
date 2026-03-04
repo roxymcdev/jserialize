@@ -9,7 +9,6 @@ import net.roxymc.jserialize.model.property.MethodRef;
 import net.roxymc.jserialize.model.property.PropertyModel;
 import net.roxymc.jserialize.model.property.meta.PropertyKind;
 import net.roxymc.jserialize.model.property.meta.PropertyMeta;
-import net.roxymc.jserialize.util.Pair;
 import org.jspecify.annotations.Nullable;
 
 import java.lang.reflect.Type;
@@ -43,8 +42,8 @@ public final class ObjectAdapterEngine<T, R> {
             extrasMap = mapType != null ? utils.createMap(mapType) : null;
         }
 
-        for (Pair<String, @Nullable PropertyModel> pair : reader.properties()) {
-            PropertyModel property = pair.second();
+        for (String name : reader.propertyNames()) {
+            PropertyModel property = resolveProperty(name);
 
             if (property != null) {
                 PropertyValue<?> value = readProperty(reader, property, ctx);
@@ -56,10 +55,6 @@ public final class ObjectAdapterEngine<T, R> {
             }
 
             if (extrasMap != null) {
-                String name = pair.first();
-                // even tho marked as non-null, the ide thinks it's nullable...
-                assert name != null;
-
                 extrasMap.put(name, reader.readRawValue(name));
                 continue;
             }
@@ -89,6 +84,15 @@ public final class ObjectAdapterEngine<T, R> {
         }
 
         return reader.readValue(property.name(), propertyType);
+    }
+
+    private @Nullable PropertyModel resolveProperty(String name) {
+        if (name.equals(utils.idPropertyName())) {
+            return classModel.properties().get(PropertyKind.ID);
+        }
+
+        PropertyModel property = classModel.properties().get(name);
+        return property != null && property.kind() != PropertyKind.ID ? property : null;
     }
 
     private @Nullable Type resolveReadType(PropertyModel property, ReadContext<?> ctx) {
