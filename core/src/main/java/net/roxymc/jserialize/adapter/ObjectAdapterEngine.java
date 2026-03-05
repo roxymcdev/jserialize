@@ -87,7 +87,12 @@ public final class ObjectAdapterEngine<T, R> {
     }
 
     private @Nullable PropertyModel resolveProperty(String name) {
-        if (name.equals(utils.idPropertyName())) {
+        String idPropertyName = utils.idPropertyName();
+        if (idPropertyName == null) {
+            return classModel.properties().get(name);
+        }
+
+        if (name.equals(idPropertyName)) {
             return classModel.properties().get(PropertyKind.ID);
         }
 
