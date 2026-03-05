@@ -76,12 +76,12 @@ final class PropertyModelImpl implements PropertyModel {
         this.parameter = builder.parameter;
         this.meta = meta;
 
-        if (meta != null && meta.kind() == PropertyKind.EXTRAS) {
+        if (kind() == PropertyKind.EXTRAS) {
             if (getter != null && !Map.class.isAssignableFrom(GenericTypeReflector.erase(getter.valueType()))) {
                 throw new IllegalStateException("@ExtraProperties property getter type must assignable to Map");
             }
 
-            if (getter != null && !Map.class.isAssignableFrom(GenericTypeReflector.erase(getter.valueType()))) {
+            if (setter != null && !Map.class.isAssignableFrom(GenericTypeReflector.erase(setter.valueType()))) {
                 throw new IllegalStateException("@ExtraProperties property setter type must assignable to Map");
             }
         }
