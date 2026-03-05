@@ -7,7 +7,6 @@ import net.roxymc.jserialize.model.constructor.ParameterModel;
 import net.roxymc.jserialize.model.property.PropertyMap;
 import net.roxymc.jserialize.util.PropertyResolution;
 import net.roxymc.jserialize.util.PropertyUtils;
-import org.jspecify.annotations.Nullable;
 
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
@@ -50,16 +49,13 @@ public class SimplePropertiesResolver implements PropertiesResolver {
     }
 
     @Override
-    public PropertyMap resolveProperties(Class<?> clazz, @Nullable ConstructorModel constructor) throws IllegalAccessException {
-        Context ctx = createContext(PropertyMap.builder());
+    public void resolveProperties(Class<?> clazz, PropertyMap.Builder properties) {
+        processClass(clazz, createContext(properties));
+    }
 
-        processClass(clazz, ctx);
-
-        if (constructor != null) {
-            processParameters(constructor.parameters(), ctx);
-        }
-
-        return ctx.properties.build();
+    @Override
+    public void resolveProperties(ConstructorModel constructor, PropertyMap.Builder properties) {
+        processParameters(constructor.parameters(), properties);
     }
 
     protected void processClass(Class<?> clazz, Context ctx) {
@@ -192,13 +188,13 @@ public class SimplePropertiesResolver implements PropertiesResolver {
         });
     }
 
-    protected void processParameters(ParameterModel[] parameters, Context ctx) {
+    protected void processParameters(ParameterModel[] parameters, PropertyMap.Builder properties) {
         for (ParameterModel parameter : parameters) {
             if (parameter.implicit()) {
                 continue;
             }
 
-            ctx.properties.withProperty(parameter.meta().kind(), parameter.name(), property -> property
+            properties.withProperty(parameter.meta().kind(), parameter.name(), property -> property
                     .parameter(parameter)
             );
         }

@@ -20,15 +20,13 @@ import static java.lang.String.format;
 import static net.roxymc.jserialize.util.ObjectUtils.nonNull;
 
 final class PropertyModelImpl implements PropertyModel {
-    private static final MethodHandles.Lookup LOOKUP = MethodHandles.lookup();
-
     private final String name;
     private final @Nullable GetterRef getter;
     private final @Nullable SetterRef setter;
     private final @Nullable ParameterModel parameter;
     private final @Nullable PropertyMeta meta;
 
-    private PropertyModelImpl(BuilderImpl builder) throws IllegalAccessException {
+    private PropertyModelImpl(BuilderImpl builder, MethodHandles.Lookup methodLookup) throws IllegalAccessException {
         this.name = builder.name;
 
         PropertyMeta meta = null;
@@ -37,7 +35,7 @@ final class PropertyModelImpl implements PropertyModel {
             this.getter = new GetterRefImpl(
                     builder.getter.getGenericReturnType(),
                     builder.getter.getDeclaringClass(),
-                    LOOKUP.unreflect(builder.getter)
+                    methodLookup.unreflect(builder.getter)
             );
 
             meta = PropertyMeta.of(builder.getter);
@@ -45,7 +43,7 @@ final class PropertyModelImpl implements PropertyModel {
             this.getter = new GetterRefImpl(
                     builder.field.getGenericType(),
                     builder.field.getDeclaringClass(),
-                    LOOKUP.unreflectGetter(builder.field)
+                    methodLookup.unreflectGetter(builder.field)
             );
 
             meta = PropertyMeta.of(builder.field);
@@ -57,7 +55,7 @@ final class PropertyModelImpl implements PropertyModel {
             this.setter = new SetterRefImpl(
                     builder.setter.getGenericParameterTypes()[0],
                     builder.setter.getDeclaringClass(),
-                    LOOKUP.unreflect(builder.setter)
+                    methodLookup.unreflect(builder.setter)
             );
 
             if (meta == null) {
@@ -67,7 +65,7 @@ final class PropertyModelImpl implements PropertyModel {
             this.setter = new SetterRefImpl(
                     builder.field.getGenericType(),
                     builder.field.getDeclaringClass(),
-                    LOOKUP.unreflectSetter(builder.field)
+                    methodLookup.unreflectSetter(builder.field)
             );
         } else {
             this.setter = null;
@@ -203,9 +201,8 @@ final class PropertyModelImpl implements PropertyModel {
             return this;
         }
 
-        @Override
-        public PropertyModel build() throws IllegalAccessException {
-            return new PropertyModelImpl(this);
+        public PropertyModel build(MethodHandles.Lookup methodLookup) throws IllegalAccessException {
+            return new PropertyModelImpl(this, methodLookup);
         }
     }
 }

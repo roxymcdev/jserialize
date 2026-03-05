@@ -3,7 +3,6 @@ package net.roxymc.jserialize.model.resolver;
 import net.roxymc.jserialize.annotation.Creator;
 import net.roxymc.jserialize.model.constructor.ConstructorModel;
 import net.roxymc.jserialize.util.PropertyUtils;
-import org.jspecify.annotations.Nullable;
 
 import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
@@ -20,7 +19,7 @@ public class SimpleConstructorResolver implements ConstructorResolver {
     }
 
     @Override
-    public @Nullable ConstructorModel resolveConstructor(Class<?> clazz) throws IllegalAccessException {
+    public void resolveConstructor(Class<?> clazz, ConstructorModel.Builder constructor) {
         Set<Executable> constructors = new HashSet<>();
 
         Collections.addAll(constructors, clazz.getDeclaredConstructors());
@@ -39,33 +38,31 @@ public class SimpleConstructorResolver implements ConstructorResolver {
             throw new IllegalStateException("No constructors found");
         }
 
-        Executable targetConstructor = null;
+        Executable target = null;
 
-        for (Executable constructor : constructors) {
-            if (constructor.getDeclaredAnnotation(Creator.class) == null) {
+        for (Executable ctor : constructors) {
+            if (ctor.getDeclaredAnnotation(Creator.class) == null) {
                 continue;
             }
 
-            if (targetConstructor != null) {
+            if (target != null) {
                 throw new IllegalStateException("Multiple constructors found");
             }
 
-            targetConstructor = constructor;
+            target = ctor;
         }
 
-        if (targetConstructor == null) {
+        if (target == null) {
             if (constructors.size() > 1) {
                 throw new IllegalStateException("Multiple constructors found");
             }
 
-            targetConstructor = constructors.iterator().next();
+            target = constructors.iterator().next();
         }
 
-        ConstructorModel.Builder builder = ConstructorModel.builder(targetConstructor);
+        constructor.executable(target);
 
-        processParameters(targetConstructor.getParameters(), builder);
-
-        return builder.build();
+        processParameters(target.getParameters(), constructor);
     }
 
     protected void processParameters(Parameter[] parameters, ConstructorModel.Builder builder) {

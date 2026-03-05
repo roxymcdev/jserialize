@@ -61,7 +61,5 @@ public interface PropertyModel {
         Builder setter(Method setter);
 
         Builder parameter(ParameterModel parameter);
-
-        PropertyModel build() throws IllegalAccessException;
     }
 }

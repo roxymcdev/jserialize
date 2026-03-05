@@ -16,23 +16,22 @@ import java.util.Map;
 import static net.roxymc.jserialize.util.ObjectUtils.nonNull;
 
 final class ConstructorModelImpl implements ConstructorModel {
-    private static final MethodHandles.Lookup LOOKUP = MethodHandles.lookup();
-
     private final MethodHandle handle;
     private final ParameterModel[] parameters;
 
-    private ConstructorModelImpl(BuilderImpl builder) throws IllegalAccessException {
+    private ConstructorModelImpl(BuilderImpl builder, MethodHandles.Lookup methodLookup) throws IllegalAccessException {
         this.parameters = builder.parameters.values().toArray(ParameterModel[]::new);
 
-        MethodHandle constructor;
+        Executable executable = nonNull(builder.executable, "executable");
+        MethodHandle handle;
 
-        if (builder.constructor instanceof Constructor<?>) {
-            constructor = LOOKUP.unreflectConstructor((Constructor<?>) builder.constructor);
+        if (executable instanceof Constructor<?>) {
+            handle = methodLookup.unreflectConstructor((Constructor<?>) executable);
         } else {
-            constructor = LOOKUP.unreflect((Method) builder.constructor);
+            handle = methodLookup.unreflect((Method) executable);
         }
 
-        this.handle = constructor.asSpreader(Object[].class, parameters.length);
+        this.handle = handle.asSpreader(Object[].class, parameters.length);
     }
 
     @Override
@@ -53,12 +52,14 @@ final class ConstructorModelImpl implements ConstructorModel {
     }
 
     static final class BuilderImpl implements Builder {
-        private final Executable constructor;
+        private @Nullable Executable executable;
         private final Map<String, ParameterModel> parameters = new LinkedHashMap<>();
         private int parameterIndex = 0;
 
-        BuilderImpl(Executable constructor) {
-            this.constructor = nonNull(constructor, "constructor");
+        @Override
+        public Builder executable(Executable executable) {
+            this.executable = nonNull(executable, "executable");
+            return this;
         }
 
         @Override
@@ -75,8 +76,8 @@ final class ConstructorModelImpl implements ConstructorModel {
         }
 
         @Override
-        public ConstructorModel build() throws IllegalAccessException {
-            return new ConstructorModelImpl(this);
+        public ConstructorModel build(MethodHandles.Lookup methodLookup) throws IllegalAccessException {
+            return new ConstructorModelImpl(this, methodLookup);
         }
     }
 }

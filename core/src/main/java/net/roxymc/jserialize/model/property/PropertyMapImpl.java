@@ -3,6 +3,7 @@ package net.roxymc.jserialize.model.property;
 import net.roxymc.jserialize.model.property.meta.PropertyKind;
 import org.jetbrains.annotations.Nullable;
 
+import java.lang.invoke.MethodHandles;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -15,12 +16,12 @@ final class PropertyMapImpl implements PropertyMap {
     private final Map<String, PropertyModel> nameToProperty;
     private final Map<PropertyKind<?>, PropertyModel> kindToProperty;
 
-    PropertyMapImpl(BuilderImpl builder) throws IllegalAccessException {
+    PropertyMapImpl(BuilderImpl builder, MethodHandles.Lookup methodLookup) throws IllegalAccessException {
         Map<String, PropertyModel> nameToProperty = new HashMap<>();
 
         for (Map.Entry<String, PropertyModelImpl.BuilderImpl> entry : builder.nameToProperty.entrySet()) {
             String name = entry.getKey();
-            PropertyModel property = entry.getValue().build();
+            PropertyModel property = entry.getValue().build(methodLookup);
 
             nameToProperty.put(name, property);
         }
@@ -93,8 +94,8 @@ final class PropertyMapImpl implements PropertyMap {
         }
 
         @Override
-        public PropertyMap build() throws IllegalAccessException {
-            return new PropertyMapImpl(this);
+        public PropertyMap build(MethodHandles.Lookup methodLookup) throws IllegalAccessException {
+            return new PropertyMapImpl(this, methodLookup);
         }
     }
 }

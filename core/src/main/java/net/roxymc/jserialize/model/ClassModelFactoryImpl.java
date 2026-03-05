@@ -9,6 +9,7 @@ import net.roxymc.jserialize.model.resolver.SimpleConstructorResolver;
 import net.roxymc.jserialize.model.resolver.SimplePropertiesResolver;
 import net.roxymc.jserialize.util.SneakyThrow;
 
+import java.lang.invoke.MethodHandles;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -21,10 +22,12 @@ final class ClassModelFactoryImpl implements ClassModel.Factory {
 
     private final ConstructorResolver constructorResolver;
     private final PropertiesResolver propertiesResolver;
+    private final MethodHandles.Lookup methodLookup;
 
     private ClassModelFactoryImpl(BuilderImpl builder) {
         this.constructorResolver = builder.constructorResolver;
         this.propertiesResolver = builder.propertiesResolver;
+        this.methodLookup = builder.methodLookup;
     }
 
     @SuppressWarnings("RedundantThrows")
@@ -46,10 +49,27 @@ final class ClassModelFactoryImpl implements ClassModel.Factory {
     private <T> ClassModel<T> create0(Class<T> clazz) throws IllegalAccessException {
         JSerializable annotation = clazz.getDeclaredAnnotation(JSerializable.class);
 
-        ConstructorModel constructor = annotation == null || !annotation.mutateOnly()
-                ? constructorResolver.resolveConstructor(clazz)
-                : null;
-        PropertyMap properties = propertiesResolver.resolveProperties(clazz, constructor);
+        ConstructorModel constructor = null;
+        if (annotation == null || !annotation.mutateOnly()) {
+            ConstructorModel.Builder builder = ConstructorModel.builder();
+
+            constructorResolver.resolveConstructor(clazz, builder);
+
+            constructor = builder.build(methodLookup);
+        }
+
+        PropertyMap properties;
+        {
+            PropertyMap.Builder builder = PropertyMap.builder();
+
+            propertiesResolver.resolveProperties(clazz, builder);
+
+            if (constructor != null) {
+                propertiesResolver.resolveProperties(constructor, builder);
+            }
+
+            properties = builder.build(methodLookup);
+        }
 
         return new ClassModelImpl<>(clazz, constructor, properties);
     }
@@ -57,6 +77,7 @@ final class ClassModelFactoryImpl implements ClassModel.Factory {
     static final class BuilderImpl implements ClassModel.Factory.Builder {
         private ConstructorResolver constructorResolver = SimpleConstructorResolver.INSTANCE;
         private PropertiesResolver propertiesResolver = SimplePropertiesResolver.INSTANCE;
+        private MethodHandles.Lookup methodLookup = MethodHandles.lookup();
 
         @Override
         public Builder constructorResolver(ConstructorResolver constructorResolver) {
@@ -67,6 +88,12 @@ final class ClassModelFactoryImpl implements ClassModel.Factory {
         @Override
         public Builder propertiesResolver(PropertiesResolver propertiesResolver) {
             this.propertiesResolver = nonNull(propertiesResolver, "propertiesResolver");
+            return this;
+        }
+
+        @Override
+        public Builder methodLookup(MethodHandles.Lookup methodLookup) {
+            this.methodLookup = nonNull(methodLookup, "methodLookup");
             return this;
         }
 

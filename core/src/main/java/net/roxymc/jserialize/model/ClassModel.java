@@ -7,6 +7,8 @@ import net.roxymc.jserialize.model.resolver.PropertiesResolver;
 import org.jetbrains.annotations.ApiStatus;
 import org.jspecify.annotations.Nullable;
 
+import java.lang.invoke.MethodHandles;
+
 @ApiStatus.NonExtendable
 public interface ClassModel<T> {
     static Factory factory() {
@@ -32,6 +34,8 @@ public interface ClassModel<T> {
             Builder constructorResolver(ConstructorResolver constructorResolver);
 
             Builder propertiesResolver(PropertiesResolver propertiesResolver);
+
+            Builder methodLookup(MethodHandles.Lookup methodLookup);
 
             Factory build();
         }

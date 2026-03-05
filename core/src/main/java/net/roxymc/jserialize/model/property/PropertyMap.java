@@ -4,10 +4,12 @@ import net.roxymc.jserialize.model.property.meta.PropertyKind;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
+import java.lang.invoke.MethodHandles;
 import java.util.function.Consumer;
 
 @ApiStatus.NonExtendable
 public interface PropertyMap {
+    @ApiStatus.Internal
     static Builder builder() {
         return new PropertyMapImpl.BuilderImpl();
     }
@@ -26,6 +28,7 @@ public interface PropertyMap {
 
         Builder withProperty(PropertyKind<?> kind, String fallbackName, Consumer<PropertyModel.Builder> action);
 
-        PropertyMap build() throws IllegalAccessException;
+        @ApiStatus.Internal
+        PropertyMap build(MethodHandles.Lookup methodLookup) throws IllegalAccessException;
     }
 }
