@@ -29,9 +29,9 @@ public interface ClassModel<T> {
 
         @ApiStatus.NonExtendable
         interface Builder {
-            Builder constructorDiscoverer(ConstructorResolver constructorResolver);
+            Builder constructorResolver(ConstructorResolver constructorResolver);
 
-            Builder propertyDiscoverer(PropertiesResolver propertiesResolver);
+            Builder propertiesResolver(PropertiesResolver propertiesResolver);
 
             Factory build();
         }

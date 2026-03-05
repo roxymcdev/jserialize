@@ -59,13 +59,13 @@ final class ClassModelFactoryImpl implements ClassModel.Factory {
         private PropertiesResolver propertiesResolver = SimplePropertiesResolver.INSTANCE;
 
         @Override
-        public Builder constructorDiscoverer(ConstructorResolver constructorResolver) {
+        public Builder constructorResolver(ConstructorResolver constructorResolver) {
             this.constructorResolver = nonNull(constructorResolver, "constructorResolver");
             return this;
         }
 
         @Override
-        public Builder propertyDiscoverer(PropertiesResolver propertiesResolver) {
+        public Builder propertiesResolver(PropertiesResolver propertiesResolver) {
             this.propertiesResolver = nonNull(propertiesResolver, "propertiesResolver");
             return this;
         }
