@@ -1,7 +1,5 @@
 package net.roxymc.jserialize.annotation;
 
-import net.roxymc.jserialize.util.PropertyResolution;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

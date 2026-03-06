@@ -5,7 +5,7 @@ import net.roxymc.jserialize.annotation.Transient;
 import net.roxymc.jserialize.model.constructor.ConstructorModel;
 import net.roxymc.jserialize.model.constructor.ParameterModel;
 import net.roxymc.jserialize.model.property.PropertyMap;
-import net.roxymc.jserialize.util.PropertyResolution;
+import net.roxymc.jserialize.annotation.PropertyResolution;
 import net.roxymc.jserialize.util.PropertyUtils;
 
 import java.lang.reflect.AnnotatedElement;

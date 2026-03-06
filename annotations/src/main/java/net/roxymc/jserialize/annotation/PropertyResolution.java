@@ -1,4 +1,4 @@
-package net.roxymc.jserialize.util;
+package net.roxymc.jserialize.annotation;
 
 public enum PropertyResolution {
     ALWAYS,
