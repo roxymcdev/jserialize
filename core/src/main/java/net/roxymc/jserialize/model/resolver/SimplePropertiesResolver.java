@@ -1,12 +1,14 @@
 package net.roxymc.jserialize.model.resolver;
 
 import net.roxymc.jserialize.annotation.JSerializable;
+import net.roxymc.jserialize.annotation.JSerializable.FieldResolution;
+import net.roxymc.jserialize.annotation.JSerializable.MethodResolution;
 import net.roxymc.jserialize.annotation.Transient;
 import net.roxymc.jserialize.model.constructor.ConstructorModel;
 import net.roxymc.jserialize.model.constructor.ParameterModel;
 import net.roxymc.jserialize.model.property.PropertyMap;
-import net.roxymc.jserialize.annotation.PropertyResolution;
 import net.roxymc.jserialize.util.PropertyUtils;
+import org.jspecify.annotations.Nullable;
 
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
@@ -29,18 +31,19 @@ public class SimplePropertiesResolver implements PropertiesResolver {
             .map(MethodSignature::new)
             .collect(Collectors.toUnmodifiableSet());
 
-    protected final PropertyResolution fieldResolution, methodResolution;
+    protected final FieldResolution fieldResolution;
+    protected final MethodResolution methodResolution;
 
     protected SimplePropertiesResolver() {
-        this(PropertyResolution.ALWAYS, PropertyResolution.ALWAYS);
+        this(FieldResolution.ALWAYS, MethodResolution.BEAN);
     }
 
-    protected SimplePropertiesResolver(PropertyResolution fieldResolution, PropertyResolution methodResolution) {
+    protected SimplePropertiesResolver(FieldResolution fieldResolution, MethodResolution methodResolution) {
         this.fieldResolution = fieldResolution;
         this.methodResolution = methodResolution;
     }
 
-    protected SimplePropertiesResolver createResolver(PropertyResolution fieldResolution, PropertyResolution methodResolutions) {
+    protected SimplePropertiesResolver createResolver(FieldResolution fieldResolution, MethodResolution methodResolutions) {
         return new SimplePropertiesResolver(fieldResolution, methodResolutions);
     }
 
@@ -92,7 +95,7 @@ public class SimplePropertiesResolver implements PropertiesResolver {
     }
 
     protected void processFields(Field[] fields, Context ctx) {
-        if (fieldResolution == PropertyResolution.NEVER) {
+        if (fieldResolution == FieldResolution.NEVER) {
             return;
         }
 
@@ -101,7 +104,7 @@ public class SimplePropertiesResolver implements PropertiesResolver {
                 continue;
             }
 
-            if (fieldResolution == PropertyResolution.ANNOTATED_ONLY && !hasPropertyAnnotation(field)) {
+            if (fieldResolution == FieldResolution.ANNOTATED_ONLY && !hasPropertyAnnotation(field)) {
                 continue;
             }
 
@@ -120,7 +123,7 @@ public class SimplePropertiesResolver implements PropertiesResolver {
     }
 
     protected void processMethods(Method[] methods, Context ctx) {
-        if (methodResolution == PropertyResolution.NEVER) {
+        if (methodResolution == MethodResolution.NEVER) {
             return;
         }
 
@@ -129,7 +132,7 @@ public class SimplePropertiesResolver implements PropertiesResolver {
                 continue;
             }
 
-            if (methodResolution == PropertyResolution.ANNOTATED_ONLY && !hasPropertyAnnotation(method)) {
+            if (methodResolution == MethodResolution.ANNOTATED_ONLY && !hasPropertyAnnotation(method)) {
                 continue;
             }
 
@@ -145,6 +148,9 @@ public class SimplePropertiesResolver implements PropertiesResolver {
         method.setAccessible(true);
 
         String name = getPropertyName(method);
+        if (name == null) {
+            return;
+        }
 
         ctx.properties.withProperty(name, property -> {
             switch (method.getParameterCount()) {
@@ -165,27 +171,30 @@ public class SimplePropertiesResolver implements PropertiesResolver {
         });
     }
 
-    protected String getPropertyName(Method method) {
-        return PropertyUtils.getPropertyName(method, () -> {
-            String methodName = method.getName();
+    protected @Nullable String getPropertyName(Method method) {
+        String propertyName = PropertyUtils.getPropertyName(method);
+        if (propertyName != null) {
+            return propertyName;
+        }
 
-            switch (method.getParameterCount()) {
-                case 0:
-                    if (hasPrefix(methodName, "get")) {
-                        return decapitalize(methodName.substring(3));
-                    } else if (hasPrefix(methodName, "is")) {
-                        return decapitalize(methodName.substring(2));
-                    }
-                    break;
-                case 1:
-                    if (hasPrefix(methodName, "set")) {
-                        return decapitalize(methodName.substring(3));
-                    }
-                    break;
-            }
+        String methodName = method.getName();
 
-            return methodName;
-        });
+        switch (method.getParameterCount()) {
+            case 0:
+                if (hasPrefix(methodName, "get")) {
+                    return decapitalize(methodName.substring(3));
+                } else if (hasPrefix(methodName, "is")) {
+                    return decapitalize(methodName.substring(2));
+                }
+                break;
+            case 1:
+                if (hasPrefix(methodName, "set")) {
+                    return decapitalize(methodName.substring(3));
+                }
+                break;
+        }
+
+        return methodResolution != MethodResolution.BEAN ? methodName : null;
     }
 
     protected void processParameters(ParameterModel[] parameters, PropertyMap.Builder properties) {

@@ -57,10 +57,10 @@ public final class PropertyUtils {
         return annotations.iterator().next();
     }
 
-    public static String getPropertyName(AnnotatedElement element, Supplier<String> defaultName) {
+    public static @Nullable String getPropertyName(AnnotatedElement element) {
         Annotation annotation = getPropertyAnnotation(element);
         if (annotation == null) {
-            return defaultName.get();
+            return null;
         }
 
         String name = "";
@@ -75,6 +75,11 @@ public final class PropertyUtils {
             name = ((Property) annotation).value();
         }
 
-        return !name.isEmpty() ? name : defaultName.get();
+        return !name.isEmpty() ? name : null;
+    }
+
+    public static String getPropertyName(AnnotatedElement element, Supplier<String> defaultName) {
+        String name = getPropertyName(element);
+        return name != null ? name : defaultName.get();
     }
 }

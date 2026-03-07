@@ -8,9 +8,22 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface JSerializable {
-    PropertyResolution fields() default PropertyResolution.ALWAYS;
+    FieldResolution fields() default FieldResolution.ALWAYS;
 
-    PropertyResolution methods() default PropertyResolution.ALWAYS;
+    MethodResolution methods() default MethodResolution.BEAN;
 
     boolean mutateOnly() default false;
+
+    enum FieldResolution {
+        ALWAYS,
+        ANNOTATED_ONLY,
+        NEVER
+    }
+
+    enum MethodResolution {
+        ALWAYS,
+        BEAN,
+        ANNOTATED_ONLY,
+        NEVER
+    }
 }
