@@ -113,8 +113,6 @@ public class SimplePropertiesResolver implements PropertiesResolver {
     }
 
     protected void processField(Field field, Context ctx) {
-        field.setAccessible(true);
-
         String name = PropertyUtils.getPropertyName(field, field::getName);
 
         ctx.properties.withProperty(name, property -> property
@@ -145,8 +143,6 @@ public class SimplePropertiesResolver implements PropertiesResolver {
     }
 
     protected void processMethod(Method method, Context ctx) {
-        method.setAccessible(true);
-
         String name = getPropertyName(method);
         if (name == null) {
             return;

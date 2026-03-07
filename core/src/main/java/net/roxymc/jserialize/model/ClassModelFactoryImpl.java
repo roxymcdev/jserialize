@@ -47,6 +47,7 @@ final class ClassModelFactoryImpl implements ClassModel.Factory {
     }
 
     private <T> ClassModel<T> create0(Class<T> clazz) throws IllegalAccessException {
+        MethodHandles.Lookup methodLookup = MethodHandles.privateLookupIn(clazz, this.methodLookup);
         JSerializable annotation = clazz.getDeclaredAnnotation(JSerializable.class);
 
         ConstructorModel constructor = null;
