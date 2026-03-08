@@ -59,7 +59,7 @@ final class BsonReaderAdapter implements ReaderAdapter<BsonValue> {
             return readValue((ObjectCodec<?>) codec);
         }
 
-        return PropertyValue.single(decoderCtx.decodeWithChildContext(codec, reader));
+        return PropertyValue.of(decoderCtx.decodeWithChildContext(codec, reader));
     }
 
     private <U> PropertyValue.Mutating<U> readValue(ObjectCodec<U> codec) {

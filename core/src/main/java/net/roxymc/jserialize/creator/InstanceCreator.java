@@ -50,7 +50,7 @@ public final class InstanceCreator<T> {
                 continue;
             }
 
-            Object value = lazyValue.asSingle(name).get(null);
+            Object value = lazyValue.get(null);
             validateValue(name, value, meta);
 
             values[parameter.index()] = value;
@@ -98,7 +98,7 @@ public final class InstanceCreator<T> {
             }
 
             if (!canMutate) {
-                Object value = lazyValue.asSingle(name).get(instance);
+                Object value = lazyValue.get(instance);
                 validateValue(name, value, meta);
 
                 property.setter().set(instance, value);
@@ -108,7 +108,7 @@ public final class InstanceCreator<T> {
             Object currentValue = property.getter().get(instance);
 
             if (currentValue instanceof Collection<?> || currentValue instanceof Map<?, ?>) {
-                Object value = lazyValue.asSingle(name).get(instance);
+                Object value = lazyValue.get(instance);
                 if (value == null) {
                     validateValue(name, null, meta);
                     continue;
@@ -136,7 +136,7 @@ public final class InstanceCreator<T> {
         if (kind == PropertyKind.PROPERTY) {
             return properties.get(name);
         } else if (kind == PropertyKind.PARENT) {
-            return PropertyValue.single(parent);
+            return PropertyValue.of(parent);
         }
 
         PropertyModel property = classModel.properties().get(kind);
@@ -172,7 +172,7 @@ public final class InstanceCreator<T> {
         public Builder<T> property(String name, @Nullable Object value) {
             nonNull(name, "name");
 
-            return property(name, PropertyValue.single(value));
+            return property(name, PropertyValue.of(value));
         }
 
         public Builder<T> property(String name, PropertyValue<?> value) {

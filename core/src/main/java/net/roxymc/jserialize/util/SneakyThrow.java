@@ -4,8 +4,8 @@ public final class SneakyThrow {
     private SneakyThrow() {
     }
 
+    @SuppressWarnings("unchecked")
     public static <X extends Throwable> RuntimeException sneakyThrow(Throwable ex) throws X {
-        //noinspection unchecked
         throw (X) ex;
     }
 }

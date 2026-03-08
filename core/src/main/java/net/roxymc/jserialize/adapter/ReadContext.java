@@ -13,8 +13,8 @@ public final class ReadContext<T> {
         this.instance = instance;
     }
 
+    @SuppressWarnings("unchecked")
     public static <T> ReadContext<T> empty() {
-        //noinspection unchecked
         return (ReadContext<T>) EMPTY;
     }
 }

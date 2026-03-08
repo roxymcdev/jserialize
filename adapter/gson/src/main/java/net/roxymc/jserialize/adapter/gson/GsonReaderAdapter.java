@@ -60,7 +60,7 @@ final class GsonReaderAdapter implements ReaderAdapter<JsonElement> {
             return readValue((ObjectAdapter<?>) adapter);
         }
 
-        return PropertyValue.single(adapter.nullSafe().read(reader));
+        return PropertyValue.of(adapter.nullSafe().read(reader));
     }
 
     private <U> PropertyValue.Mutating<U> readValue(ObjectAdapter<U> adapter) throws Throwable {

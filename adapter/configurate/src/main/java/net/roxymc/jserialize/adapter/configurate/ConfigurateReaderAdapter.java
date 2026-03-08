@@ -36,7 +36,7 @@ final class ConfigurateReaderAdapter implements ReaderAdapter<ConfigurationNode>
             return readValue(node, classModel, type);
         }
 
-        return PropertyValue.single(node.get(type));
+        return PropertyValue.of(node.get(type));
     }
 
     private <U> PropertyValue.Mutating<U> readValue(ConfigurationNode node, ClassModel<U> classModel, Type type) {

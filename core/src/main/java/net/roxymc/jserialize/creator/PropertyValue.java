@@ -1,23 +1,16 @@
 package net.roxymc.jserialize.creator;
 
-import org.jetbrains.annotations.ApiStatus;
 import org.jspecify.annotations.Nullable;
 
-@ApiStatus.NonExtendable
+@FunctionalInterface
 public interface PropertyValue<T> {
-    Single<?> NULL = single(null);
+    PropertyValue<?> NULL = of(null);
 
-    static <T> Single<T> single(@Nullable T value) {
+    static <T> PropertyValue<T> of(@Nullable T value) {
         return $ -> value;
     }
 
-    default Single<T> asSingle(String name) {
-        if (this instanceof Single) {
-            return (Single<T>) this;
-        }
-
-        throw new IllegalStateException("Expected property '" + name + "' to be a single value");
-    }
+    @Nullable T get(@Nullable Object parent) throws Throwable;
 
     default Mutating<T> asMutating(String name) {
         if (this instanceof Mutating) {
@@ -28,12 +21,12 @@ public interface PropertyValue<T> {
     }
 
     @FunctionalInterface
-    interface Single<T> extends PropertyValue<T> {
-        @Nullable T get(@Nullable Object parent) throws Throwable;
-    }
-
-    @FunctionalInterface
     interface Mutating<T> extends PropertyValue<T> {
-        void mutate(@Nullable Object parent, T instance) throws Throwable;
+        @Override
+        default T get(@Nullable Object parent) throws Throwable {
+            return mutate(parent, null);
+        }
+
+        T mutate(@Nullable Object parent, @Nullable T instance) throws Throwable;
     }
 }
