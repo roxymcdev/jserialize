@@ -1,6 +1,5 @@
 package net.roxymc.jserialize.adapter;
 
-import io.leangen.geantyref.GenericTypeReflector;
 import net.roxymc.jserialize.creator.InstanceCreator;
 import net.roxymc.jserialize.creator.PropertyValue;
 import net.roxymc.jserialize.model.ClassModel;
@@ -14,6 +13,7 @@ import org.jspecify.annotations.Nullable;
 import java.lang.reflect.Type;
 import java.util.Map;
 
+import static io.leangen.geantyref.GenericTypeReflector.*;
 import static java.lang.String.format;
 
 public final class ObjectAdapterEngine<T, R> {
@@ -104,7 +104,7 @@ public final class ObjectAdapterEngine<T, R> {
         PropertyMeta meta = property.meta();
 
         if (ctx.instance == null && property.parameterType() != null) {
-            return GenericTypeReflector.resolveType(property.parameterType(), type);
+            return box(resolveType(property.parameterType(), type));
         }
 
         MethodRef ref = null;
@@ -119,8 +119,8 @@ public final class ObjectAdapterEngine<T, R> {
             return null;
         }
 
-        Type supertype = GenericTypeReflector.getExactSuperType(type, ref.declaringClass());
-        return GenericTypeReflector.resolveType(ref.valueType(), supertype);
+        Type supertype = getExactSuperType(type, ref.declaringClass());
+        return box(resolveType(ref.valueType(), supertype));
     }
 
     public void write(WriterAdapter writer, T instance) throws Throwable {
@@ -150,8 +150,8 @@ public final class ObjectAdapterEngine<T, R> {
             return;
         }
 
-        Type supertype = GenericTypeReflector.getExactSuperType(type, getter.declaringClass());
-        Type propertyType = GenericTypeReflector.resolveType(getter.valueType(), supertype);
+        Type supertype = getExactSuperType(type, getter.declaringClass());
+        Type propertyType = box(resolveType(getter.valueType(), supertype));
 
         if (meta != null && meta.kind() == PropertyKind.EXTRAS) {
             MapLike<R> extrasMap = utils.createMap(propertyType);
