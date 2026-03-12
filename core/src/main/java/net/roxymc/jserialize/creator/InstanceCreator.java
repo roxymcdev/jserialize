@@ -77,7 +77,7 @@ public final class InstanceCreator<T> {
             ));
         }
 
-        for (PropertyModel property : classModel.properties().values()) {
+        for (PropertyModel property : classModel.properties()) {
             if (skipParams && property.parameter() != null) {
                 continue;
             }
@@ -107,7 +107,7 @@ public final class InstanceCreator<T> {
 
             Object currentValue = property.getter().get(instance);
 
-            if (currentValue instanceof Collection<?> || currentValue instanceof Map<?, ?>) {
+            if (currentValue instanceof Collection || currentValue instanceof Map) {
                 Object value = lazyValue.get(instance);
                 if (value == null) {
                     validateValue(name, null, meta);

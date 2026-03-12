@@ -38,7 +38,7 @@ final class ClassModelImpl<T> implements ClassModel<T> {
         return ObjectUtils.toString(this)
                 .add("clazz=" + clazz)
                 .add("constructor=" + constructor)
-                .add("properties=" + properties.values())
+                .add("properties=" + properties)
                 .toString();
     }
 }

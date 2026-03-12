@@ -1,13 +1,10 @@
 package net.roxymc.jserialize.model.property;
 
 import net.roxymc.jserialize.model.property.meta.PropertyKind;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.lang.invoke.MethodHandles;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -40,11 +37,6 @@ final class PropertyMapImpl implements PropertyMap {
     }
 
     @Override
-    public Iterable<PropertyModel> values() {
-        return nameToProperty.values();
-    }
-
-    @Override
     public @Nullable PropertyModel get(String name) {
         return nameToProperty.get(name);
     }
@@ -52,6 +44,16 @@ final class PropertyMapImpl implements PropertyMap {
     @Override
     public @Nullable PropertyModel get(PropertyKind<?> kind) {
         return kindToProperty.get(kind);
+    }
+
+    @Override
+    public Iterator<PropertyModel> iterator() {
+        return nameToProperty.values().iterator();
+    }
+
+    @Override
+    public String toString() {
+        return nameToProperty.toString();
     }
 
     static final class BuilderImpl implements Builder {

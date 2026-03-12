@@ -1,0 +1,167 @@
+package net.roxymc.jserialize.adapter.object;
+
+import net.roxymc.jserialize.Reader;
+import net.roxymc.jserialize.adapter.ReadContext;
+import net.roxymc.jserialize.adapter.TypeAdapter;
+import net.roxymc.jserialize.creator.InstanceCreator;
+import net.roxymc.jserialize.creator.PropertyValue;
+import net.roxymc.jserialize.model.ClassModel;
+import net.roxymc.jserialize.model.property.MethodRef;
+import net.roxymc.jserialize.model.property.PropertyModel;
+import net.roxymc.jserialize.model.property.meta.PropertyKind;
+import net.roxymc.jserialize.model.property.meta.PropertyMeta;
+import net.roxymc.jserialize.token.TokenType;
+import net.roxymc.jserialize.type.TypeToken;
+import org.jspecify.annotations.Nullable;
+
+import java.io.IOException;
+import java.lang.reflect.Type;
+
+import static io.leangen.geantyref.GenericTypeReflector.*;
+
+final class ObjectReader<T, R> {
+    private final ClassModel<T> classModel;
+    private final TypeToken<? extends T> type;
+    private final @Nullable T instance;
+    private final FormatUtils<R> formatUtils;
+    private final ReadContext readCtx;
+
+    ObjectReader(
+            ClassModel<T> classModel,
+            TypeToken<? extends T> type,
+            @Nullable T instance,
+            FormatUtils<R> formatUtils,
+            ReadContext readCtx
+    ) {
+        this.classModel = classModel;
+        this.type = type;
+        this.instance = instance;
+        this.formatUtils = formatUtils;
+        this.readCtx = readCtx;
+    }
+
+    T read(Reader reader) throws Throwable {
+        reader.readObjectStart();
+
+        InstanceCreator.Builder<T> builder = InstanceCreator.builder(classModel)
+                .parent(readCtx.parent());
+
+        PropertyModel extrasProperty = classModel.properties().get(PropertyKind.EXTRAS);
+        MapLike<R> extrasMap;
+
+        if (extrasProperty != null) {
+            Type mapType = resolveReadType(extrasProperty);
+
+            extrasMap = mapType != null ? formatUtils.createMap(readCtx.typeAdapters(), mapType) : null;
+        } else {
+            extrasMap = null;
+        }
+
+        while (reader.peek() == TokenType.NAME) {
+            String name = reader.readName();
+            PropertyModel property = resolveProperty(name);
+
+            if (property != null) {
+                PropertyValue<?> value = readProperty(reader, property);
+
+                if (value != null) {
+                    builder.property(property.name(), value);
+                    continue;
+                }
+            }
+
+            if (extrasMap != null) {
+                extrasMap.put(name, readRawValue(reader));
+                continue;
+            }
+
+            reader.skipValue();
+        }
+
+        reader.readObjectEnd();
+
+        if (extrasMap != null) {
+            builder.property(extrasProperty.name(), parent -> extrasMap.asMap(readCtx.withParent(parent)));
+        }
+
+        InstanceCreator<T> creator = builder.build();
+        return instance == null ? creator.createInstance() : creator.populate(instance);
+    }
+
+    private @Nullable PropertyModel resolveProperty(String name) {
+        String idPropertyName = formatUtils.idPropertyName();
+        if (idPropertyName == null) {
+            return classModel.properties().get(name);
+        }
+
+        if (name.equals(idPropertyName)) {
+            return classModel.properties().get(PropertyKind.ID);
+        }
+
+        PropertyModel property = classModel.properties().get(name);
+        return property != null && property.kind() != PropertyKind.ID ? property : null;
+    }
+
+    private @Nullable PropertyValue<?> readProperty(Reader reader, PropertyModel property) throws IOException {
+        PropertyMeta meta = property.meta();
+        if (meta != null && !meta.shouldDeserialize()) {
+            return null;
+        }
+
+        Type type = resolveReadType(property);
+        if (type == null) {
+            return null;
+        }
+
+        TypeToken<Object> typeToken = TypeToken.of(type);
+        TypeAdapter<Object> adapter = readCtx.typeAdapters().getOrThrow(typeToken);
+
+        R rawValue = readRawValue(reader);
+        if (rawValue == null) {
+            return PropertyValue.Mutable.NOOP;
+        }
+
+        Reader valueReader = formatUtils.newReader(rawValue);
+
+        if (!(adapter instanceof TypeAdapter.Mutable)) {
+            return parent -> adapter.read(
+                    valueReader, typeToken, readCtx.withParent(parent)
+            );
+        }
+
+        TypeAdapter.Mutable<Object> mutableAdapter = (TypeAdapter.Mutable<Object>) adapter;
+        return (PropertyValue.Mutable<?>) (parent, instance) -> mutableAdapter.mutate(
+                valueReader, typeToken, instance, readCtx.withParent(parent)
+        );
+    }
+
+    private @Nullable R readRawValue(Reader reader) throws IOException {
+        TypeToken<R> typeToken = TypeToken.of(formatUtils.rawType());
+        TypeAdapter<R> adapter = readCtx.typeAdapters().getOrThrow(typeToken);
+
+        return adapter.read(reader, typeToken, readCtx.withParent(null));
+    }
+
+    private @Nullable Type resolveReadType(PropertyModel property) {
+        PropertyMeta meta = property.meta();
+
+        if (instance == null && property.parameterType() != null) {
+            return box(resolveType(property.parameterType(), type.getType()));
+        }
+
+        MethodRef method = null;
+
+        if (meta != null && meta.mutate() && property.getter() != null) {
+            method = property.getter();
+        } else if (property.setter() != null) {
+            method = property.setter();
+        }
+
+        if (method == null) {
+            return null;
+        }
+
+        Type supertype = getExactSuperType(type.getType(), method.declaringClass());
+        return box(resolveType(method.valueType(), supertype));
+    }
+}

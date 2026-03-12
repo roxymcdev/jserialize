@@ -22,11 +22,13 @@ public interface PropertyValue<T> {
 
     @FunctionalInterface
     interface Mutable<T> extends PropertyValue<T> {
+        Mutable<?> NOOP = (parent, instance) -> instance;
+
         @Override
-        default T get(@Nullable Object parent) throws Throwable {
+        default @Nullable T get(@Nullable Object parent) throws Throwable {
             return mutate(parent, null);
         }
 
-        T mutate(@Nullable Object parent, @Nullable T instance) throws Throwable;
+        @Nullable T mutate(@Nullable Object parent, @Nullable T instance) throws Throwable;
     }
 }

@@ -7,7 +7,9 @@ import net.roxymc.jserialize.model.resolver.ConstructorResolver;
 import net.roxymc.jserialize.model.resolver.PropertiesResolver;
 import net.roxymc.jserialize.model.resolver.SimpleConstructorResolver;
 import net.roxymc.jserialize.model.resolver.SimplePropertiesResolver;
+import net.roxymc.jserialize.type.TypeToken;
 import net.roxymc.jserialize.util.SneakyThrow;
+import net.roxymc.jserialize.util.TypeUtils;
 
 import java.lang.invoke.MethodHandles;
 import java.util.Map;
@@ -30,15 +32,28 @@ final class ClassModelFactoryImpl implements ClassModel.Factory {
         this.methodLookup = builder.methodLookup;
     }
 
-    @SuppressWarnings("RedundantThrows")
     @Override
-    public <T> ClassModel<T> create(Class<T> clazz) throws IllegalAccessException {
-        nonNull(clazz, "clazz");
+    public <T> ClassModel<T> create(TypeToken<? extends T> type) throws IllegalAccessException {
+        return createUnchecked(type.getRawType());
+    }
+
+    @Override
+    public <T> ClassModel<T> create(Class<T> type) throws IllegalAccessException {
+        return createUnchecked(type);
+    }
+
+    @SuppressWarnings("RedundantThrows") // sneaky throw
+    private <T> ClassModel<T> createUnchecked(Class<?> type) throws IllegalAccessException {
+        nonNull(type, "type");
+
+        if (TypeUtils.isPrimitive(type)) {
+            throw new IllegalArgumentException("type cannot be primitive");
+        }
 
         @SuppressWarnings("unchecked")
-        ClassModel<T> classModel = (ClassModel<T>) cache.computeIfAbsent(clazz, $ -> {
+        ClassModel<T> classModel = (ClassModel<T>) cache.computeIfAbsent(type, $ -> {
             try {
-                return create0(clazz);
+                return createInternal(type);
             } catch (IllegalAccessException e) {
                 throw SneakyThrow.sneakyThrow(e);
             }
@@ -46,15 +61,15 @@ final class ClassModelFactoryImpl implements ClassModel.Factory {
         return classModel;
     }
 
-    private <T> ClassModel<T> create0(Class<T> clazz) throws IllegalAccessException {
-        MethodHandles.Lookup methodLookup = MethodHandles.privateLookupIn(clazz, this.methodLookup);
-        JSerializable annotation = clazz.getDeclaredAnnotation(JSerializable.class);
+    private <T> ClassModel<T> createInternal(Class<T> type) throws IllegalAccessException {
+        MethodHandles.Lookup methodLookup = MethodHandles.privateLookupIn(type, this.methodLookup);
+        JSerializable annotation = type.getDeclaredAnnotation(JSerializable.class);
 
         ConstructorModel constructor = null;
         if (annotation == null || !annotation.mutateOnly()) {
             ConstructorModel.Builder builder = ConstructorModel.builder();
 
-            constructorResolver.resolveConstructor(clazz, builder);
+            constructorResolver.resolveConstructor(type, builder);
 
             constructor = builder.build(methodLookup);
         }
@@ -63,7 +78,7 @@ final class ClassModelFactoryImpl implements ClassModel.Factory {
         {
             PropertyMap.Builder builder = PropertyMap.builder();
 
-            propertiesResolver.resolveProperties(clazz, builder);
+            propertiesResolver.resolveProperties(type, builder);
 
             if (constructor != null) {
                 propertiesResolver.resolveProperties(constructor, builder);
@@ -72,7 +87,7 @@ final class ClassModelFactoryImpl implements ClassModel.Factory {
             properties = builder.build(methodLookup);
         }
 
-        return new ClassModelImpl<>(clazz, constructor, properties);
+        return new ClassModelImpl<>(type, constructor, properties);
     }
 
     static final class BuilderImpl implements ClassModel.Factory.Builder {

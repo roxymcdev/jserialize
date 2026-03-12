@@ -1,0 +1,89 @@
+package net.roxymc.jserialize.format.configurate;
+
+import net.roxymc.jserialize.Reader;
+import net.roxymc.jserialize.Writer;
+import net.roxymc.jserialize.adapter.ReadContext;
+import net.roxymc.jserialize.adapter.TypeAdapter;
+import net.roxymc.jserialize.adapter.TypeAdapters;
+import net.roxymc.jserialize.adapter.WriteContext;
+import net.roxymc.jserialize.adapter.object.FormatUtils;
+import net.roxymc.jserialize.adapter.object.MapLike;
+import net.roxymc.jserialize.token.reader.TokenReader;
+import net.roxymc.jserialize.token.reader.ValueTokenizer;
+import net.roxymc.jserialize.token.writer.TokenWriter;
+import net.roxymc.jserialize.token.writer.ValueDetokenizer;
+import net.roxymc.jserialize.type.TypeToken;
+import org.jspecify.annotations.Nullable;
+import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.ConfigurationNode;
+
+import java.io.IOException;
+import java.lang.reflect.Type;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+final class ConfigurateUtils implements FormatUtils<ConfigurationNode> {
+    static final ConfigurateUtils INSTANCE = new ConfigurateUtils();
+
+    private ConfigurateUtils() {
+    }
+
+    static Reader newReader0(ConfigurationNode node) {
+        return new TokenReader<>(new ValueTokenizer<>(node, ConfigurationNodeAccessor.INSTANCE));
+    }
+
+    static Writer newWriter0(ConfigurationNode node) {
+        return new TokenWriter<>(new ValueDetokenizer<>(node, ConfigurationNodeAccessor.INSTANCE));
+    }
+
+    @Override
+    public Class<ConfigurationNode> rawType() {
+        return ConfigurationNode.class;
+    }
+
+    @Override
+    public Reader newReader(ConfigurationNode raw) {
+        return newReader0(raw);
+    }
+
+    @Override
+    public MapLike<ConfigurationNode> createMap(TypeAdapters typeAdapters, Type mapType) {
+        TypeToken<Map<?, ?>> typeToken = TypeToken.of(mapType);
+        TypeAdapter<Map<?, ?>> typeAdapter = typeAdapters.getOrThrow(typeToken);
+
+        return new MapLike<>() {
+            private final ConfigurationNode node = CommentedConfigurationNode.root(
+                    ((ConfigurateTypeAdapters) typeAdapters).options
+            );
+
+            @Override
+            public void put(String key, @Nullable ConfigurationNode value) {
+                if (value != null) {
+                    node.node(key).from(value);
+                }
+            }
+
+            @Override
+            public void putAll(Map<?, ?> map, WriteContext ctx) throws IOException {
+                CommentedConfigurationNode result = CommentedConfigurationNode.root(node.options());
+
+                typeAdapter.write(newWriter0(result), typeToken, map, ctx);
+
+                node.mergeFrom(result);
+            }
+
+            @Override
+            public @Nullable Map<?, ?> asMap(ReadContext ctx) throws IOException {
+                return typeAdapter.read(newReader0(node), typeToken, ctx);
+            }
+
+            @Override
+            public Map<String, ConfigurationNode> asRawMap() {
+                return node.childrenMap().entrySet().stream().collect(Collectors.toMap(
+                        e -> String.valueOf(e.getKey()),
+                        Map.Entry::getValue
+                ));
+            }
+        };
+    }
+}

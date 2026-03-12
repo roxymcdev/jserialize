@@ -11,9 +11,9 @@ dependencies.constraints {
     listOf(
         "annotations",
         "core",
-        "adapter-bson",
-        "adapter-configurate",
-        "adapter-gson"
+        "format-bson",
+        "format-configurate",
+        "format-gson"
     ).forEach { module ->
         api(project(":jserialize-$module"))
     }

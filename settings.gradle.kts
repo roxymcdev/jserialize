@@ -24,7 +24,7 @@ listOf(
     "configurate",
     "gson"
 ).forEach { module ->
-    include(":jserialize-adapter-$module") {
-        projectDir = file("adapter/$module")
+    include(":jserialize-format-$module") {
+        projectDir = file("format/$module")
     }
 }

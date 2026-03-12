@@ -1,20 +1,21 @@
 package net.roxymc.jserialize.adapter;
 
+import net.roxymc.jserialize.adapter.object.FormatUtils;
+import org.jetbrains.annotations.ApiStatus;
 import org.jspecify.annotations.Nullable;
 
-public final class ReadContext<T> {
-    private static final ReadContext<?> EMPTY = new ReadContext<>(null, null);
-
-    final @Nullable Object parent;
-    final @Nullable T instance;
-
-    public ReadContext(@Nullable Object parent, @Nullable T instance) {
-        this.parent = parent;
-        this.instance = instance;
+public interface ReadContext {
+    @ApiStatus.Internal
+    static ReadContext of(TypeAdapters typeAdapters, FormatUtils<?> formatUtils) {
+        return new ReadContextImpl(typeAdapters, formatUtils);
     }
 
-    @SuppressWarnings("unchecked")
-    public static <T> ReadContext<T> empty() {
-        return (ReadContext<T>) EMPTY;
-    }
+    TypeAdapters typeAdapters();
+
+    @Nullable Object parent();
+
+    ReadContext withParent(@Nullable Object parent);
+
+    @ApiStatus.Internal
+    FormatUtils<?> formatUtils();
 }

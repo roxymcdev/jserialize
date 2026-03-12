@@ -4,6 +4,7 @@ import net.roxymc.jserialize.model.constructor.ConstructorModel;
 import net.roxymc.jserialize.model.property.PropertyMap;
 import net.roxymc.jserialize.model.resolver.ConstructorResolver;
 import net.roxymc.jserialize.model.resolver.PropertiesResolver;
+import net.roxymc.jserialize.type.TypeToken;
 import org.jetbrains.annotations.ApiStatus;
 import org.jspecify.annotations.Nullable;
 
@@ -27,7 +28,9 @@ public interface ClassModel<T> {
 
     @ApiStatus.NonExtendable
     interface Factory {
-        <T> ClassModel<T> create(Class<T> clazz) throws IllegalAccessException;
+        <T> ClassModel<T> create(TypeToken<? extends T> type) throws IllegalAccessException;
+
+        <T> ClassModel<T> create(Class<T> type) throws IllegalAccessException;
 
         @ApiStatus.NonExtendable
         interface Builder {
