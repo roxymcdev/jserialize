@@ -6,6 +6,7 @@ import org.jetbrains.annotations.Nullable;
 import java.lang.invoke.MethodHandles;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -17,7 +18,7 @@ final class PropertyMapImpl implements PropertyMap {
     private final Map<PropertyKind<?>, PropertyModel> kindToProperty;
 
     PropertyMapImpl(BuilderImpl builder, MethodHandles.Lookup methodLookup) throws IllegalAccessException {
-        Map<String, PropertyModel> nameToProperty = new HashMap<>();
+        Map<String, PropertyModel> nameToProperty = new LinkedHashMap<>();
 
         for (Map.Entry<String, PropertyModelImpl.BuilderImpl> entry : builder.nameToProperty.entrySet()) {
             String name = entry.getKey();
@@ -29,7 +30,7 @@ final class PropertyMapImpl implements PropertyMap {
         this.nameToProperty = Collections.unmodifiableMap(nameToProperty);
         this.kindToProperty = builder.kindToName.entrySet().stream().collect(Collectors.toMap(
                 Map.Entry::getKey,
-                entry -> nameToProperty.get(entry.getValue())
+                entry -> this.nameToProperty.get(entry.getValue())
         ));
     }
 
@@ -54,7 +55,7 @@ final class PropertyMapImpl implements PropertyMap {
     }
 
     static final class BuilderImpl implements Builder {
-        private final Map<String, PropertyModelImpl.BuilderImpl> nameToProperty = new HashMap<>();
+        private final Map<String, PropertyModelImpl.BuilderImpl> nameToProperty = new LinkedHashMap<>();
         private final Map<PropertyKind<?>, String> kindToName = new HashMap<>();
 
         @Override
@@ -81,14 +82,7 @@ final class PropertyMapImpl implements PropertyMap {
             String name = kindToName.getOrDefault(kind, fallbackName);
 
             PropertyModelImpl.BuilderImpl builder = nameToProperty.computeIfAbsent(name, PropertyModelImpl.BuilderImpl::new);
-            if (builder.kind != null && builder.kind != kind) {
-                throw new IllegalStateException(format(
-                        "Expected kind: %s, but found: %s",
-                        kind, builder.kind
-                ));
-            }
-
-            builder.kind = kind;
+            builder.checkKind(kind);
 
             return withProperty(name, action);
         }

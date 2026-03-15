@@ -139,7 +139,7 @@ final class PropertyModelImpl implements PropertyModel {
             checkKind(PropertyKind.get(annotationType));
         }
 
-        private void checkKind(PropertyKind<?> kind) {
+        void checkKind(PropertyKind<?> kind) {
             if (this.kind == null) {
                 this.kind = kind;
                 return;
