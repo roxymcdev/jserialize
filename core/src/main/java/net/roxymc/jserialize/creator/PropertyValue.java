@@ -12,16 +12,16 @@ public interface PropertyValue<T> {
 
     @Nullable T get(@Nullable Object parent) throws Throwable;
 
-    default Mutating<T> asMutating(String name) {
-        if (this instanceof Mutating) {
-            return (Mutating<T>) this;
+    default Mutable<T> asMutable(String name) {
+        if (this instanceof Mutable) {
+            return (Mutable<T>) this;
         }
 
-        throw new IllegalStateException("Expected property '" + name + "' to be a mutating value");
+        throw new IllegalStateException("Expected property '" + name + "' to be a mutable value");
     }
 
     @FunctionalInterface
-    interface Mutating<T> extends PropertyValue<T> {
+    interface Mutable<T> extends PropertyValue<T> {
         @Override
         default T get(@Nullable Object parent) throws Throwable {
             return mutate(parent, null);

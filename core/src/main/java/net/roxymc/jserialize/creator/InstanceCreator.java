@@ -126,7 +126,7 @@ public final class InstanceCreator<T> {
             }
 
             //noinspection unchecked,rawtypes
-            ((PropertyValue) lazyValue).asMutating(name).mutate(instance, currentValue);
+            ((PropertyValue) lazyValue).asMutable(name).mutate(instance, currentValue);
         }
 
         return instance;

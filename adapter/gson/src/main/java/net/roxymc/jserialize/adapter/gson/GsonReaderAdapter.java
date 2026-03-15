@@ -63,7 +63,7 @@ final class GsonReaderAdapter implements ReaderAdapter<JsonElement> {
         return PropertyValue.of(adapter.nullSafe().read(reader));
     }
 
-    private <U> PropertyValue.Mutating<U> readValue(ObjectAdapter<U> adapter) throws Throwable {
+    private <U> PropertyValue.Mutable<U> readValue(ObjectAdapter<U> adapter) throws Throwable {
         JsonElement element = this.adapter.gson.getAdapter(ObjectAdapter.RAW_TYPE).read(reader);
 
         return (parent, instance) -> adapter.engine.read(

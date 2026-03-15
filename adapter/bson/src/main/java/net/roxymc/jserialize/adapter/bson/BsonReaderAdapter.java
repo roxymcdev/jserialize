@@ -62,7 +62,7 @@ final class BsonReaderAdapter implements ReaderAdapter<BsonValue> {
         return PropertyValue.of(decoderCtx.decodeWithChildContext(codec, reader));
     }
 
-    private <U> PropertyValue.Mutating<U> readValue(ObjectCodec<U> codec) {
+    private <U> PropertyValue.Mutable<U> readValue(ObjectCodec<U> codec) {
         RawBsonDocument document = decoderCtx.decodeWithChildContext(
                 this.codec.codecRegistry.get(RawBsonDocument.class), reader
         );
