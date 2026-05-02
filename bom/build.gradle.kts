@@ -8,13 +8,5 @@ indra.configurePublications {
 }
 
 dependencies.constraints {
-    listOf(
-        "annotations",
-        "core",
-        "format-bson",
-        "format-configurate",
-        "format-gson"
-    ).forEach { module ->
-        api(project(":jserialize-$module"))
-    }
+    rootProject.subprojects.filter { it != project }.forEach(::api)
 }
