@@ -1,6 +1,7 @@
 package net.roxymc.jserialize.adapter;
 
 import net.roxymc.jserialize.adapter.object.FormatUtils;
+import net.roxymc.jserialize.util.ObjectUtils;
 
 final class WriteContextImpl implements WriteContext {
     private final TypeAdapters typeAdapters;
@@ -19,5 +20,10 @@ final class WriteContextImpl implements WriteContext {
     @Override
     public FormatUtils<?> formatUtils() {
         return formatUtils;
+    }
+
+    @Override
+    public String toString() {
+        return ObjectUtils.toString(this).toString();
     }
 }

@@ -1,9 +1,6 @@
 package net.roxymc.jserialize.util;
 
-import net.roxymc.jserialize.annotation.ExtraProperties;
-import net.roxymc.jserialize.annotation.Id;
-import net.roxymc.jserialize.annotation.Parent;
-import net.roxymc.jserialize.annotation.Property;
+import net.roxymc.jserialize.model.property.meta.PropertyKind;
 import org.jspecify.annotations.Nullable;
 
 import java.lang.annotation.Annotation;
@@ -14,16 +11,12 @@ import java.util.StringJoiner;
 import java.util.function.Supplier;
 
 public final class PropertyUtils {
-    public static final Set<Class<? extends Annotation>> PROPERTY_ANNOTATIONS = Set.of(
-            ExtraProperties.class, Id.class, Parent.class, Property.class
-    );
-
     private PropertyUtils() {
     }
 
     public static boolean hasPropertyAnnotation(AnnotatedElement element) {
-        for (Class<? extends Annotation> annotationType : PROPERTY_ANNOTATIONS) {
-            if (element.isAnnotationPresent(annotationType)) {
+        for (PropertyKind<?> kind : PropertyKind.values()) {
+            if (element.isAnnotationPresent(kind.annotationType())) {
                 return true;
             }
         }
@@ -34,8 +27,10 @@ public final class PropertyUtils {
     public static @Nullable Annotation getPropertyAnnotation(AnnotatedElement element) {
         Set<Annotation> annotations = new LinkedHashSet<>();
 
-        for (Annotation annotation : element.getAnnotations()) {
-            if (PROPERTY_ANNOTATIONS.contains(annotation.annotationType())) {
+        for (PropertyKind<?> kind : PropertyKind.values()) {
+            Annotation annotation = element.getAnnotation(kind.annotationType());
+
+            if (annotation != null) {
                 annotations.add(annotation);
             }
         }
@@ -63,18 +58,7 @@ public final class PropertyUtils {
             return null;
         }
 
-        String name = "";
-
-        if (annotation instanceof ExtraProperties) {
-            name = ((ExtraProperties) annotation).value();
-        } else if (annotation instanceof Id) {
-            name = ((Id) annotation).value();
-        } else if (annotation instanceof Parent) {
-            name = ((Parent) annotation).value();
-        } else if (annotation instanceof Property) {
-            name = ((Property) annotation).value();
-        }
-
+        String name = PropertyKind.<Annotation>get(annotation.annotationType()).resolveName(annotation);
         return !name.isEmpty() ? name : null;
     }
 

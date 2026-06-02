@@ -15,7 +15,7 @@ public final class ValueTokenizer<V> implements Tokenizer<V> {
     private final Deque<Entry<V>> stack = new ArrayDeque<>();
 
     public ValueTokenizer(V value, ValueAccessor<V> accessor) {
-        this.accessor = accessor;
+        this.accessor = nonNull(accessor, "accessor");
         push(value);
     }
 

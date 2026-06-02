@@ -6,12 +6,14 @@ import org.jspecify.annotations.Nullable;
 
 import java.util.Iterator;
 
+import static net.roxymc.jserialize.util.ObjectUtils.nonNull;
+
 public final class SimpleTokenizer implements Tokenizer<Token> {
     private final Iterator<Token> iterator;
     private @Nullable Token token;
 
     public SimpleTokenizer(Iterator<Token> iterator) {
-        this.iterator = iterator;
+        this.iterator = nonNull(iterator, "iterator");
     }
 
     @Override

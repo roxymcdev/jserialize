@@ -1,5 +1,6 @@
 package net.roxymc.jserialize.util;
 
+import org.jetbrains.annotations.Contract;
 import org.jspecify.annotations.Nullable;
 
 import java.util.Objects;
@@ -11,6 +12,11 @@ public final class ObjectUtils {
 
     public static <T> T nonNull(@Nullable T obj, String name) {
         return Objects.requireNonNull(obj, name + " == null");
+    }
+
+    @Contract("_, !null -> !null")
+    public static <T> @Nullable T nonNullOrElse(@Nullable T obj, @Nullable T defaultValue) {
+        return obj != null ? obj : defaultValue;
     }
 
     public static StringJoiner toString(Object obj) {

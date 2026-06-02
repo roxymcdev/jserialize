@@ -23,20 +23,20 @@ final class ObjectWriter<T, R> {
     private final TypeToken<? extends T> type;
     private final T instance;
     private final FormatUtils<R> formatUtils;
-    private final WriteContext writeCtx;
+    private final WriteContext context;
 
     ObjectWriter(
             ClassModel<T> classModel,
             TypeToken<? extends T> type,
             T instance,
             FormatUtils<R> formatUtils,
-            WriteContext writeCtx
+            WriteContext context
     ) {
         this.classModel = classModel;
         this.type = type;
         this.instance = instance;
         this.formatUtils = formatUtils;
-        this.writeCtx = writeCtx;
+        this.context = context;
     }
 
     void write(Writer writer) throws Throwable {
@@ -53,7 +53,7 @@ final class ObjectWriter<T, R> {
         PropertyMeta meta = property.meta();
         GetterRef getter = property.getter();
 
-        if (meta != null && !meta.shouldSerialize() || getter == null) {
+        if (meta != null && !meta.kind().shouldSerialize() || getter == null) {
             return;
         }
 
@@ -74,23 +74,23 @@ final class ObjectWriter<T, R> {
         }
 
         TypeToken<Object> typeToken = TypeToken.of(type);
-        TypeAdapter<Object> adapter = writeCtx.typeAdapters().getOrThrow(typeToken);
+        TypeAdapter<Object> adapter = context.typeAdapters().getOrThrow(typeToken);
 
         String name = resolveWriteName(property);
         writer.writeName(name);
-        adapter.write(writer, typeToken, value, writeCtx);
+        adapter.write(writer, typeToken, value, context);
     }
 
     private void writeExtrasProperty(Writer writer, Type type, Object value) throws IOException {
-        MapLike<R> extrasMap = formatUtils.createMap(writeCtx.typeAdapters(), type);
-        extrasMap.putAll((Map<?, ?>) value, writeCtx);
+        MapLike<R> extrasMap = formatUtils.createMap(context.typeAdapters(), type);
+        extrasMap.putAll((Map<?, ?>) value, context);
 
         TypeToken<R> typeToken = TypeToken.of(formatUtils.rawType());
-        TypeAdapter<R> adapter = writeCtx.typeAdapters().getOrThrow(typeToken);
+        TypeAdapter<R> adapter = context.typeAdapters().getOrThrow(typeToken);
 
         for (Map.Entry<String, R> entry : extrasMap.asRawMap().entrySet()) {
             writer.writeName(entry.getKey());
-            adapter.write(writer, typeToken, entry.getValue(), writeCtx);
+            adapter.write(writer, typeToken, entry.getValue(), context);
         }
     }
 

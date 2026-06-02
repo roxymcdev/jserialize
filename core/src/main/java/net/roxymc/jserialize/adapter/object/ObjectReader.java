@@ -24,27 +24,34 @@ final class ObjectReader<T, R> {
     private final TypeToken<? extends T> type;
     private final @Nullable T instance;
     private final FormatUtils<R> formatUtils;
-    private final ReadContext readCtx;
+    private final ReadContext context;
 
     ObjectReader(
             ClassModel<T> classModel,
             TypeToken<? extends T> type,
             @Nullable T instance,
             FormatUtils<R> formatUtils,
-            ReadContext readCtx
+            ReadContext context
     ) {
         this.classModel = classModel;
         this.type = type;
         this.instance = instance;
         this.formatUtils = formatUtils;
-        this.readCtx = readCtx;
+        this.context = context;
     }
 
     T read(Reader reader) throws Throwable {
         reader.readObjectStart();
 
-        InstanceCreator.Builder<T> builder = InstanceCreator.builder(classModel)
-                .parent(readCtx.parent());
+        InstanceCreator.Builder<T> builder = InstanceCreator.builder(classModel);
+
+        classModel.properties().getOptional(PropertyKind.PARENT).ifPresent(property ->
+                builder.property(property, context.parent())
+        );
+        classModel.properties().getOptional(PropertyKind.KEY).ifPresent(property ->
+                // TODO we should pass the key through the desired key adapter
+                builder.property(property, context.key())
+        );
 
         PropertyModel extrasProperty = classModel.properties().get(PropertyKind.EXTRAS);
         MapLike<R> extrasMap;
@@ -52,7 +59,7 @@ final class ObjectReader<T, R> {
         if (extrasProperty != null) {
             Type mapType = resolveReadType(extrasProperty);
 
-            extrasMap = mapType != null ? formatUtils.createMap(readCtx.typeAdapters(), mapType) : null;
+            extrasMap = mapType != null ? formatUtils.createMap(context.typeAdapters(), mapType) : null;
         } else {
             extrasMap = null;
         }
@@ -65,7 +72,7 @@ final class ObjectReader<T, R> {
                 PropertyValue<?> value = readProperty(reader, property);
 
                 if (value != null) {
-                    builder.property(property.name(), value);
+                    builder.property(property, value);
                     continue;
                 }
             }
@@ -81,7 +88,9 @@ final class ObjectReader<T, R> {
         reader.readObjectEnd();
 
         if (extrasMap != null) {
-            builder.property(extrasProperty.name(), parent -> extrasMap.asMap(readCtx.withParent(parent)));
+            builder.property(extrasProperty, parent -> extrasMap.asMap(
+                    context.withParent(parent).withKey(extrasProperty.name())
+            ));
         }
 
         InstanceCreator<T> creator = builder.build();
@@ -104,7 +113,7 @@ final class ObjectReader<T, R> {
 
     private @Nullable PropertyValue<?> readProperty(Reader reader, PropertyModel property) throws IOException {
         PropertyMeta meta = property.meta();
-        if (meta != null && !meta.shouldDeserialize()) {
+        if (meta != null && !meta.kind().shouldDeserialize()) {
             return null;
         }
 
@@ -114,7 +123,7 @@ final class ObjectReader<T, R> {
         }
 
         TypeToken<Object> typeToken = TypeToken.of(type);
-        TypeAdapter<Object> adapter = readCtx.typeAdapters().getOrThrow(typeToken);
+        TypeAdapter<Object> adapter = context.typeAdapters().getOrThrow(typeToken);
 
         R rawValue = readRawValue(reader);
         if (rawValue == null) {
@@ -122,24 +131,25 @@ final class ObjectReader<T, R> {
         }
 
         Reader valueReader = formatUtils.newReader(rawValue);
+        ReadContext context = this.context.withKey(property.name());
 
         if (!(adapter instanceof TypeAdapter.Mutable)) {
             return parent -> adapter.read(
-                    valueReader, typeToken, readCtx.withParent(parent)
+                    valueReader, typeToken, context.withParent(parent)
             );
         }
 
         TypeAdapter.Mutable<Object> mutableAdapter = (TypeAdapter.Mutable<Object>) adapter;
         return (PropertyValue.Mutable<?>) (parent, instance) -> mutableAdapter.mutate(
-                valueReader, typeToken, instance, readCtx.withParent(parent)
+                valueReader, typeToken, instance, context.withParent(parent)
         );
     }
 
     private @Nullable R readRawValue(Reader reader) throws IOException {
         TypeToken<R> typeToken = TypeToken.of(formatUtils.rawType());
-        TypeAdapter<R> adapter = readCtx.typeAdapters().getOrThrow(typeToken);
+        TypeAdapter<R> adapter = context.typeAdapters().getOrThrow(typeToken);
 
-        return adapter.read(reader, typeToken, readCtx.withParent(null));
+        return adapter.read(reader, typeToken, context.withParent(null).withKey(null));
     }
 
     private @Nullable Type resolveReadType(PropertyModel property) {

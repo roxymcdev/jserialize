@@ -22,12 +22,4 @@ public interface PropertyMeta {
     boolean writeNull();
 
     boolean mutate();
-
-    default boolean shouldSerialize() {
-        return !(kind() == PropertyKind.PARENT);
-    }
-
-    default boolean shouldDeserialize() {
-        return shouldSerialize() && !(kind() == PropertyKind.EXTRAS);
-    }
 }

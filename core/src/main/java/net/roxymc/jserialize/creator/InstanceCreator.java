@@ -17,13 +17,11 @@ import static net.roxymc.jserialize.util.ObjectUtils.nonNull;
 
 public final class InstanceCreator<T> {
     private final ClassModel<T> classModel;
-    private final Map<String, PropertyValue<?>> properties;
-    private final @Nullable Object parent;
+    private final Map<PropertyModel, PropertyValue<?>> properties;
 
     private InstanceCreator(Builder<T> builder) {
         this.classModel = builder.classModel;
         this.properties = Map.copyOf(builder.properties);
-        this.parent = builder.parent;
     }
 
     public static <T> Builder<T> builder(ClassModel<T> classModel) {
@@ -44,16 +42,17 @@ public final class InstanceCreator<T> {
             String name = parameter.name();
             PropertyMeta meta = parameter.meta();
 
-            PropertyValue<?> lazyValue = getValue(name, meta.kind());
-            if (lazyValue == null) {
+            PropertyValue<?> value = getValue(parameter);
+            if (value == null) {
                 validateValue(name, null, meta);
                 continue;
             }
 
-            Object value = lazyValue.get(null);
-            validateValue(name, value, meta);
+            // parent should be passed here
+            Object resolvedValue = value.get(null);
+            validateValue(name, resolvedValue, meta);
 
-            values[parameter.index()] = value;
+            values[parameter.index()] = resolvedValue;
         }
 
         @SuppressWarnings("unchecked")
@@ -91,55 +90,66 @@ public final class InstanceCreator<T> {
                 continue;
             }
 
-            PropertyValue<?> lazyValue = getValue(name, property.kind());
-            if (lazyValue == null) {
+            PropertyValue<?> value = getValue(property);
+            if (value == null) {
                 validateValue(name, null, meta);
                 continue;
             }
 
             if (!canMutate) {
-                Object value = lazyValue.get(instance);
-                validateValue(name, value, meta);
+                Object resolvedValue = value.get(instance);
+                validateValue(name, resolvedValue, meta);
 
-                property.setter().set(instance, value);
+                property.setter().set(instance, resolvedValue);
                 continue;
             }
 
             Object currentValue = property.getter().get(instance);
 
+            if (value instanceof PropertyValue.Mutable) {
+                //noinspection unchecked,rawtypes
+                ((PropertyValue.Mutable) value).mutate(instance, currentValue);
+                continue;
+            }
+
             if (currentValue instanceof Collection || currentValue instanceof Map) {
-                Object value = lazyValue.get(instance);
-                if (value == null) {
+                Object resolvedValue = value.get(instance);
+                if (resolvedValue == null) {
                     validateValue(name, null, meta);
                     continue;
                 }
 
                 if (currentValue instanceof Collection) {
                     //noinspection unchecked,rawtypes
-                    ((Collection) currentValue).addAll(((Collection) value));
+                    ((Collection) currentValue).addAll(((Collection) resolvedValue));
                 } else {
                     //noinspection unchecked,rawtypes
-                    ((Map) currentValue).putAll(((Map) value));
+                    ((Map) currentValue).putAll(((Map) resolvedValue));
                 }
 
                 continue;
             }
 
-            //noinspection unchecked,rawtypes
-            ((PropertyValue) lazyValue).asMutable(name).mutate(instance, currentValue);
+            throw new IllegalStateException("Expected property '" + name + "' to be a mutable value");
         }
 
         return instance;
     }
 
-    private @Nullable PropertyValue<?> getValue(String name, PropertyKind<?> kind) {
+    private @Nullable PropertyValue<?> getValue(PropertyModel property) {
+        return properties.get(property);
+    }
+
+    private @Nullable PropertyValue<?> getValue(ParameterModel parameter) {
+        PropertyKind<?> kind = parameter.meta().kind();
+        PropertyModel property;
+
         if (kind == PropertyKind.PROPERTY) {
-            return properties.get(name);
-        } else if (kind == PropertyKind.PARENT) {
-            return PropertyValue.of(parent);
+            property = classModel.properties().get(parameter.name());
+        } else {
+            property = classModel.properties().get(kind);
         }
 
-        PropertyModel property = classModel.properties().get(kind);
         if (property == null) {
             throw new IllegalStateException(format(
                     "No property of kind %s found",
@@ -147,13 +157,13 @@ public final class InstanceCreator<T> {
             ));
         }
 
-        return properties.get(property.name());
+        return properties.get(property);
     }
 
     private void validateValue(String name, @Nullable Object value, @Nullable PropertyMeta meta) {
         if (value == null && meta != null && meta.required()) {
             throw new IllegalStateException(format(
-                    "Required property %s is missing a value",
+                    "Required property %s is missing value",
                     name
             ));
         }
@@ -161,38 +171,28 @@ public final class InstanceCreator<T> {
 
     public static final class Builder<T> {
         private final ClassModel<T> classModel;
-        private final Map<String, PropertyValue<?>> properties;
-        private @Nullable Object parent;
+        private final Map<PropertyModel, PropertyValue<?>> properties;
 
         private Builder(ClassModel<T> classModel) {
             this.classModel = nonNull(classModel, "classModel");
             this.properties = new HashMap<>(classModel.properties().size());
         }
 
-        public Builder<T> property(String name, @Nullable Object value) {
-            nonNull(name, "name");
+        public Builder<T> property(PropertyModel property, @Nullable Object value) {
+            nonNull(property, "property");
 
-            return property(name, PropertyValue.of(value));
+            return property(property, PropertyValue.of(value));
         }
 
-        public Builder<T> property(String name, PropertyValue<?> value) {
-            nonNull(name, "name");
+        public Builder<T> property(PropertyModel property, PropertyValue<?> value) {
+            nonNull(property, "property");
             nonNull(value, "value");
 
-            if (classModel.properties().get(name) == null) {
-                throw new IllegalStateException("Property " + name + " does not exist");
+            if (properties.containsKey(property)) {
+                throw new IllegalArgumentException("Property " + property.name() + " is already set");
             }
 
-            if (properties.containsKey(name)) {
-                throw new IllegalArgumentException("Property " + name + " already exists");
-            }
-
-            properties.put(name, value);
-            return this;
-        }
-
-        public Builder<T> parent(@Nullable Object owner) {
-            this.parent = owner;
+            properties.put(property, value);
             return this;
         }
 

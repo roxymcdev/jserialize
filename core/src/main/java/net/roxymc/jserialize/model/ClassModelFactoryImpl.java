@@ -54,8 +54,8 @@ final class ClassModelFactoryImpl implements ClassModel.Factory {
         ClassModel<T> classModel = (ClassModel<T>) cache.computeIfAbsent(type, $ -> {
             try {
                 return createInternal(type);
-            } catch (IllegalAccessException e) {
-                throw SneakyThrow.sneakyThrow(e);
+            } catch (IllegalAccessException ex) {
+                throw SneakyThrow.sneakyThrow(ex);
             }
         });
         return classModel;

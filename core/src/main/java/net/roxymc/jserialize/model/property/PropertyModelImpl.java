@@ -122,7 +122,7 @@ final class PropertyModelImpl implements PropertyModel {
     }
 
     static final class BuilderImpl implements Builder {
-        private final String name;
+        final String name;
         private @Nullable Field field;
         private @Nullable Method getter, setter;
         private @Nullable ParameterModel parameter;

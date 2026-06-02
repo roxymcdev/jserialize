@@ -16,6 +16,10 @@ public interface ReadContext {
 
     ReadContext withParent(@Nullable Object parent);
 
+    @Nullable String key();
+
+    ReadContext withKey(@Nullable String key);
+
     @ApiStatus.Internal
     FormatUtils<?> formatUtils();
 }

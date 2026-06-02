@@ -12,14 +12,6 @@ public interface PropertyValue<T> {
 
     @Nullable T get(@Nullable Object parent) throws Throwable;
 
-    default Mutable<T> asMutable(String name) {
-        if (this instanceof Mutable) {
-            return (Mutable<T>) this;
-        }
-
-        throw new IllegalStateException("Expected property '" + name + "' to be a mutable value");
-    }
-
     @FunctionalInterface
     interface Mutable<T> extends PropertyValue<T> {
         Mutable<?> NOOP = (parent, instance) -> instance;

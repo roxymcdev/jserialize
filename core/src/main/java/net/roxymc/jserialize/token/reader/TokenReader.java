@@ -3,11 +3,13 @@ package net.roxymc.jserialize.token.reader;
 import net.roxymc.jserialize.AbstractReader;
 import net.roxymc.jserialize.token.*;
 
+import static net.roxymc.jserialize.util.ObjectUtils.nonNull;
+
 public final class TokenReader<V> extends AbstractReader {
     private final Tokenizer<V> tokenizer;
 
     public TokenReader(Tokenizer<V> tokenizer) {
-        this.tokenizer = tokenizer;
+        this.tokenizer = nonNull(tokenizer, "tokenizer");
     }
 
     public Tokenizer<V> tokenizer() {

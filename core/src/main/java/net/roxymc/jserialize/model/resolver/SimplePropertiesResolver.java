@@ -195,11 +195,9 @@ public class SimplePropertiesResolver implements PropertiesResolver {
 
     protected void processParameters(ParameterModel[] parameters, PropertyMap.Builder properties) {
         for (ParameterModel parameter : parameters) {
-            if (parameter.implicit()) {
-                continue;
-            }
+            String name = !parameter.implicit() ? parameter.name() : null;
 
-            properties.withProperty(parameter.meta().kind(), parameter.name(), property -> property
+            properties.withProperty(parameter.meta().kind(), name, property -> property
                     .parameter(parameter)
             );
         }
