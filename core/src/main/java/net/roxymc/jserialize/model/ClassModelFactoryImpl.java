@@ -8,7 +8,6 @@ import net.roxymc.jserialize.model.resolver.PropertiesResolver;
 import net.roxymc.jserialize.model.resolver.SimpleConstructorResolver;
 import net.roxymc.jserialize.model.resolver.SimplePropertiesResolver;
 import net.roxymc.jserialize.type.TypeToken;
-import net.roxymc.jserialize.util.SneakyThrow;
 import net.roxymc.jserialize.util.TypeUtils;
 
 import java.lang.invoke.MethodHandles;
@@ -33,17 +32,16 @@ final class ClassModelFactoryImpl implements ClassModel.Factory {
     }
 
     @Override
-    public <T> ClassModel<T> create(TypeToken<? extends T> type) throws IllegalAccessException {
+    public <T> ClassModel<T> create(TypeToken<? extends T> type) {
         return createUnchecked(type.getRawType());
     }
 
     @Override
-    public <T> ClassModel<T> create(Class<T> type) throws IllegalAccessException {
+    public <T> ClassModel<T> create(Class<T> type) {
         return createUnchecked(type);
     }
 
-    @SuppressWarnings("RedundantThrows") // sneaky throw
-    private <T> ClassModel<T> createUnchecked(Class<?> type) throws IllegalAccessException {
+    private <T> ClassModel<T> createUnchecked(Class<?> type){
         nonNull(type, "type");
 
         if (TypeUtils.isPrimitive(type)) {
@@ -54,8 +52,8 @@ final class ClassModelFactoryImpl implements ClassModel.Factory {
         ClassModel<T> classModel = (ClassModel<T>) cache.computeIfAbsent(type, $ -> {
             try {
                 return createInternal(type);
-            } catch (IllegalAccessException ex) {
-                throw SneakyThrow.sneakyThrow(ex);
+            } catch (Exception ex) {
+                throw new RuntimeException("Failed to create class model of " + type);
             }
         });
         return classModel;

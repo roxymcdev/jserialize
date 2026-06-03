@@ -35,7 +35,7 @@ public class SimpleConstructorResolver implements ConstructorResolver {
         }
 
         if (constructors.isEmpty()) {
-            throw new IllegalStateException("No constructor found for " + clazz);
+            throw new IllegalStateException("No constructor found");
         }
 
         Executable target = null;
@@ -46,7 +46,7 @@ public class SimpleConstructorResolver implements ConstructorResolver {
             }
 
             if (target != null) {
-                throw new IllegalStateException("Multiple constructors found for " + clazz);
+                throw new IllegalStateException("Multiple constructors found");
             }
 
             target = ctor;
@@ -54,7 +54,7 @@ public class SimpleConstructorResolver implements ConstructorResolver {
 
         if (target == null) {
             if (constructors.size() > 1) {
-                throw new IllegalStateException("Multiple constructors found for " + clazz);
+                throw new IllegalStateException("Multiple constructors found");
             }
 
             target = constructors.iterator().next();
