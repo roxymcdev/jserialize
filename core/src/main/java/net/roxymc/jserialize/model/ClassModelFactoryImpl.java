@@ -41,7 +41,7 @@ final class ClassModelFactoryImpl implements ClassModel.Factory {
         return createUnchecked(type);
     }
 
-    private <T> ClassModel<T> createUnchecked(Class<?> type){
+    private <T> ClassModel<T> createUnchecked(Class<?> type) {
         nonNull(type, "type");
 
         if (TypeUtils.isPrimitive(type)) {

@@ -39,33 +39,40 @@ public final class InstanceCreator<T> {
         @Nullable Object[] values = new Object[parameters.length];
 
         for (ParameterModel parameter : parameters) {
-            String name = parameter.name();
-            PropertyMeta meta = parameter.meta();
-
-            PropertyValue<?> value = getValue(parameter);
-            if (value == null) {
-                validateValue(name, null, meta);
-                continue;
+            try {
+                values[parameter.index()] = resolveParameter(parameter);
+            } catch (Throwable ex) {
+                throw new RuntimeException("Failed to resolve parameter: " + parameter.name(), ex);
             }
-
-            // TODO parent should be passed here
-            Object resolvedValue = value.getSafe(name, null);
-            validateValue(name, resolvedValue, meta);
-
-            values[parameter.index()] = resolvedValue;
         }
 
         @SuppressWarnings("unchecked")
         T instance = (T) constructor.invoke(values);
-
         return populate(instance, true);
     }
 
-    public T populate(T instance) throws Throwable {
+    private @Nullable Object resolveParameter(ParameterModel parameter) throws Throwable {
+        String name = parameter.name();
+        PropertyMeta meta = parameter.meta();
+
+        PropertyValue<?> value = getValue(parameter);
+        if (value == null) {
+            validateValue(name, null, meta);
+            return null;
+        }
+
+        // TODO parent should be passed here
+        Object resolvedValue = value.get(null);
+        validateValue(name, resolvedValue, meta);
+
+        return resolvedValue;
+    }
+
+    public T populate(T instance) {
         return populate(instance, false);
     }
 
-    private T populate(T instance, boolean skipParams) throws Throwable {
+    private T populate(T instance, boolean skipParams) {
         nonNull(instance, "instance");
 
         if (!classModel.clazz().isInstance(instance)) {
@@ -81,59 +88,67 @@ public final class InstanceCreator<T> {
                 continue;
             }
 
-            String name = property.name();
-            PropertyMeta meta = property.meta();
-
-            boolean canMutate = meta != null && meta.mutate() && property.getter() != null;
-
-            if (!canMutate && property.setter() == null) {
-                continue;
+            try {
+                resolveProperty(instance, property);
+            } catch (Throwable ex) {
+                throw new RuntimeException("Failed to resolve property: " + property.name(), ex);
             }
-
-            PropertyValue<?> value = getValue(property);
-            if (value == null) {
-                validateValue(name, null, meta);
-                continue;
-            }
-
-            if (!canMutate) {
-                Object resolvedValue = value.getSafe(name, instance);
-                validateValue(name, resolvedValue, meta);
-
-                property.setter().set(instance, resolvedValue);
-                continue;
-            }
-
-            Object currentValue = property.getter().get(instance);
-
-            if (value instanceof PropertyValue.Mutable) {
-                //noinspection unchecked,rawtypes
-                ((PropertyValue.Mutable) value).mutateSafe(name, instance, currentValue);
-                continue;
-            }
-
-            if (currentValue instanceof Collection || currentValue instanceof Map) {
-                Object resolvedValue = value.getSafe(name, instance);
-                if (resolvedValue == null) {
-                    validateValue(name, null, meta);
-                    continue;
-                }
-
-                if (currentValue instanceof Collection) {
-                    //noinspection unchecked,rawtypes
-                    ((Collection) currentValue).addAll(((Collection) resolvedValue));
-                } else {
-                    //noinspection unchecked,rawtypes
-                    ((Map) currentValue).putAll(((Map) resolvedValue));
-                }
-
-                continue;
-            }
-
-            throw new IllegalStateException("Expected property '" + name + "' to be a mutable value");
         }
 
         return instance;
+    }
+
+    private void resolveProperty(T instance, PropertyModel property) throws Throwable {
+        String name = property.name();
+        PropertyMeta meta = property.meta();
+
+        boolean canMutate = meta != null && meta.mutate() && property.getter() != null;
+
+        if (!canMutate && property.setter() == null) {
+            return;
+        }
+
+        PropertyValue<?> value = getValue(property);
+        if (value == null) {
+            validateValue(name, null, meta);
+            return;
+        }
+
+        if (!canMutate) {
+            Object resolvedValue = value.get(instance);
+            validateValue(name, resolvedValue, meta);
+
+            property.setter().set(instance, resolvedValue);
+            return;
+        }
+
+        Object currentValue = property.getter().get(instance);
+
+        if (value instanceof PropertyValue.Mutable) {
+            //noinspection unchecked,rawtypes
+            ((PropertyValue.Mutable) value).mutate(instance, currentValue);
+            return;
+        }
+
+        if (currentValue instanceof Collection || currentValue instanceof Map) {
+            Object resolvedValue = value.get(instance);
+            if (resolvedValue == null) {
+                validateValue(name, null, meta);
+                return;
+            }
+
+            if (currentValue instanceof Collection) {
+                //noinspection unchecked,rawtypes
+                ((Collection) currentValue).addAll(((Collection) resolvedValue));
+            } else {
+                //noinspection unchecked,rawtypes
+                ((Map) currentValue).putAll(((Map) resolvedValue));
+            }
+
+            return;
+        }
+
+        throw new IllegalStateException("Expected property value to be mutable: " + name);
     }
 
     private @Nullable PropertyValue<?> getValue(PropertyModel property) {
@@ -151,10 +166,7 @@ public final class InstanceCreator<T> {
         }
 
         if (property == null) {
-            throw new IllegalStateException(format(
-                    "No property of kind %s found",
-                    kind
-            ));
+            throw new IllegalStateException(format("No property of kind %s found", kind));
         }
 
         return properties.get(property);
@@ -162,10 +174,7 @@ public final class InstanceCreator<T> {
 
     private void validateValue(String name, @Nullable Object value, @Nullable PropertyMeta meta) {
         if (value == null && meta != null && meta.required()) {
-            throw new IllegalStateException(format(
-                    "Required property %s is missing value",
-                    name
-            ));
+            throw new IllegalStateException("Required property is missing value: " + name);
         }
     }
 
@@ -189,7 +198,7 @@ public final class InstanceCreator<T> {
             nonNull(value, "value");
 
             if (properties.containsKey(property)) {
-                throw new IllegalArgumentException("Property " + property.name() + " is already set");
+                throw new IllegalArgumentException("Property already set: " + property.name());
             }
 
             properties.put(property, value);

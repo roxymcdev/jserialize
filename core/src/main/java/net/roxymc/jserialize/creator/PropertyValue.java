@@ -12,14 +12,6 @@ public interface PropertyValue<T> {
 
     @Nullable T get(@Nullable Object parent) throws Throwable;
 
-    default @Nullable T getSafe(String name, @Nullable Object parent) {
-        try {
-            return get(parent);
-        } catch (Throwable ex) {
-            throw new RuntimeException("Failed to process property: " + name, ex);
-        }
-    }
-
     @FunctionalInterface
     interface Mutable<T> extends PropertyValue<T> {
         Mutable<?> NOOP = (parent, instance) -> instance;
@@ -30,13 +22,5 @@ public interface PropertyValue<T> {
         }
 
         @Nullable T mutate(@Nullable Object parent, @Nullable T instance) throws Throwable;
-
-        default @Nullable T mutateSafe(String name, @Nullable Object parent, @Nullable T instance) {
-            try {
-                return mutate(parent, instance);
-            } catch (Throwable ex) {
-                throw new RuntimeException("Failed to process property: " + name, ex);
-            }
-        }
     }
 }

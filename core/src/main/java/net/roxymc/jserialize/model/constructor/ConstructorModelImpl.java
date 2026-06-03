@@ -58,7 +58,13 @@ final class ConstructorModelImpl implements ConstructorModel {
 
         @Override
         public Builder executable(Executable executable) {
-            this.executable = nonNull(executable, "executable");
+            nonNull(executable, "executable");
+
+            if (this.executable != null) {
+                throw new IllegalStateException("Executable is already set");
+            }
+
+            this.executable = executable;
             return this;
         }
 
@@ -68,7 +74,7 @@ final class ConstructorModelImpl implements ConstructorModel {
             nonNull(parameter, "parameter");
 
             if (parameters.containsKey(name)) {
-                throw new IllegalStateException("Parameter " + name + " already exists");
+                throw new IllegalStateException("Parameter already exists: " + name);
             }
 
             parameters.put(name, new ParameterModelImpl(name, parameterIndex++, parameter));

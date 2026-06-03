@@ -146,10 +146,7 @@ final class PropertyModelImpl implements PropertyModel {
             }
 
             if (this.kind != kind) {
-                throw new IllegalStateException(format(
-                        "Expected kind: %s, but found: %s",
-                        kind, this.kind
-                ));
+                throw new IllegalStateException(format("Expected kind: %s, but found: %s", kind, this.kind));
             }
         }
 
