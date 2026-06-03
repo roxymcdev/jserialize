@@ -28,9 +28,9 @@ public interface ClassModel<T> {
 
     @ApiStatus.NonExtendable
     interface Factory {
-        <T> ClassModel<T> create(TypeToken<? extends T> type) throws IllegalAccessException;
+        <T> ClassModel<T> create(TypeToken<? extends T> type);
 
-        <T> ClassModel<T> create(Class<T> type) throws IllegalAccessException;
+        <T> ClassModel<T> create(Class<T> type);
 
         @ApiStatus.NonExtendable
         interface Builder {
