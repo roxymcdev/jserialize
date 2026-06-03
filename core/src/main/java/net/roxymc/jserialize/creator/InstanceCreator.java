@@ -32,7 +32,7 @@ public final class InstanceCreator<T> {
         ConstructorModel constructor = classModel.constructor();
 
         if (constructor == null) {
-            throw new IllegalStateException("No constructor found");
+            throw new IllegalStateException("No constructor found for " + classModel.clazz());
         }
 
         ParameterModel[] parameters = constructor.parameters();
@@ -48,8 +48,8 @@ public final class InstanceCreator<T> {
                 continue;
             }
 
-            // parent should be passed here
-            Object resolvedValue = value.get(null);
+            // TODO parent should be passed here
+            Object resolvedValue = value.getSafe(name, null);
             validateValue(name, resolvedValue, meta);
 
             values[parameter.index()] = resolvedValue;
@@ -97,7 +97,7 @@ public final class InstanceCreator<T> {
             }
 
             if (!canMutate) {
-                Object resolvedValue = value.get(instance);
+                Object resolvedValue = value.getSafe(name, instance);
                 validateValue(name, resolvedValue, meta);
 
                 property.setter().set(instance, resolvedValue);
@@ -108,12 +108,12 @@ public final class InstanceCreator<T> {
 
             if (value instanceof PropertyValue.Mutable) {
                 //noinspection unchecked,rawtypes
-                ((PropertyValue.Mutable) value).mutate(instance, currentValue);
+                ((PropertyValue.Mutable) value).mutateSafe(name, instance, currentValue);
                 continue;
             }
 
             if (currentValue instanceof Collection || currentValue instanceof Map) {
-                Object resolvedValue = value.get(instance);
+                Object resolvedValue = value.getSafe(name, instance);
                 if (resolvedValue == null) {
                     validateValue(name, null, meta);
                     continue;
