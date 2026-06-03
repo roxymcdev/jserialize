@@ -53,7 +53,7 @@ final class ClassModelFactoryImpl implements ClassModel.Factory {
             try {
                 return createInternal(type);
             } catch (Exception ex) {
-                throw new RuntimeException("Failed to create class model of " + type);
+                throw new RuntimeException("Failed to create class model of " + type, ex);
             }
         });
         return classModel;
