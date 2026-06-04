@@ -82,4 +82,9 @@ public class TypeToken<T extends @Nullable Object> {
         TypeToken<?> that = (TypeToken<?>) obj;
         return this.annotatedType.equals(that.annotatedType);
     }
+
+    @Override
+    public String toString() {
+        return "TypeToken[" + annotatedType + "]";
+    }
 }
