@@ -66,23 +66,28 @@ final class ObjectReader<T, R> {
 
         while (reader.peek() == TokenType.NAME) {
             String name = reader.readName();
-            PropertyModel property = resolveProperty(name);
 
-            if (property != null) {
-                PropertyValue<?> value = readProperty(reader, property);
+            try {
+                PropertyModel property = resolveProperty(name);
 
-                if (value != null) {
-                    builder.property(property, value);
+                if (property != null) {
+                    PropertyValue<?> value = readProperty(reader, property);
+
+                    if (value != null) {
+                        builder.property(property, value);
+                        continue;
+                    }
+                }
+
+                if (extrasMap != null) {
+                    extrasMap.put(name, readRawValue(reader));
                     continue;
                 }
-            }
 
-            if (extrasMap != null) {
-                extrasMap.put(name, readRawValue(reader));
-                continue;
+                reader.skipValue();
+            } catch (Throwable ex) {
+                throw new RuntimeException("Failed to read property: " + name, ex);
             }
-
-            reader.skipValue();
         }
 
         reader.readObjectEnd();

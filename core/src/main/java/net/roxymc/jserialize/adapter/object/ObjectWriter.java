@@ -43,7 +43,11 @@ final class ObjectWriter<T, R> {
         writer.writeObjectStart();
 
         for (PropertyModel property : classModel.properties()) {
-            writeProperty(writer, property);
+            try {
+                writeProperty(writer, property);
+            } catch (Throwable ex) {
+                throw new RuntimeException("Failed to write property: " + property.name(), ex);
+            }
         }
 
         writer.writeObjectEnd();
