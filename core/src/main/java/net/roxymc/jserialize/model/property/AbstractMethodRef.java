@@ -3,21 +3,21 @@ package net.roxymc.jserialize.model.property;
 import net.roxymc.jserialize.util.ObjectUtils;
 
 import java.lang.invoke.MethodHandle;
-import java.lang.reflect.Type;
+import java.lang.reflect.AnnotatedType;
 
 abstract class AbstractMethodRef implements MethodRef {
-    private final Type valueType;
+    private final AnnotatedType valueType;
     private final Class<?> declaringClass;
     final MethodHandle handle;
 
-    AbstractMethodRef(Type valueType, Class<?> declaringClass, MethodHandle handle) {
+    AbstractMethodRef(AnnotatedType valueType, Class<?> declaringClass, MethodHandle handle) {
         this.valueType = valueType;
         this.declaringClass = declaringClass;
         this.handle = handle;
     }
 
     @Override
-    public Type valueType() {
+    public AnnotatedType valueType() {
         return valueType;
     }
 

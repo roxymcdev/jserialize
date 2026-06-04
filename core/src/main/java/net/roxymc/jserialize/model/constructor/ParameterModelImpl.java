@@ -5,21 +5,21 @@ import net.roxymc.jserialize.model.property.meta.PropertyMeta;
 import net.roxymc.jserialize.util.ObjectUtils;
 import net.roxymc.jserialize.util.TypeUtils;
 
+import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
-import java.lang.reflect.Type;
 
 final class ParameterModelImpl implements ParameterModel {
     private final String name;
     private final int index;
-    private final Type type;
+    private final AnnotatedType type;
     private final boolean implicit;
     private final PropertyMeta meta;
 
     ParameterModelImpl(String name, int index, Parameter parameter) {
         this.name = name;
         this.index = index;
-        this.type = parameter.getParameterizedType();
+        this.type = parameter.getAnnotatedType();
 
         Class<?> declaringClass = parameter.getDeclaringExecutable().getDeclaringClass();
         boolean implicitParent = index == 0 && parameter.isImplicit() && declaringClass.isMemberClass() && !Modifier.isStatic(declaringClass.getModifiers());
@@ -39,7 +39,7 @@ final class ParameterModelImpl implements ParameterModel {
     }
 
     @Override
-    public Type type() {
+    public AnnotatedType type() {
         return type;
     }
 
@@ -56,7 +56,7 @@ final class ParameterModelImpl implements ParameterModel {
     @Override
     public String toString() {
         return ObjectUtils.toString(this)
-                .add("name=" + name)
+                .add("name='" + name + "'")
                 .add("index=" + index)
                 .add("type=" + type)
                 .add("implicit=" + implicit)

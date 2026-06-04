@@ -5,7 +5,7 @@ import net.roxymc.jserialize.adapter.TypeAdapters;
 import org.jetbrains.annotations.ApiStatus;
 import org.jspecify.annotations.Nullable;
 
-import java.lang.reflect.Type;
+import java.lang.reflect.AnnotatedType;
 
 @ApiStatus.Internal
 public interface FormatUtils<R> {
@@ -17,5 +17,5 @@ public interface FormatUtils<R> {
 
     Reader newReader(R raw);
 
-    MapLike<R> createMap(TypeAdapters typeAdapters, Type mapType);
+    MapLike<R> createMap(TypeAdapters typeAdapters, AnnotatedType mapType);
 }

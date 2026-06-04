@@ -18,7 +18,7 @@ import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.ConfigurationNode;
 
 import java.io.IOException;
-import java.lang.reflect.Type;
+import java.lang.reflect.AnnotatedType;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -47,7 +47,7 @@ final class ConfigurateUtils implements FormatUtils<ConfigurationNode> {
     }
 
     @Override
-    public MapLike<ConfigurationNode> createMap(TypeAdapters typeAdapters, Type mapType) {
+    public MapLike<ConfigurationNode> createMap(TypeAdapters typeAdapters, AnnotatedType mapType) {
         TypeToken<Map<?, ?>> typeToken = TypeToken.of(mapType);
         TypeAdapter<Map<?, ?>> typeAdapter = typeAdapters.getOrThrow(typeToken);
 

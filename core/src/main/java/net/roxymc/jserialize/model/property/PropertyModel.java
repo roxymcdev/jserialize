@@ -7,9 +7,9 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Contract;
 import org.jspecify.annotations.Nullable;
 
+import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.lang.reflect.Type;
 
 @ApiStatus.NonExtendable
 public interface PropertyModel {
@@ -20,7 +20,7 @@ public interface PropertyModel {
     @Nullable GetterRef getter();
 
     @Contract(pure = true)
-    default @Nullable Type getterType() {
+    default @Nullable AnnotatedType getterType() {
         MethodRef getter = getter();
         return getter != null ? getter.valueType() : null;
     }
@@ -29,7 +29,7 @@ public interface PropertyModel {
     @Nullable SetterRef setter();
 
     @Contract(pure = true)
-    default @Nullable Type setterType() {
+    default @Nullable AnnotatedType setterType() {
         MethodRef setter = setter();
         return setter != null ? setter.valueType() : null;
     }
@@ -38,7 +38,7 @@ public interface PropertyModel {
     @Nullable ParameterModel parameter();
 
     @Contract(pure = true)
-    default @Nullable Type parameterType() {
+    default @Nullable AnnotatedType parameterType() {
         ParameterModel parameter = parameter();
         return parameter != null ? parameter.type() : null;
     }

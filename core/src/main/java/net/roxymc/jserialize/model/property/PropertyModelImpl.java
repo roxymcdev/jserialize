@@ -33,7 +33,7 @@ final class PropertyModelImpl implements PropertyModel {
 
         if (builder.getter != null) {
             this.getter = new GetterRefImpl(
-                    builder.getter.getGenericReturnType(),
+                    builder.getter.getAnnotatedReturnType(),
                     builder.getter.getDeclaringClass(),
                     methodLookup.unreflect(builder.getter)
             );
@@ -41,7 +41,7 @@ final class PropertyModelImpl implements PropertyModel {
             meta = PropertyMeta.of(builder.getter);
         } else if (builder.field != null) {
             this.getter = new GetterRefImpl(
-                    builder.field.getGenericType(),
+                    builder.field.getAnnotatedType(),
                     builder.field.getDeclaringClass(),
                     methodLookup.unreflectGetter(builder.field)
             );
@@ -53,7 +53,7 @@ final class PropertyModelImpl implements PropertyModel {
 
         if (builder.setter != null) {
             this.setter = new SetterRefImpl(
-                    builder.setter.getGenericParameterTypes()[0],
+                    builder.setter.getAnnotatedParameterTypes()[0],
                     builder.setter.getDeclaringClass(),
                     methodLookup.unreflect(builder.setter)
             );
@@ -63,7 +63,7 @@ final class PropertyModelImpl implements PropertyModel {
             }
         } else if (builder.field != null && !Modifier.isFinal(builder.field.getModifiers())) {
             this.setter = new SetterRefImpl(
-                    builder.field.getGenericType(),
+                    builder.field.getAnnotatedType(),
                     builder.field.getDeclaringClass(),
                     methodLookup.unreflectSetter(builder.field)
             );
@@ -75,11 +75,11 @@ final class PropertyModelImpl implements PropertyModel {
         this.meta = meta;
 
         if (kind() == PropertyKind.EXTRAS) {
-            if (getter != null && !Map.class.isAssignableFrom(GenericTypeReflector.erase(getter.valueType()))) {
+            if (getter != null && !Map.class.isAssignableFrom(GenericTypeReflector.erase(getter.valueType().getType()))) {
                 throw new IllegalStateException("@ExtraProperties property getter type must assignable to Map");
             }
 
-            if (setter != null && !Map.class.isAssignableFrom(GenericTypeReflector.erase(setter.valueType()))) {
+            if (setter != null && !Map.class.isAssignableFrom(GenericTypeReflector.erase(setter.valueType().getType()))) {
                 throw new IllegalStateException("@ExtraProperties property setter type must assignable to Map");
             }
         }

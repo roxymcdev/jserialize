@@ -2,11 +2,11 @@ package net.roxymc.jserialize.model.property;
 
 import org.jetbrains.annotations.ApiStatus;
 
-import java.lang.reflect.Type;
+import java.lang.reflect.AnnotatedType;
 
 @ApiStatus.NonExtendable
 public interface MethodRef {
-    Type valueType();
+    AnnotatedType valueType();
 
     Class<?> declaringClass();
 }

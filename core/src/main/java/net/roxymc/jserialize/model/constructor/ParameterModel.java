@@ -2,14 +2,14 @@ package net.roxymc.jserialize.model.constructor;
 
 import net.roxymc.jserialize.model.property.meta.PropertyMeta;
 
-import java.lang.reflect.Type;
+import java.lang.reflect.AnnotatedType;
 
 public interface ParameterModel {
     String name();
 
     int index();
 
-    Type type();
+    AnnotatedType type();
 
     boolean implicit();
 

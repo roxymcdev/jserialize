@@ -3,10 +3,10 @@ package net.roxymc.jserialize.model.property;
 import org.jspecify.annotations.Nullable;
 
 import java.lang.invoke.MethodHandle;
-import java.lang.reflect.Type;
+import java.lang.reflect.AnnotatedType;
 
 final class SetterRefImpl extends AbstractMethodRef implements SetterRef {
-    SetterRefImpl(Type valueType, Class<?> declaringClass, MethodHandle handle) {
+    SetterRefImpl(AnnotatedType valueType, Class<?> declaringClass, MethodHandle handle) {
         super(valueType, declaringClass, handle);
     }
 

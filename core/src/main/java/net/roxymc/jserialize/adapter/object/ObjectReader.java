@@ -12,10 +12,11 @@ import net.roxymc.jserialize.model.property.meta.PropertyKind;
 import net.roxymc.jserialize.model.property.meta.PropertyMeta;
 import net.roxymc.jserialize.token.TokenType;
 import net.roxymc.jserialize.type.TypeToken;
+import net.roxymc.jserialize.util.TypeUtils;
 import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
-import java.lang.reflect.Type;
+import java.lang.reflect.AnnotatedType;
 
 import static io.leangen.geantyref.GenericTypeReflector.*;
 
@@ -57,7 +58,7 @@ final class ObjectReader<T, R> {
         MapLike<R> extrasMap;
 
         if (extrasProperty != null) {
-            Type mapType = resolveReadType(extrasProperty);
+            AnnotatedType mapType = resolveReadType(extrasProperty);
 
             extrasMap = mapType != null ? formatUtils.createMap(context.typeAdapters(), mapType) : null;
         } else {
@@ -122,7 +123,7 @@ final class ObjectReader<T, R> {
             return null;
         }
 
-        Type type = resolveReadType(property);
+        AnnotatedType type = resolveReadType(property);
         if (type == null) {
             return null;
         }
@@ -157,11 +158,11 @@ final class ObjectReader<T, R> {
         return adapter.read(reader, typeToken, context.withParent(null).withKey(null));
     }
 
-    private @Nullable Type resolveReadType(PropertyModel property) {
+    private @Nullable AnnotatedType resolveReadType(PropertyModel property) {
         PropertyMeta meta = property.meta();
 
         if (instance == null && property.parameterType() != null) {
-            return box(resolveType(property.parameterType(), type.getType()));
+            return TypeUtils.box(resolveType(property.parameterType(), type.getAnnotatedType()));
         }
 
         MethodRef method = null;
@@ -176,7 +177,7 @@ final class ObjectReader<T, R> {
             return null;
         }
 
-        Type supertype = getExactSuperType(type.getType(), method.declaringClass());
-        return box(resolveType(method.valueType(), supertype));
+        AnnotatedType supertype = capture(getExactSuperType(type.getAnnotatedType(), method.declaringClass()));
+        return TypeUtils.box(resolveType(method.valueType(), supertype));
     }
 }

@@ -9,9 +9,10 @@ import net.roxymc.jserialize.model.property.PropertyModel;
 import net.roxymc.jserialize.model.property.meta.PropertyKind;
 import net.roxymc.jserialize.model.property.meta.PropertyMeta;
 import net.roxymc.jserialize.type.TypeToken;
+import net.roxymc.jserialize.util.TypeUtils;
 
 import java.io.IOException;
-import java.lang.reflect.Type;
+import java.lang.reflect.AnnotatedType;
 import java.util.Map;
 import java.util.Objects;
 
@@ -66,8 +67,8 @@ final class ObjectWriter<T, R> {
             return;
         }
 
-        Type declaringType = getExactSuperType(type.getType(), getter.declaringClass());
-        Type type = box(resolveType(getter.valueType(), declaringType));
+        AnnotatedType declaringType = capture(getExactSuperType(type.getAnnotatedType(), getter.declaringClass()));
+        AnnotatedType type = TypeUtils.box(resolveType(getter.valueType(), declaringType));
 
         if (meta != null && meta.kind() == PropertyKind.EXTRAS) {
             // if it's an extras property, it never writes null
@@ -85,7 +86,7 @@ final class ObjectWriter<T, R> {
         adapter.write(writer, typeToken, value, context);
     }
 
-    private void writeExtrasProperty(Writer writer, Type type, Object value) throws IOException {
+    private void writeExtrasProperty(Writer writer, AnnotatedType type, Object value) throws IOException {
         MapLike<R> extrasMap = formatUtils.createMap(context.typeAdapters(), type);
         extrasMap.putAll((Map<?, ?>) value, context);
 

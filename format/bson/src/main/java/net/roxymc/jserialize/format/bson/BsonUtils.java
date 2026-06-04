@@ -12,7 +12,7 @@ import org.bson.*;
 import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
-import java.lang.reflect.Type;
+import java.lang.reflect.AnnotatedType;
 import java.util.Collections;
 import java.util.Map;
 
@@ -48,7 +48,7 @@ final class BsonUtils implements FormatUtils<BsonValue> {
     }
 
     @Override
-    public MapLike<BsonValue> createMap(TypeAdapters typeAdapters, Type mapType) {
+    public MapLike<BsonValue> createMap(TypeAdapters typeAdapters, AnnotatedType mapType) {
         TypeToken<Map<?, ?>> typeToken = TypeToken.of(mapType);
         TypeAdapter<Map<?, ?>> mapAdapter = typeAdapters.getOrThrow(typeToken);
 

@@ -15,7 +15,7 @@ import net.roxymc.jserialize.type.TypeToken;
 import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
-import java.lang.reflect.Type;
+import java.lang.reflect.AnnotatedType;
 import java.util.Collections;
 import java.util.Map;
 
@@ -36,7 +36,7 @@ final class GsonUtils implements FormatUtils<JsonElement> {
     }
 
     @Override
-    public MapLike<JsonElement> createMap(TypeAdapters typeAdapters, Type mapType) {
+    public MapLike<JsonElement> createMap(TypeAdapters typeAdapters, AnnotatedType mapType) {
         TypeToken<Map<?, ?>> typeToken = TypeToken.of(mapType);
         TypeAdapter<Map<?, ?>> mapAdapter = typeAdapters.getOrThrow(typeToken);
 

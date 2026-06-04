@@ -1,8 +1,8 @@
 package net.roxymc.jserialize.format.configurate;
 
+import net.roxymc.jserialize.token.AbstractValueAccessor;
 import net.roxymc.jserialize.token.ScalarToken;
 import net.roxymc.jserialize.token.TokenType;
-import net.roxymc.jserialize.token.AbstractValueAccessor;
 import org.jspecify.annotations.Nullable;
 import org.spongepowered.configurate.ConfigurationNode;
 

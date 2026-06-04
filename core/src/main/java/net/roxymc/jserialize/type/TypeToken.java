@@ -85,6 +85,6 @@ public class TypeToken<T extends @Nullable Object> {
 
     @Override
     public String toString() {
-        return "TypeToken[" + annotatedType + "]";
+        return "TypeToken[" + getType() + "]";
     }
 }
