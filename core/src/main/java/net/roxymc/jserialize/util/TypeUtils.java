@@ -13,4 +13,9 @@ public final class TypeUtils {
     public static boolean isPrimitive(Class<?> type) {
         return !Object.class.isAssignableFrom(type);
     }
+
+    public static boolean isRecord(Class<?> type) {
+        Class<?> supertype = type.getSuperclass();
+        return supertype != null && supertype.getName().equals("java.lang.Record");
+    }
 }

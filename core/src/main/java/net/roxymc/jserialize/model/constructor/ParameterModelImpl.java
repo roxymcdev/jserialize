@@ -3,6 +3,7 @@ package net.roxymc.jserialize.model.constructor;
 import net.roxymc.jserialize.model.property.meta.PropertyKind;
 import net.roxymc.jserialize.model.property.meta.PropertyMeta;
 import net.roxymc.jserialize.util.ObjectUtils;
+import net.roxymc.jserialize.util.TypeUtils;
 
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
@@ -19,11 +20,11 @@ final class ParameterModelImpl implements ParameterModel {
         this.name = name;
         this.index = index;
         this.type = parameter.getParameterizedType();
-        this.implicit = parameter.isImplicit();
 
         Class<?> declaringClass = parameter.getDeclaringExecutable().getDeclaringClass();
         boolean implicitParent = index == 0 && parameter.isImplicit() && declaringClass.isMemberClass() && !Modifier.isStatic(declaringClass.getModifiers());
 
+        this.implicit = implicitParent || (parameter.isImplicit() && !TypeUtils.isRecord(declaringClass));
         this.meta = implicitParent ? PropertyKind.PARENT.createMeta(null) : PropertyMeta.of(parameter);
     }
 
