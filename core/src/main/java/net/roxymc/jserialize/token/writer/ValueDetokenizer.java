@@ -98,7 +98,7 @@ public final class ValueDetokenizer<V> implements Detokenizer<V> {
             return accessor.objectAppend(container, name);
         }
 
-        if (accessor.isArray(container)) {
+        if (!accessor.isArray(container)) {
             throw new IllegalStateException("cannot append to a non-array");
         }
 
