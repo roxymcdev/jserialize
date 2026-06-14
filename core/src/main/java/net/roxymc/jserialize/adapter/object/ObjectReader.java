@@ -162,7 +162,7 @@ final class ObjectReader<T, R> {
         PropertyMeta meta = property.meta();
 
         if (instance == null && property.parameterType() != null) {
-            return TypeUtils.box(resolveType(property.parameterType(), type.getAnnotatedType()));
+            return TypeUtils.box(resolveType(property.parameterType(), capture(type.getAnnotatedType())));
         }
 
         MethodRef method = null;
@@ -177,7 +177,7 @@ final class ObjectReader<T, R> {
             return null;
         }
 
-        AnnotatedType supertype = capture(getExactSuperType(type.getAnnotatedType(), method.declaringClass()));
+        AnnotatedType supertype = getExactSuperType(capture(type.getAnnotatedType()), method.declaringClass());
         return TypeUtils.box(resolveType(method.valueType(), supertype));
     }
 }

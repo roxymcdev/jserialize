@@ -67,7 +67,7 @@ final class ObjectWriter<T, R> {
             return;
         }
 
-        AnnotatedType declaringType = capture(getExactSuperType(type.getAnnotatedType(), getter.declaringClass()));
+        AnnotatedType declaringType = getExactSuperType(capture(type.getAnnotatedType()), getter.declaringClass());
         AnnotatedType type = TypeUtils.box(resolveType(getter.valueType(), declaringType));
 
         if (meta != null && meta.kind() == PropertyKind.EXTRAS) {
