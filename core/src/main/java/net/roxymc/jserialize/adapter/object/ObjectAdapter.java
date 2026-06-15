@@ -55,10 +55,8 @@ public final class ObjectAdapter<T> implements TypeAdapter.Mutable<T> {
             ObjectReader<T, ?> objectReader = new ObjectReader<>(classModel, type, instance, ctx.formatUtils(), ctx);
 
             return objectReader.read(reader);
-        } catch (IOException | RuntimeException e) {
-            throw e;
         } catch (Throwable e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Failed to read object of type: " + type.getType(), e);
         }
     }
 
@@ -74,10 +72,8 @@ public final class ObjectAdapter<T> implements TypeAdapter.Mutable<T> {
             ObjectWriter<T, ?> objectWriter = new ObjectWriter<>(classModel, type, instance, ctx.formatUtils(), ctx);
 
             objectWriter.write(writer);
-        } catch (IOException | RuntimeException e) {
-            throw e;
         } catch (Throwable e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Failed to write object of type: " + type.getType(), e);
         }
     }
 }
