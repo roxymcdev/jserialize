@@ -69,7 +69,7 @@ public class SimpleConstructorResolver implements ConstructorResolver {
         for (Parameter parameter : parameters) {
             String propertyName = PropertyUtils.getPropertyName(parameter, () -> {
                 if (!parameter.isNamePresent()) {
-                    throw new IllegalStateException("Parameter has no name");
+                    throw new IllegalStateException("Parameter has no name: " + parameter);
                 }
 
                 return parameter.getName();
