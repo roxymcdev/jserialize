@@ -1,14 +1,27 @@
 package net.roxymc.jserialize.type;
 
 import io.leangen.geantyref.GenericTypeReflector;
+import org.jetbrains.annotations.UnknownNullability;
 import org.jspecify.annotations.Nullable;
 
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.VarHandle;
 import java.lang.reflect.AnnotatedParameterizedType;
 import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
-public class TypeToken<T extends @Nullable Object> {
+public class TypeToken<T extends @UnknownNullability Object> {
+    private static final VarHandle RAW_TYPE_HANDLE;
+
+    static {
+        try {
+            RAW_TYPE_HANDLE = MethodHandles.lookup().findVarHandle(TypeToken.class, "rawType", Class.class);
+        } catch (NoSuchFieldException | IllegalAccessException ex) {
+            throw new ExceptionInInitializerError(ex);
+        }
+    }
+
     private final AnnotatedType annotatedType;
     private @Nullable Class<? super T> rawType;
 
@@ -40,14 +53,18 @@ public class TypeToken<T extends @Nullable Object> {
         return annotatedType;
     }
 
+    @SuppressWarnings("unchecked")
     public final Class<? super T> getRawType() {
-        if (rawType == null) {
-            @SuppressWarnings("unchecked")
-            Class<? super T> rawType = (Class<? super T>) GenericTypeReflector.erase(getType());
-            this.rawType = rawType;
+        Class<? super T> value = (Class<? super T>) RAW_TYPE_HANDLE.getAcquire(this);
+
+        if (value == null) {
+            Class<? super T> erased = (Class<? super T>) GenericTypeReflector.erase(getType());
+            Class<? super T> witness = (Class<? super T>) RAW_TYPE_HANDLE.compareAndExchangeRelease(this, null, erased);
+
+            value = witness != null ? witness : erased;
         }
 
-        return rawType;
+        return value;
     }
 
     private AnnotatedType extractType() {
