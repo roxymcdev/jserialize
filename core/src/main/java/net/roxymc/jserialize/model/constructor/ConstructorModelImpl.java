@@ -5,10 +5,7 @@ import org.jspecify.annotations.Nullable;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Executable;
-import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
+import java.lang.reflect.*;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -54,7 +51,6 @@ final class ConstructorModelImpl implements ConstructorModel {
     static final class BuilderImpl implements Builder {
         private @Nullable Executable executable;
         private final Map<String, ParameterModel> parameters = new LinkedHashMap<>();
-        private int parameterIndex = 0;
 
         @Override
         public Builder executable(Executable executable) {
@@ -69,7 +65,7 @@ final class ConstructorModelImpl implements ConstructorModel {
         }
 
         @Override
-        public Builder parameter(String name, Parameter parameter) {
+        public Builder parameter(String name, int index, Parameter parameter, AnnotatedType type) {
             nonNull(name, "name");
             nonNull(parameter, "parameter");
 
@@ -77,7 +73,7 @@ final class ConstructorModelImpl implements ConstructorModel {
                 throw new IllegalStateException("Parameter already exists: " + name);
             }
 
-            parameters.put(name, new ParameterModelImpl(name, parameterIndex++, parameter));
+            parameters.put(name, new ParameterModelImpl(name, index, parameter, type));
             return this;
         }
 

@@ -3,11 +3,9 @@ package net.roxymc.jserialize.model.resolver;
 import net.roxymc.jserialize.annotation.Creator;
 import net.roxymc.jserialize.model.constructor.ConstructorModel;
 import net.roxymc.jserialize.util.PropertyUtils;
+import net.roxymc.jserialize.util.RecordUtils;
 
-import java.lang.reflect.Executable;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.Parameter;
+import java.lang.reflect.*;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -62,12 +60,23 @@ public class SimpleConstructorResolver implements ConstructorResolver {
 
         constructor.executable(target);
 
-        processParameters(target.getParameters(), constructor);
+        processParameters(target, constructor);
     }
 
-    protected void processParameters(Parameter[] parameters, ConstructorModel.Builder builder) {
-        for (Parameter parameter : parameters) {
-            String propertyName = PropertyUtils.getPropertyName(parameter, () -> {
+    protected void processParameters(Executable executable, ConstructorModel.Builder builder) {
+        Class<?> clazz = executable.getDeclaringClass();
+
+        AnnotatedType[] componentTypes = null;
+        if (executable instanceof Constructor && RecordUtils.isRecord(clazz) && RecordUtils.isPrimaryConstructor((Constructor<?>) executable)) {
+            componentTypes = RecordUtils.getComponentTypes(clazz);
+        }
+
+        Parameter[] parameters = executable.getParameters();
+
+        for (int i = 0; i < parameters.length; i++) {
+            Parameter parameter = parameters[i];
+
+            String name = PropertyUtils.getPropertyName(parameter, () -> {
                 if (!parameter.isNamePresent()) {
                     throw new IllegalStateException("Parameter has no name: " + parameter);
                 }
@@ -75,7 +84,9 @@ public class SimpleConstructorResolver implements ConstructorResolver {
                 return parameter.getName();
             });
 
-            builder.parameter(propertyName, parameter);
+            AnnotatedType type = componentTypes != null ? componentTypes[i] : parameter.getAnnotatedType();
+
+            builder.parameter(name, i, parameter, type);
         }
     }
 }

@@ -18,11 +18,6 @@ public final class TypeUtils {
         return !Object.class.isAssignableFrom(type);
     }
 
-    public static boolean isRecord(Class<?> type) {
-        Class<?> supertype = type.getSuperclass();
-        return supertype != null && supertype.getName().equals("java.lang.Record");
-    }
-
     public static AnnotatedType box(AnnotatedType type) {
         Type rawType = type.getType();
         Type boxedType = GenericTypeReflector.box(rawType);
