@@ -37,12 +37,12 @@ final class WrappedCodec<T> implements TypeAdapter<T> {
     }
 
     @Override
-    public void write(Writer writer, TypeToken<? extends T> type, @Nullable T instance, WriteContext context) throws IOException {
-        if (instance == null) {
+    public void write(Writer writer, TypeToken<? extends T> type, @Nullable T value, WriteContext context) throws IOException {
+        if (value == null) {
             writer.writeNull();
             return;
         }
 
-        codec.encode(((BsonWriterAdapter) writer).writer, instance, EncoderContext.builder().build());
+        codec.encode(((BsonWriterAdapter) writer).writer, value, EncoderContext.builder().build());
     }
 }

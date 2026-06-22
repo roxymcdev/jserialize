@@ -1,10 +1,12 @@
 package net.roxymc.jserialize.format.bson;
 
+import net.roxymc.jserialize.adapter.KeyAdapter;
 import net.roxymc.jserialize.adapter.TypeAdapter;
 import net.roxymc.jserialize.adapter.TypeAdapters;
 import net.roxymc.jserialize.type.TypeToken;
 import org.bson.codecs.Codec;
 import org.bson.codecs.configuration.CodecRegistry;
+import org.jspecify.annotations.Nullable;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -12,9 +14,11 @@ import java.util.List;
 
 final class BsonTypeAdapters implements TypeAdapters {
     private final CodecRegistry registry;
+    private final TypeAdapters adapters;
 
-    BsonTypeAdapters(CodecRegistry registry) {
+    BsonTypeAdapters(CodecRegistry registry, TypeAdapters adapters) {
         this.registry = registry;
+        this.adapters = adapters;
     }
 
     private <T> Codec<T> getCodec(TypeToken<? extends T> typeToken) {
@@ -35,7 +39,7 @@ final class BsonTypeAdapters implements TypeAdapters {
     }
 
     @Override
-    public <T> TypeAdapter<T> get(TypeToken<? extends T> type) {
+    public <T> TypeAdapter<T> get(TypeToken<T> type) {
         Codec<T> codec = getCodec(type);
 
         if (codec instanceof WrappedTypeAdapter) {
@@ -43,5 +47,10 @@ final class BsonTypeAdapters implements TypeAdapters {
         }
 
         return new WrappedCodec<>(codec);
+    }
+
+    @Override
+    public @Nullable <T> KeyAdapter<T> getKey(TypeToken<T> type) {
+        return adapters.getKey(type);
     }
 }

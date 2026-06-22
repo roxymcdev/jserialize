@@ -23,8 +23,8 @@ final class WrappedGsonTypeAdapter<T> implements TypeAdapter<T> {
     }
 
     @Override
-    public void write(Writer writer, TypeToken<? extends T> type, @Nullable T instance, WriteContext context) throws IOException {
+    public void write(Writer writer, TypeToken<? extends T> type, @Nullable T value, WriteContext context) throws IOException {
         //noinspection DataFlowIssue - Gson allows null value
-        adapter.write(((GsonWriterAdapter) writer).writer, instance);
+        adapter.write(((GsonWriterAdapter) writer).writer, value);
     }
 }

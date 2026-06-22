@@ -7,19 +7,19 @@ import java.util.function.Predicate;
 
 import static net.roxymc.jserialize.util.ObjectUtils.nonNull;
 
-final class PredicateTypeAdapterFactory implements TypeAdapter.Factory {
-    private final TypeAdapter<?> adapter;
+final class PredicateKeyAdapterFactory implements KeyAdapter.Factory {
+    private final KeyAdapter<?> adapter;
     private final Predicate<? super TypeToken<?>> predicate;
 
-    PredicateTypeAdapterFactory(Predicate<? super TypeToken<?>> predicate, TypeAdapter<?> adapter) {
+    PredicateKeyAdapterFactory(Predicate<? super TypeToken<?>> predicate, KeyAdapter<?> adapter) {
         this.adapter = nonNull(adapter, "adapter");
         this.predicate = nonNull(predicate, "predicate");
     }
 
     @Override
-    public <T> @Nullable TypeAdapter<T> create(TypeToken<T> type, TypeAdapters adapters) {
+    public <T> @Nullable KeyAdapter<T> create(TypeToken<T> type, TypeAdapters adapters) {
         @SuppressWarnings("unchecked")
-        TypeAdapter<T> adapter = (TypeAdapter<T>) this.adapter;
+        KeyAdapter<T> adapter = (KeyAdapter<T>) this.adapter;
         return predicate.test(type) ? adapter : null;
     }
 }

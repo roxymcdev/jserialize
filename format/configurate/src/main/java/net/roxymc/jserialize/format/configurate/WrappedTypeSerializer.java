@@ -29,9 +29,9 @@ final class WrappedTypeSerializer<T> implements TypeAdapter<T> {
     }
 
     @Override
-    public void write(Writer writer, TypeToken<? extends T> type, @Nullable T instance, WriteContext context) throws IOException {
+    public void write(Writer writer, TypeToken<? extends T> type, @Nullable T value, WriteContext context) throws IOException {
         @SuppressWarnings("unchecked")
         TokenWriter<ConfigurationNode> tokenWriter = (TokenWriter<ConfigurationNode>) writer;
-        serializer.serialize(type.getAnnotatedType(), instance, tokenWriter.detokenizer().value());
+        serializer.serialize(type.getAnnotatedType(), value, tokenWriter.detokenizer().value());
     }
 }

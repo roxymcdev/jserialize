@@ -7,5 +7,5 @@ import org.jspecify.annotations.Nullable;
 import java.io.IOException;
 
 public interface TypeWriter<T> {
-    void write(Writer writer, TypeToken<? extends T> type, @Nullable T instance, WriteContext context) throws IOException;
+    void write(Writer writer, TypeToken<? extends T> type, @Nullable T value, WriteContext context) throws IOException;
 }

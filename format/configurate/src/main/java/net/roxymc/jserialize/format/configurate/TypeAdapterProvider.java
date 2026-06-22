@@ -37,7 +37,7 @@ public final class TypeAdapterProvider implements TypeSerializer.Annotated<Objec
         Reader reader = ConfigurateUtils.newReader0(node);
 
         try {
-            ReadContext context = ReadContext.of(new ConfigurateTypeAdapters(node.options()), ConfigurateUtils.INSTANCE);
+            ReadContext context = ReadContext.of(new ConfigurateTypeAdapters(node.options(), adapters), ConfigurateUtils.INSTANCE);
 
             return typeAdapter.read(reader, typeToken, context);
         } catch (IOException e) {
@@ -53,7 +53,7 @@ public final class TypeAdapterProvider implements TypeSerializer.Annotated<Objec
         Writer writer = ConfigurateUtils.newWriter0(node);
 
         try {
-            WriteContext context = WriteContext.of(new ConfigurateTypeAdapters(node.options()), ConfigurateUtils.INSTANCE);
+            WriteContext context = WriteContext.of(new ConfigurateTypeAdapters(node.options(), adapters), ConfigurateUtils.INSTANCE);
 
             typeAdapter.write(writer, typeToken, obj, context);
         } catch (IOException e) {

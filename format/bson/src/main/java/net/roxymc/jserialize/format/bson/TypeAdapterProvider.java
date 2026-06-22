@@ -34,13 +34,13 @@ public final class TypeAdapterProvider implements CodecProvider {
         return get(TypeToken.of(type), registry);
     }
 
-    private <T> @Nullable Codec<T> get(TypeToken<? extends T> type, CodecRegistry registry) {
+    private <T> @Nullable Codec<T> get(TypeToken<T> type, CodecRegistry registry) {
         TypeAdapter<T> adapter = this.adapters.get(type);
         if (adapter == null) {
             return null;
         }
 
-        BsonTypeAdapters adapters = new BsonTypeAdapters(registry);
+        BsonTypeAdapters adapters = new BsonTypeAdapters(registry, this.adapters);
         return new WrappedTypeAdapter<>(type, adapter, adapters);
     }
 }

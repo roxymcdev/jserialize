@@ -6,44 +6,73 @@ import org.jspecify.annotations.Nullable;
 
 import java.lang.reflect.AnnotatedType;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.BiFunction;
 
 final class TypeAdaptersImpl implements TypeAdapters {
-    private final Map<AnnotatedType, Optional<TypeAdapter<?>>> cache = new HashMap<>();
-    private final Set<TypeAdapter.Factory> factories;
+    private final Registry<TypeAdapter.Factory, TypeAdapter<?>> typeAdapters;
+    private final Registry<KeyAdapter.Factory, KeyAdapter<?>> keyAdapters;
 
+    @SuppressWarnings({"NullableProblems", "DataFlowIssue"}) // IntelliJ has existential issues
     private TypeAdaptersImpl(BuilderImpl builder) {
-        this.factories = Collections.unmodifiableSet(new LinkedHashSet<>(builder.factories));
+        this.typeAdapters = new Registry<>(builder.typeAdapters, (factory, type) -> factory.create(type, this));
+        this.keyAdapters = new Registry<>(builder.keyAdapters, (factory, type) -> factory.create(type, this));
     }
 
     @Override
-    public @Nullable <T> TypeAdapter<T> get(TypeToken<? extends T> type) {
+    public @Nullable <T> TypeAdapter<T> get(TypeToken<T> type) {
         @SuppressWarnings("unchecked")
-        TypeAdapter<T> adapter = (TypeAdapter<T>) get0(type).orElse(null);
+        TypeAdapter<T> adapter = (TypeAdapter<T>) typeAdapters.get(type).orElse(null);
         return adapter;
     }
 
-    private Optional<TypeAdapter<?>> get0(TypeToken<?> type) {
-        AnnotatedType targetType = GenericTypeReflector.toCanonicalBoxed(type.getAnnotatedType());
+    @Override
+    public @Nullable <T> KeyAdapter<T> getKey(TypeToken<T> type) {
+        @SuppressWarnings("unchecked")
+        KeyAdapter<T> adapter = (KeyAdapter<T>) keyAdapters.get(type).orElse(null);
+        return adapter;
+    }
 
-        return cache.computeIfAbsent(targetType, $ -> {
-            for (TypeAdapter.Factory factory : factories) {
-                TypeAdapter<?> adapter = factory.create(type, this);
+    private static final class Registry<F, A> {
+        private final Map<AnnotatedType, Optional<A>> cache = new ConcurrentHashMap<>();
+        private final Set<F> factories;
+        private final BiFunction<F, TypeToken<?>, @Nullable A> creator;
 
-                if (adapter != null) {
-                    return Optional.of(adapter);
+        private Registry(Set<F> factories, BiFunction<F, TypeToken<?>, @Nullable A> creator) {
+            this.factories = Collections.unmodifiableSet(new LinkedHashSet<>(factories));
+            this.creator = creator;
+        }
+
+        private Optional<A> get(TypeToken<?> type) {
+            AnnotatedType targetType = GenericTypeReflector.toCanonicalBoxed(type.getAnnotatedType());
+
+            return cache.computeIfAbsent(targetType, $ -> {
+                for (F factory : factories) {
+                    A adapter = creator.apply(factory, type);
+
+                    if (adapter != null) {
+                        return Optional.of(adapter);
+                    }
                 }
-            }
 
-            return Optional.empty();
-        });
+                return Optional.empty();
+            });
+        }
     }
 
     static final class BuilderImpl implements Builder {
-        private final Set<TypeAdapter.Factory> factories = new LinkedHashSet<>();
+        private final Set<TypeAdapter.Factory> typeAdapters = new LinkedHashSet<>();
+        private final Set<KeyAdapter.Factory> keyAdapters = new LinkedHashSet<>();
 
         @Override
         public Builder add(TypeAdapter.Factory factory) {
-            factories.add(factory);
+            typeAdapters.add(factory);
+            return this;
+        }
+
+        @Override
+        public Builder addKey(KeyAdapter.Factory factory) {
+            keyAdapters.add(factory);
             return this;
         }
 

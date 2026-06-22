@@ -2,10 +2,10 @@ package net.roxymc.jserialize.adapter;
 
 import net.roxymc.jserialize.adapter.object.ObjectAdapter;
 import net.roxymc.jserialize.type.TypeToken;
+import org.jetbrains.annotations.ApiStatus;
 import org.jspecify.annotations.Nullable;
 
-import java.util.function.Predicate;
-
+@ApiStatus.NonExtendable
 public interface TypeAdapters {
     TypeAdapters DEFAULT = builder()
             .add(ObjectAdapter.factory())
@@ -15,17 +15,17 @@ public interface TypeAdapters {
         return new TypeAdaptersImpl.BuilderImpl();
     }
 
-    default <T> @Nullable TypeAdapter<T> get(Class<? extends T> type) {
+    default <T> @Nullable TypeAdapter<T> get(Class<T> type) {
         return get(TypeToken.of(type));
     }
 
-    <T> @Nullable TypeAdapter<T> get(TypeToken<? extends T> type);
+    <T> @Nullable TypeAdapter<T> get(TypeToken<T> type);
 
-    default <T> TypeAdapter<T> getOrThrow(Class<? extends T> type) {
+    default <T> TypeAdapter<T> getOrThrow(Class<T> type) {
         return getOrThrow(TypeToken.of(type));
     }
 
-    default <T> TypeAdapter<T> getOrThrow(TypeToken<? extends T> type) {
+    default <T> TypeAdapter<T> getOrThrow(TypeToken<T> type) {
         TypeAdapter<T> adapter = get(type);
         if (adapter != null) {
             return adapter;
@@ -34,28 +34,29 @@ public interface TypeAdapters {
         throw new IllegalStateException("Could not find type adapter for " + type.getAnnotatedType());
     }
 
+    default <T> @Nullable KeyAdapter<T> getKey(Class<T> type) {
+        return getKey(TypeToken.of(type));
+    }
+
+    <T> @Nullable KeyAdapter<T> getKey(TypeToken<T> type);
+
+    default <T> KeyAdapter<T> getKeyOrThrow(Class<T> type) {
+        return getKeyOrThrow(TypeToken.of(type));
+    }
+
+    default <T> KeyAdapter<T> getKeyOrThrow(TypeToken<T> type) {
+        KeyAdapter<T> adapter = getKey(type);
+        if (adapter != null) {
+            return adapter;
+        }
+        throw new IllegalStateException("Could not find key adapter for " + type.getAnnotatedType());
+    }
+
+    @ApiStatus.NonExtendable
     interface Builder {
-        default Builder add(Predicate<? super TypeToken<?>> predicate, TypeAdapter<?> adapter) {
-            return add(TypeAdapter.Factory.predicate(predicate, adapter));
-        }
-
-        default <T> Builder add(Class<? extends T> type, TypeAdapter<T> adapter) {
-            return add(TypeToken.of(type), adapter);
-        }
-
-        default <T> Builder add(TypeToken<? extends T> type, TypeAdapter<T> adapter) {
-            return add(TypeAdapter.Factory.polymorphic(type, adapter));
-        }
-
-        default <T> Builder addExact(Class<? extends T> type, TypeAdapter<T> adapter) {
-            return add(TypeToken.of(type), adapter);
-        }
-
-        default <T> Builder addExact(TypeToken<? extends T> type, TypeAdapter<T> adapter) {
-            return add(TypeAdapter.Factory.exact(type, adapter));
-        }
-
         Builder add(TypeAdapter.Factory factory);
+
+        Builder addKey(KeyAdapter.Factory factory);
 
         TypeAdapters build();
     }
