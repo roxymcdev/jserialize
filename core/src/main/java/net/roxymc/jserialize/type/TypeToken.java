@@ -101,7 +101,7 @@ public class TypeToken<T extends @UnknownNullability Object> {
     }
 
     @Override
-    public String toString() {
+    public final String toString() {
         return "TypeToken[" + getType() + "]";
     }
 }
