@@ -1,5 +1,7 @@
 package net.roxymc.jserialize.adapter;
 
+import org.jspecify.annotations.Nullable;
+
 public interface KeyDecoder<T> {
-    T decode(String value);
+    @Nullable T decode(@Nullable String value);
 }

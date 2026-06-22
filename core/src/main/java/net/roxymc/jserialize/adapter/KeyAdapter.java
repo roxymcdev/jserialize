@@ -10,22 +10,22 @@ public interface KeyAdapter<T> extends KeyDecoder<T>, KeyEncoder<T> {
     static <T> KeyAdapter<T> of(KeyDecoder<T> decoder, KeyEncoder<T> encoder) {
         return new KeyAdapter<>() {
             @Override
-            public T decode(String value) {
+            public @Nullable T decode(@Nullable String value) {
                 return decoder.decode(value);
             }
 
             @Override
-            public String encode(T value) {
+            public String encode(@Nullable T value) {
                 return encoder.encode(value);
             }
         };
     }
 
     @Override
-    T decode(String value);
+    @Nullable T decode(@Nullable String value);
 
     @Override
-    String encode(T value);
+    String encode(@Nullable T value);
 
     interface Factory {
         static Factory predicate(Predicate<? super TypeToken<?>> predicate, KeyAdapter<?> adapter) {
