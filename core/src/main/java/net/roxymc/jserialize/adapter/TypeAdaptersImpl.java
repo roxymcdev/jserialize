@@ -9,6 +9,8 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiFunction;
 
+import static net.roxymc.jserialize.util.ObjectUtils.nonNull;
+
 final class TypeAdaptersImpl implements TypeAdapters {
     private final Registry<TypeAdapter.Factory, TypeAdapter<?>> typeAdapters;
     private final Registry<KeyAdapter.Factory, KeyAdapter<?>> keyAdapters;
@@ -22,14 +24,14 @@ final class TypeAdaptersImpl implements TypeAdapters {
     @Override
     public @Nullable <T> TypeAdapter<T> get(TypeToken<T> type) {
         @SuppressWarnings("unchecked")
-        TypeAdapter<T> adapter = (TypeAdapter<T>) typeAdapters.get(type).orElse(null);
+        TypeAdapter<T> adapter = (TypeAdapter<T>) typeAdapters.get(nonNull(type, "type")).orElse(null);
         return adapter;
     }
 
     @Override
     public @Nullable <T> KeyAdapter<T> getKey(TypeToken<T> type) {
         @SuppressWarnings("unchecked")
-        KeyAdapter<T> adapter = (KeyAdapter<T>) keyAdapters.get(type).orElse(null);
+        KeyAdapter<T> adapter = (KeyAdapter<T>) keyAdapters.get(nonNull(type, "type")).orElse(null);
         return adapter;
     }
 
@@ -66,13 +68,13 @@ final class TypeAdaptersImpl implements TypeAdapters {
 
         @Override
         public Builder add(TypeAdapter.Factory factory) {
-            typeAdapters.add(factory);
+            typeAdapters.add(nonNull(factory, "factory"));
             return this;
         }
 
         @Override
         public Builder addKey(KeyAdapter.Factory factory) {
-            keyAdapters.add(factory);
+            keyAdapters.add(nonNull(factory, "factory"));
             return this;
         }
 

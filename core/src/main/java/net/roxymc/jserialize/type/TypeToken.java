@@ -1,10 +1,10 @@
 package net.roxymc.jserialize.type;
 
 import io.leangen.geantyref.GenericTypeReflector;
+import net.roxymc.jserialize.util.VarHandles;
 import org.jetbrains.annotations.UnknownNullability;
 import org.jspecify.annotations.Nullable;
 
-import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
 import java.lang.reflect.AnnotatedParameterizedType;
 import java.lang.reflect.AnnotatedType;
@@ -12,15 +12,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
 public class TypeToken<T extends @UnknownNullability Object> {
-    private static final VarHandle RAW_TYPE_HANDLE;
-
-    static {
-        try {
-            RAW_TYPE_HANDLE = MethodHandles.lookup().findVarHandle(TypeToken.class, "rawType", Class.class);
-        } catch (NoSuchFieldException | IllegalAccessException ex) {
-            throw new ExceptionInInitializerError(ex);
-        }
-    }
+    private static final VarHandle RAW_TYPE_HANDLE = VarHandles.find(TypeToken.class, "rawType", Class.class);
 
     private final AnnotatedType annotatedType;
     private @Nullable Class<? super T> rawType;

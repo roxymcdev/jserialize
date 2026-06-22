@@ -1,5 +1,6 @@
 package net.roxymc.jserialize.adapter;
 
+import net.roxymc.jserialize.adapter.map.MapAdapter;
 import net.roxymc.jserialize.adapter.object.ObjectAdapter;
 import net.roxymc.jserialize.type.TypeToken;
 import org.jetbrains.annotations.ApiStatus;
@@ -8,6 +9,7 @@ import org.jspecify.annotations.Nullable;
 @ApiStatus.NonExtendable
 public interface TypeAdapters {
     TypeAdapters DEFAULT = builder()
+            .add(MapAdapter.factory())
             .add(ObjectAdapter.factory())
             .build();
 
@@ -49,6 +51,7 @@ public interface TypeAdapters {
         if (adapter != null) {
             return adapter;
         }
+
         throw new IllegalStateException("Could not find key adapter for " + type.getAnnotatedType());
     }
 
