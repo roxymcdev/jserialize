@@ -6,6 +6,8 @@ import net.roxymc.jserialize.adapter.TypeAdapter;
 import net.roxymc.jserialize.adapter.TypeAdapters;
 import net.roxymc.jserialize.type.TypeToken;
 import net.roxymc.jserialize.util.VarHandles;
+import org.jetbrains.annotations.UnknownNullability;
+import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 import java.lang.invoke.VarHandle;
@@ -16,7 +18,7 @@ import java.util.Map;
 import static io.leangen.geantyref.GenericTypeReflector.capture;
 import static io.leangen.geantyref.GenericTypeReflector.resolveType;
 
-final class MapType<K, V> {
+final class MapType<K extends @UnknownNullability Object, V extends @UnknownNullability Object> {
     private static final AnnotatedType MAP_TYPE = GenericTypeReflector.annotate(Map.class);
     private static final VarHandle MAP_FACTORY_HANDLE = VarHandles.find(MapType.class, "mapFactory", MapFactory.class);
 
@@ -38,11 +40,11 @@ final class MapType<K, V> {
         this.valueType = TypeToken.of(ptype.getAnnotatedActualTypeArguments()[1]);
     }
 
-    KeyAdapter<K> keyAdapter(TypeAdapters adapters) {
+    KeyAdapter<@NonNull K> keyAdapter(TypeAdapters adapters) {
         return adapters.getKeyOrThrow(keyType);
     }
 
-    TypeAdapter<V> valueAdapter(TypeAdapters adapters) {
+    TypeAdapter<@NonNull V> valueAdapter(TypeAdapters adapters) {
         return adapters.getOrThrow(valueType);
     }
 

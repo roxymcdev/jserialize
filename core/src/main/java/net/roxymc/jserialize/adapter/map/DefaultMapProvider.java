@@ -16,7 +16,7 @@ public final class DefaultMapProvider implements MapProvider {
     }
 
     @Override
-    public @Nullable <K, V> MapFactory<K, V> resolve(TypeToken<? extends Map<K, V>> type) {
+    public <K extends @Nullable Object, V extends @Nullable Object> @Nullable MapFactory<K, V> resolve(TypeToken<? extends Map<K, V>> type) {
         Class<?> rawType = type.getRawType();
 
         if (rawType.isAssignableFrom(LinkedHashMap.class)) {

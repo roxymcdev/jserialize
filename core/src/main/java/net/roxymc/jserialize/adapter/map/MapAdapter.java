@@ -8,7 +8,7 @@ import net.roxymc.jserialize.adapter.TypeAdapter;
 import net.roxymc.jserialize.adapter.WriteContext;
 import net.roxymc.jserialize.token.TokenType;
 import net.roxymc.jserialize.type.TypeToken;
-import org.jetbrains.annotations.UnknownNullability;
+import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
@@ -49,8 +49,8 @@ public final class MapAdapter implements TypeAdapter.Mutable<Map<?, ?>> {
         return mutate0(reader, type, value, ctx);
     }
 
-    private <K, V> @Nullable Map<K, V> mutate0(
-            Reader reader, TypeToken<? extends Map<?, ?>> type, @Nullable Map<@UnknownNullability K, @UnknownNullability V> map, ReadContext ctx
+    private <K extends @Nullable Object, V extends @Nullable Object> @Nullable Map<K, V> mutate0(
+            Reader reader, TypeToken<? extends Map<?, ?>> type, @Nullable Map<K, V> map, ReadContext ctx
     ) throws IOException {
         if (reader.peek() == TokenType.NULL) {
             reader.readNull();
@@ -63,8 +63,8 @@ public final class MapAdapter implements TypeAdapter.Mutable<Map<?, ?>> {
             map = mapType.createMap(providers);
         }
 
-        KeyAdapter<K> keyAdapter = mapType.keyAdapter(ctx.typeAdapters());
-        TypeAdapter<V> valueAdapter = mapType.valueAdapter(ctx.typeAdapters());
+        KeyAdapter<@NonNull K> keyAdapter = mapType.keyAdapter(ctx.typeAdapters());
+        TypeAdapter<@NonNull V> valueAdapter = mapType.valueAdapter(ctx.typeAdapters());
 
         reader.readObjectStart();
 
@@ -89,7 +89,7 @@ public final class MapAdapter implements TypeAdapter.Mutable<Map<?, ?>> {
         write0(writer, type, value, ctx);
     }
 
-    private <K, V> void write0(
+    private <K extends @Nullable Object, V extends @Nullable Object> void write0(
             Writer writer, TypeToken<? extends Map<?, ?>> type, @Nullable Map<K, V> map, WriteContext ctx
     ) throws IOException {
         if (map == null) {
@@ -99,8 +99,8 @@ public final class MapAdapter implements TypeAdapter.Mutable<Map<?, ?>> {
 
         MapType<K, V> mapType = resolveMapType(type);
 
-        KeyAdapter<K> keyAdapter = mapType.keyAdapter(ctx.typeAdapters());
-        TypeAdapter<V> valueAdapter = mapType.valueAdapter(ctx.typeAdapters());
+        KeyAdapter<@NonNull K> keyAdapter = mapType.keyAdapter(ctx.typeAdapters());
+        TypeAdapter<@NonNull V> valueAdapter = mapType.valueAdapter(ctx.typeAdapters());
 
         writer.writeObjectStart();
 
