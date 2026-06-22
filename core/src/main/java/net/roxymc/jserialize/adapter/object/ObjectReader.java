@@ -1,6 +1,7 @@
 package net.roxymc.jserialize.adapter.object;
 
 import net.roxymc.jserialize.Reader;
+import net.roxymc.jserialize.adapter.KeyAdapter;
 import net.roxymc.jserialize.adapter.ReadContext;
 import net.roxymc.jserialize.adapter.TypeAdapter;
 import net.roxymc.jserialize.creator.InstanceCreator;
@@ -49,10 +50,17 @@ final class ObjectReader<T, R> {
         classModel.properties().getOptional(PropertyKind.PARENT).ifPresent(property ->
                 builder.property(property, context.parent())
         );
-        classModel.properties().getOptional(PropertyKind.KEY).ifPresent(property ->
-                // TODO we should pass the key through the desired key adapter
-                builder.property(property, context.key())
-        );
+        classModel.properties().getOptional(PropertyKind.KEY).ifPresent(property -> {
+            AnnotatedType type = resolveReadType(property);
+            if (type == null) {
+                return;
+            }
+
+            TypeToken<?> typeToken = TypeToken.of(type);
+            KeyAdapter<?> adapter = context.typeAdapters().getKeyOrThrow(typeToken);
+
+            builder.property(property, adapter.decode(context.key()));
+        });
 
         PropertyModel extrasProperty = classModel.properties().get(PropertyKind.EXTRAS);
         MapLike<R> extrasMap;
