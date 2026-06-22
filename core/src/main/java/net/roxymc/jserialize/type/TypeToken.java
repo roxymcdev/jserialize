@@ -33,15 +33,15 @@ public class TypeToken<T extends @UnknownNullability Object> {
         this.annotatedType = type;
     }
 
-    public static <T extends @Nullable Object> TypeToken<T> of(Class<T> type) {
+    public static <T extends @UnknownNullability Object> TypeToken<T> of(Class<T> type) {
         return of((Type) type);
     }
 
-    public static <T extends @Nullable Object> TypeToken<T> of(Type type) {
+    public static <T extends @UnknownNullability Object> TypeToken<T> of(Type type) {
         return of(GenericTypeReflector.annotate(type));
     }
 
-    public static <T extends @Nullable Object> TypeToken<T> of(AnnotatedType type) {
+    public static <T extends @UnknownNullability Object> TypeToken<T> of(AnnotatedType type) {
         return new TypeToken<>(type);
     }
 
