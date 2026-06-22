@@ -47,6 +47,7 @@ public final class ObjectAdapter<T> implements TypeAdapter.Mutable<T> {
     @Override
     public @Nullable T mutate(Reader reader, TypeToken<? extends T> type, @Nullable T instance, ReadContext ctx) throws IOException {
         if (reader.peek() == TokenType.NULL) {
+            reader.readNull();
             return instance;
         }
 
