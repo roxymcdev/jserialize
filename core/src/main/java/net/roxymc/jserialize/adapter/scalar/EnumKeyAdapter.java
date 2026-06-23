@@ -5,6 +5,8 @@ import net.roxymc.jserialize.adapter.TypeAdapters;
 import net.roxymc.jserialize.type.TypeToken;
 import org.jspecify.annotations.Nullable;
 
+import static net.roxymc.jserialize.util.ObjectUtils.nonNull;
+
 public final class EnumKeyAdapter implements KeyAdapter<Enum<?>> {
     private static final KeyAdapter.Factory FACTORY = new Factory() {
         @Override
@@ -44,6 +46,6 @@ public final class EnumKeyAdapter implements KeyAdapter<Enum<?>> {
 
     @Override
     public String encode(@Nullable Enum<?> value) {
-        return value != null ? value.name() : "null";
+        return nonNull(value, "value").name();
     }
 }

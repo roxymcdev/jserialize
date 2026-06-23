@@ -11,6 +11,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
+import static net.roxymc.jserialize.util.ObjectUtils.nonNull;
+
 public final class ScalarKeyAdapters {
     private static final Map<Class<?>, KeyAdapter<?>> ADAPTERS = new HashMap<>();
 
@@ -55,7 +57,7 @@ public final class ScalarKeyAdapters {
                 throw new IllegalStateException("key adapter for " + type + " is already registered");
             }
 
-            return KeyAdapter.of(value -> value != null ? function.apply(value) : null, String::valueOf);
+            return KeyAdapter.of(value -> value != null ? function.apply(value) : null, value -> nonNull(value, "value").toString());
         });
         return keyAdapter;
     }
