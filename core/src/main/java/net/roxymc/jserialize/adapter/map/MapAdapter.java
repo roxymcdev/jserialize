@@ -113,5 +113,4 @@ public final class MapAdapter implements TypeAdapter.Mutable<Map<?, ?>> {
 
         writer.writeObjectEnd();
     }
-
 }
