@@ -36,8 +36,8 @@ public final class ScalarKeyAdapters {
             Type boxedType = GenericTypeReflector.box(type.getRawType());
 
             @SuppressWarnings({"unchecked", "SuspiciousMethodCalls"})
-            KeyAdapter<T> keyAdapter = (KeyAdapter<T>) ADAPTERS.get(boxedType);
-            return keyAdapter;
+            KeyAdapter<T> adapter = (KeyAdapter<T>) ADAPTERS.get(boxedType);
+            return adapter;
         }
     };
 
