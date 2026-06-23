@@ -1,6 +1,5 @@
 package net.roxymc.jserialize.adapter.collection;
 
-import io.leangen.geantyref.GenericTypeReflector;
 import net.roxymc.jserialize.adapter.TypeAdapter;
 import net.roxymc.jserialize.adapter.TypeAdapters;
 import net.roxymc.jserialize.type.TypeToken;
@@ -15,10 +14,9 @@ import java.lang.reflect.AnnotatedType;
 import java.util.Collection;
 
 import static io.leangen.geantyref.GenericTypeReflector.capture;
-import static io.leangen.geantyref.GenericTypeReflector.resolveType;
+import static io.leangen.geantyref.GenericTypeReflector.getExactSuperType;
 
 final class CollectionType<E extends @UnknownNullability Object> {
-    private static final AnnotatedType COLLECTION_TYPE = GenericTypeReflector.annotate(Collection.class);
     private static final VarHandle COLLECTION_FACTORY_HANDLE = VarHandles.find(CollectionType.class, "collectionFactory", CollectionFactory.class);
 
     final TypeToken<? extends Collection<E>> collectionType;
@@ -26,9 +24,9 @@ final class CollectionType<E extends @UnknownNullability Object> {
     private @Nullable CollectionFactory<E> collectionFactory;
 
     CollectionType(TypeToken<? extends Collection<?>> collectionType) {
-        AnnotatedType type = resolveType(COLLECTION_TYPE, capture(collectionType.getAnnotatedType()));
+        AnnotatedType type = getExactSuperType(capture(collectionType.getAnnotatedType()), Collection.class);
         if (!(type instanceof AnnotatedParameterizedType)) {
-            throw new IllegalStateException(collectionType.getRawType() + " must be parameterized");
+            throw new IllegalStateException(collectionType.getType() + " must be parameterized ");
         }
 
         AnnotatedParameterizedType ptype = (AnnotatedParameterizedType) type;

@@ -14,7 +14,7 @@ public interface TypeAdapters {
     TypeAdapters DEFAULT = builder()
             .add(CollectionAdapter.factory())
             .add(MapAdapter.factory())
-            .add(ObjectAdapter.factory())
+            .add(ObjectAdapter.annotatedFactory())
             .addKey(ScalarKeyAdapters.factory())
             .addKey(EnumKeyAdapter.factory())
             .build();

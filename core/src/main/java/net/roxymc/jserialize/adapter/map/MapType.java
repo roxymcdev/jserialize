@@ -1,6 +1,5 @@
 package net.roxymc.jserialize.adapter.map;
 
-import io.leangen.geantyref.GenericTypeReflector;
 import net.roxymc.jserialize.adapter.KeyAdapter;
 import net.roxymc.jserialize.adapter.TypeAdapter;
 import net.roxymc.jserialize.adapter.TypeAdapters;
@@ -16,10 +15,9 @@ import java.lang.reflect.AnnotatedType;
 import java.util.Map;
 
 import static io.leangen.geantyref.GenericTypeReflector.capture;
-import static io.leangen.geantyref.GenericTypeReflector.resolveType;
+import static io.leangen.geantyref.GenericTypeReflector.getExactSuperType;
 
 final class MapType<K extends @UnknownNullability Object, V extends @UnknownNullability Object> {
-    private static final AnnotatedType MAP_TYPE = GenericTypeReflector.annotate(Map.class);
     private static final VarHandle MAP_FACTORY_HANDLE = VarHandles.find(MapType.class, "mapFactory", MapFactory.class);
 
     final TypeToken<? extends Map<K, V>> mapType;
@@ -28,7 +26,7 @@ final class MapType<K extends @UnknownNullability Object, V extends @UnknownNull
     private @Nullable MapFactory<K, V> mapFactory;
 
     MapType(TypeToken<? extends Map<?, ?>> mapType) {
-        AnnotatedType type = resolveType(MAP_TYPE, capture(mapType.getAnnotatedType()));
+        AnnotatedType type = getExactSuperType(capture(mapType.getAnnotatedType()), Map.class);
         if (!(type instanceof AnnotatedParameterizedType)) {
             throw new IllegalStateException(mapType.getRawType() + " must be parameterized");
         }

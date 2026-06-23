@@ -9,7 +9,7 @@ public final class VarHandles {
 
     public static VarHandle find(Class<?> clazz, String name, Class<?> type) {
         try {
-            return MethodHandles.lookup().findVarHandle(clazz, name, type);
+            return MethodHandles.privateLookupIn(clazz, MethodHandles.lookup()).findVarHandle(clazz, name, type);
         } catch (NoSuchFieldException | IllegalAccessException ex) {
             throw SneakyThrow.sneakyThrow(ex);
         }
