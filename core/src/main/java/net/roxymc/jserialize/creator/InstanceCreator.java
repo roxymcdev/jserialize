@@ -8,7 +8,6 @@ import net.roxymc.jserialize.model.property.meta.PropertyKind;
 import net.roxymc.jserialize.model.property.meta.PropertyMeta;
 import org.jspecify.annotations.Nullable;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -122,29 +121,11 @@ public final class InstanceCreator<T> {
             return;
         }
 
-        Object currentValue = property.getter().get(instance);
-
         if (value instanceof PropertyValue.Mutable) {
+            Object currentValue = property.getter().get(instance);
+
             //noinspection unchecked,rawtypes
             ((PropertyValue.Mutable) value).mutate(instance, currentValue);
-            return;
-        }
-
-        if (currentValue instanceof Collection || currentValue instanceof Map) {
-            Object resolvedValue = value.get(instance);
-            if (resolvedValue == null) {
-                validateValue(name, null, meta);
-                return;
-            }
-
-            if (currentValue instanceof Collection) {
-                //noinspection unchecked,rawtypes
-                ((Collection) currentValue).addAll(((Collection) resolvedValue));
-            } else {
-                //noinspection unchecked,rawtypes
-                ((Map) currentValue).putAll(((Map) resolvedValue));
-            }
-
             return;
         }
 
