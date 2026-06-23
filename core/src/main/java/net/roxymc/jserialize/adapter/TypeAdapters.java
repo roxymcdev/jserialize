@@ -1,5 +1,6 @@
 package net.roxymc.jserialize.adapter;
 
+import net.roxymc.jserialize.adapter.collection.CollectionAdapter;
 import net.roxymc.jserialize.adapter.map.MapAdapter;
 import net.roxymc.jserialize.adapter.object.ObjectAdapter;
 import net.roxymc.jserialize.type.TypeToken;
@@ -9,6 +10,7 @@ import org.jspecify.annotations.Nullable;
 @ApiStatus.NonExtendable
 public interface TypeAdapters {
     TypeAdapters DEFAULT = builder()
+            .add(CollectionAdapter.factory())
             .add(MapAdapter.factory())
             .add(ObjectAdapter.factory())
             .build();

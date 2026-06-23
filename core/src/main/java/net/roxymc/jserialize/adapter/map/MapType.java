@@ -66,7 +66,7 @@ final class MapType<K extends @UnknownNullability Object, V extends @UnknownNull
 
             if (resolved == null) {
                 resolved = () -> {
-                    throw new IllegalStateException("Failed to find map factory for " + mapType.getType());
+                    throw new IllegalStateException("Could not find map factory for " + mapType.getType());
                 };
             }
 
