@@ -30,7 +30,7 @@ final class GsonTypeAdapters implements TypeAdapters {
     }
 
     @Override
-    public @Nullable <T> KeyAdapter<T> getKey(TypeToken<T> type) {
+    public <T> @Nullable KeyAdapter<T> getKey(TypeToken<T> type) {
         return adapters.getKey(type);
     }
 }

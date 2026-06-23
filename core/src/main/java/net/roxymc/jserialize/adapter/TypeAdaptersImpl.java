@@ -22,7 +22,7 @@ final class TypeAdaptersImpl implements TypeAdapters {
     }
 
     @Override
-    public @Nullable <T> TypeAdapter<T> get(TypeToken<T> type) {
+    public <T> @Nullable TypeAdapter<T> get(TypeToken<T> type) {
         @SuppressWarnings("unchecked")
         TypeAdapter<T> adapter = (TypeAdapter<T>) typeAdapters.get(nonNull(type, "type")).orElse(null);
         return adapter;

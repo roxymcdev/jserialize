@@ -10,7 +10,7 @@ import static net.roxymc.jserialize.util.ObjectUtils.nonNull;
 public final class EnumKeyAdapter implements KeyAdapter<Enum<?>> {
     private static final KeyAdapter.Factory FACTORY = new KeyAdapter.Factory() {
         @Override
-        public @Nullable <T> KeyAdapter<T> create(TypeToken<T> type, TypeAdapters adapters) {
+        public <T> @Nullable KeyAdapter<T> create(TypeToken<T> type, TypeAdapters adapters) {
             @SuppressWarnings("unchecked")
             Class<? extends Enum<?>> enumType = (Class<? extends Enum<?>>) type.getRawType();
             if (!enumType.isEnum()) {

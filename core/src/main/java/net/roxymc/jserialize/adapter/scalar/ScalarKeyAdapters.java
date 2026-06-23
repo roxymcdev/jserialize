@@ -34,10 +34,10 @@ public final class ScalarKeyAdapters {
 
     private static final KeyAdapter.Factory FACTORY = new KeyAdapter.Factory() {
         @Override
-        public @Nullable <T> KeyAdapter<T> create(TypeToken<T> type, TypeAdapters adapters) {
-            Type boxedType = GenericTypeReflector.box(type.getRawType());
+        public <T> @Nullable KeyAdapter<T> create(TypeToken<T> type, TypeAdapters adapters) {
+            Class<?> boxedType = (Class<?>) GenericTypeReflector.box(type.getRawType());
 
-            @SuppressWarnings({"unchecked", "SuspiciousMethodCalls"})
+            @SuppressWarnings("unchecked")
             KeyAdapter<T> adapter = (KeyAdapter<T>) ADAPTERS.get(boxedType);
             return adapter;
         }
