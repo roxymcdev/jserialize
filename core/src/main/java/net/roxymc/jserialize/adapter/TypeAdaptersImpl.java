@@ -29,7 +29,7 @@ final class TypeAdaptersImpl implements TypeAdapters {
     }
 
     @Override
-    public @Nullable <T> KeyAdapter<T> getKey(TypeToken<T> type) {
+    public <T> @Nullable KeyAdapter<T> getKey(TypeToken<T> type) {
         @SuppressWarnings("unchecked")
         KeyAdapter<T> adapter = (KeyAdapter<T>) keyAdapters.get(nonNull(type, "type")).orElse(null);
         return adapter;
