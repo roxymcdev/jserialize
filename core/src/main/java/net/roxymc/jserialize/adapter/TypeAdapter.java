@@ -22,8 +22,8 @@ public interface TypeAdapter<T> extends TypeReader<T>, TypeWriter<T> {
             }
 
             @Override
-            public void write(Writer writer, TypeToken<? extends T> type, @Nullable T instance, WriteContext context) throws IOException {
-                writer0.write(writer, type, instance, context);
+            public void write(Writer writer, TypeToken<? extends T> type, @Nullable T value, WriteContext context) throws IOException {
+                writer0.write(writer, type, value, context);
             }
         };
     }
@@ -32,7 +32,7 @@ public interface TypeAdapter<T> extends TypeReader<T>, TypeWriter<T> {
     @Nullable T read(Reader reader, TypeToken<? extends T> type, ReadContext context) throws IOException;
 
     @Override
-    void write(Writer writer, TypeToken<? extends T> type, @Nullable T instance, WriteContext context) throws IOException;
+    void write(Writer writer, TypeToken<? extends T> type, @Nullable T value, WriteContext context) throws IOException;
 
     interface Mutable<T> extends TypeAdapter<T> {
         @Override
@@ -41,12 +41,16 @@ public interface TypeAdapter<T> extends TypeReader<T>, TypeWriter<T> {
         }
 
         @Contract("_, _, !null, _ -> param3")
-        @Nullable T mutate(Reader reader, TypeToken<? extends T> type, @Nullable T instance, ReadContext context) throws IOException;
+        @Nullable T mutate(Reader reader, TypeToken<? extends T> type, @Nullable T value, ReadContext context) throws IOException;
     }
 
     interface Factory {
         static Factory predicate(Predicate<? super TypeToken<?>> predicate, TypeAdapter<?> adapter) {
             return new PredicateTypeAdapterFactory(predicate, adapter);
+        }
+
+        static <T> Factory polymorphic(Class<? super T> type, TypeAdapter<T> adapter) {
+            return predicate(subtype -> type.isAssignableFrom(subtype.getRawType()), adapter);
         }
 
         static <T> Factory polymorphic(TypeToken<? extends T> type, TypeAdapter<T> adapter) {
@@ -57,6 +61,10 @@ public interface TypeAdapter<T> extends TypeReader<T>, TypeWriter<T> {
             return predicate(subtype -> type.getType().equals(subtype.getType()), adapter);
         }
 
-        <T> @Nullable TypeAdapter<T> create(TypeToken<? extends T> type, TypeAdapters adapters);
+        static <T> Factory exactRaw(Class<? super T> type, TypeAdapter<T> adapter) {
+            return predicate(subtype -> type.equals(subtype.getRawType()), adapter);
+        }
+
+        <T> @Nullable TypeAdapter<T> create(TypeToken<T> type, TypeAdapters adapters);
     }
 }

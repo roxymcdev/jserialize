@@ -18,14 +18,14 @@ public final class TypeAdapterProvider implements TypeAdapterFactory {
 
     @Override
     public <T> com.google.gson.@Nullable TypeAdapter<T> create(Gson gson, com.google.gson.reflect.TypeToken<T> gtype) {
-        TypeToken<? extends T> type = TypeToken.of(gtype.getType());
+        TypeToken<T> type = TypeToken.of(gtype.getType());
 
         TypeAdapter<T> adapter = this.adapters.get(type);
         if (adapter == null) {
             return null;
         }
 
-        GsonTypeAdapters adapters = new GsonTypeAdapters(gson);
+        GsonTypeAdapters adapters = new GsonTypeAdapters(gson, this.adapters);
         return new WrappedTypeAdapter<>(type, adapter, adapters);
     }
 }

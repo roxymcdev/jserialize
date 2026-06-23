@@ -45,15 +45,16 @@ public final class ObjectAdapter<T> implements TypeAdapter.Mutable<T> {
     }
 
     @Override
-    public @Nullable T mutate(Reader reader, TypeToken<? extends T> type, @Nullable T instance, ReadContext ctx) throws IOException {
+    public @Nullable T mutate(Reader reader, TypeToken<? extends T> type, @Nullable T value, ReadContext ctx) throws IOException {
         if (reader.peek() == TokenType.NULL) {
             reader.readNull();
-            return instance;
+            return value;
         }
 
         try {
             ClassModel<T> classModel = factory.create(type);
-            ObjectReader<T, ?> objectReader = new ObjectReader<>(classModel, type, instance, ctx.formatUtils(), ctx);
+            @SuppressWarnings("NullableProblems") // IntelliJ has existential issues
+            ObjectReader<T, ?> objectReader = new ObjectReader<>(classModel, type, value, ctx.formatUtils(), ctx);
 
             return objectReader.read(reader);
         } catch (Throwable e) {
@@ -62,15 +63,16 @@ public final class ObjectAdapter<T> implements TypeAdapter.Mutable<T> {
     }
 
     @Override
-    public void write(Writer writer, TypeToken<? extends T> type, @Nullable T instance, WriteContext ctx) throws IOException {
-        if (instance == null) {
+    public void write(Writer writer, TypeToken<? extends T> type, @Nullable T value, WriteContext ctx) throws IOException {
+        if (value == null) {
             writer.writeNull();
             return;
         }
 
         try {
             ClassModel<T> classModel = factory.create(type);
-            ObjectWriter<T, ?> objectWriter = new ObjectWriter<>(classModel, type, instance, ctx.formatUtils(), ctx);
+            @SuppressWarnings("NullableProblems") // IntelliJ has existential issues
+            ObjectWriter<T, ?> objectWriter = new ObjectWriter<>(classModel, type, value, ctx.formatUtils(), ctx);
 
             objectWriter.write(writer);
         } catch (Throwable e) {
