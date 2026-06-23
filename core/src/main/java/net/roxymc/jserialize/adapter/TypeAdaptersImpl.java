@@ -79,6 +79,16 @@ final class TypeAdaptersImpl implements TypeAdapters {
         }
 
         @Override
+        public Builder addAll(TypeAdapters adapters) {
+            TypeAdaptersImpl adaptersImpl = (TypeAdaptersImpl) nonNull(adapters, "adapters");
+
+            typeAdapters.addAll(adaptersImpl.typeAdapters.factories);
+            keyAdapters.addAll(adaptersImpl.keyAdapters.factories);
+
+            return this;
+        }
+
+        @Override
         public TypeAdapters build() {
             return new TypeAdaptersImpl(this);
         }

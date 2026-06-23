@@ -67,6 +67,8 @@ public interface TypeAdapters {
 
         Builder addKey(KeyAdapter.Factory factory);
 
+        Builder addAll(TypeAdapters adapters);
+
         TypeAdapters build();
     }
 }
