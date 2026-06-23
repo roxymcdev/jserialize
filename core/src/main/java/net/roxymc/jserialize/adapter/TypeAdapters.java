@@ -3,6 +3,7 @@ package net.roxymc.jserialize.adapter;
 import net.roxymc.jserialize.adapter.collection.CollectionAdapter;
 import net.roxymc.jserialize.adapter.map.MapAdapter;
 import net.roxymc.jserialize.adapter.object.ObjectAdapter;
+import net.roxymc.jserialize.adapter.scalar.ScalarKeyAdapters;
 import net.roxymc.jserialize.type.TypeToken;
 import org.jetbrains.annotations.ApiStatus;
 import org.jspecify.annotations.Nullable;
@@ -13,6 +14,7 @@ public interface TypeAdapters {
             .add(CollectionAdapter.factory())
             .add(MapAdapter.factory())
             .add(ObjectAdapter.factory())
+            .addKey(ScalarKeyAdapters.factory())
             .build();
 
     static Builder builder() {
