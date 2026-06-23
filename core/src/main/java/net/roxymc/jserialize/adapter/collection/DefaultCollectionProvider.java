@@ -1,6 +1,6 @@
 package net.roxymc.jserialize.adapter.collection;
 
-import net.roxymc.jserialize.type.TypeToken;
+import net.roxymc.jserialize.type.TypeRef;
 import org.jspecify.annotations.Nullable;
 
 import java.util.*;
@@ -13,7 +13,7 @@ public final class DefaultCollectionProvider implements CollectionProvider {
     }
 
     @Override
-    public <E extends @Nullable Object> @Nullable CollectionFactory<E> resolve(TypeToken<? extends Collection<E>> type) {
+    public <E extends @Nullable Object> @Nullable CollectionFactory<E> resolve(TypeRef<? extends Collection<E>> type) {
         Class<?> rawType = type.getRawType();
 
         if (rawType.isAssignableFrom(ArrayList.class)) {

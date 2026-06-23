@@ -1,7 +1,7 @@
 package net.roxymc.jserialize.adapter;
 
 import io.leangen.geantyref.GenericTypeReflector;
-import net.roxymc.jserialize.type.TypeToken;
+import net.roxymc.jserialize.type.TypeRef;
 import org.jspecify.annotations.Nullable;
 
 import java.util.function.Predicate;
@@ -28,7 +28,7 @@ public interface KeyAdapter<T> extends KeyDecoder<T>, KeyEncoder<T> {
     String encode(@Nullable T value);
 
     interface Factory {
-        static Factory predicate(Predicate<? super TypeToken<?>> predicate, KeyAdapter<?> adapter) {
+        static Factory predicate(Predicate<? super TypeRef<?>> predicate, KeyAdapter<?> adapter) {
             return new PredicateKeyAdapterFactory(predicate, adapter);
         }
 
@@ -36,11 +36,11 @@ public interface KeyAdapter<T> extends KeyDecoder<T>, KeyEncoder<T> {
             return predicate(subtype -> type.isAssignableFrom(subtype.getRawType()), adapter);
         }
 
-        static <T> Factory polymorphic(TypeToken<? extends T> type, KeyAdapter<T> adapter) {
+        static <T> Factory polymorphic(TypeRef<? extends T> type, KeyAdapter<T> adapter) {
             return predicate(subtype -> GenericTypeReflector.isSuperType(type.getType(), subtype.getType()), adapter);
         }
 
-        static <T> Factory exact(TypeToken<? extends T> type, KeyAdapter<T> adapter) {
+        static <T> Factory exact(TypeRef<? extends T> type, KeyAdapter<T> adapter) {
             return predicate(subtype -> type.getType().equals(subtype.getType()), adapter);
         }
 
@@ -48,6 +48,6 @@ public interface KeyAdapter<T> extends KeyDecoder<T>, KeyEncoder<T> {
             return predicate(subtype -> type.equals(subtype.getRawType()), adapter);
         }
 
-        <T> @Nullable KeyAdapter<T> create(TypeToken<T> type, TypeAdapters adapters);
+        <T> @Nullable KeyAdapter<T> create(TypeRef<T> type, TypeAdapters adapters);
     }
 }

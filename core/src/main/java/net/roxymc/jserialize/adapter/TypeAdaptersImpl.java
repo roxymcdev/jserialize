@@ -1,7 +1,7 @@
 package net.roxymc.jserialize.adapter;
 
 import io.leangen.geantyref.GenericTypeReflector;
-import net.roxymc.jserialize.type.TypeToken;
+import net.roxymc.jserialize.type.TypeRef;
 import org.jspecify.annotations.Nullable;
 
 import java.lang.reflect.AnnotatedType;
@@ -22,14 +22,14 @@ final class TypeAdaptersImpl implements TypeAdapters {
     }
 
     @Override
-    public <T> @Nullable TypeAdapter<T> get(TypeToken<T> type) {
+    public <T> @Nullable TypeAdapter<T> get(TypeRef<T> type) {
         @SuppressWarnings("unchecked")
         TypeAdapter<T> adapter = (TypeAdapter<T>) typeAdapters.get(nonNull(type, "type")).orElse(null);
         return adapter;
     }
 
     @Override
-    public <T> @Nullable KeyAdapter<T> getKey(TypeToken<T> type) {
+    public <T> @Nullable KeyAdapter<T> getKey(TypeRef<T> type) {
         @SuppressWarnings("unchecked")
         KeyAdapter<T> adapter = (KeyAdapter<T>) keyAdapters.get(nonNull(type, "type")).orElse(null);
         return adapter;
@@ -38,14 +38,14 @@ final class TypeAdaptersImpl implements TypeAdapters {
     private static final class Registry<F, A> {
         private final Map<AnnotatedType, Optional<A>> cache = new ConcurrentHashMap<>();
         private final Set<F> factories;
-        private final BiFunction<F, TypeToken<?>, @Nullable A> creator;
+        private final BiFunction<F, TypeRef<?>, @Nullable A> creator;
 
-        private Registry(Set<F> factories, BiFunction<F, TypeToken<?>, @Nullable A> creator) {
+        private Registry(Set<F> factories, BiFunction<F, TypeRef<?>, @Nullable A> creator) {
             this.factories = Collections.unmodifiableSet(new LinkedHashSet<>(factories));
             this.creator = creator;
         }
 
-        private Optional<A> get(TypeToken<?> type) {
+        private Optional<A> get(TypeRef<?> type) {
             AnnotatedType targetType = GenericTypeReflector.toCanonicalBoxed(type.getAnnotatedType());
 
             return cache.computeIfAbsent(targetType, $ -> {

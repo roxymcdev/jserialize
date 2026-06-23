@@ -5,7 +5,7 @@ import net.roxymc.jserialize.Writer;
 import net.roxymc.jserialize.adapter.ReadContext;
 import net.roxymc.jserialize.adapter.TypeAdapter;
 import net.roxymc.jserialize.adapter.WriteContext;
-import net.roxymc.jserialize.type.TypeToken;
+import net.roxymc.jserialize.type.TypeRef;
 import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
@@ -18,12 +18,12 @@ final class WrappedGsonTypeAdapter<T> implements TypeAdapter<T> {
     }
 
     @Override
-    public T read(Reader reader, TypeToken<? extends T> type, ReadContext context) throws IOException {
+    public T read(Reader reader, TypeRef<? extends T> type, ReadContext context) throws IOException {
         return adapter.read(((GsonReaderAdapter) reader).reader);
     }
 
     @Override
-    public void write(Writer writer, TypeToken<? extends T> type, @Nullable T value, WriteContext context) throws IOException {
+    public void write(Writer writer, TypeRef<? extends T> type, @Nullable T value, WriteContext context) throws IOException {
         //noinspection DataFlowIssue - Gson allows null value
         adapter.write(((GsonWriterAdapter) writer).writer, value);
     }

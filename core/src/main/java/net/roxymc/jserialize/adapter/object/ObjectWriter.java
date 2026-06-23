@@ -8,7 +8,7 @@ import net.roxymc.jserialize.model.property.GetterRef;
 import net.roxymc.jserialize.model.property.PropertyModel;
 import net.roxymc.jserialize.model.property.meta.PropertyKind;
 import net.roxymc.jserialize.model.property.meta.PropertyMeta;
-import net.roxymc.jserialize.type.TypeToken;
+import net.roxymc.jserialize.type.TypeRef;
 import net.roxymc.jserialize.util.TypeUtils;
 
 import java.io.IOException;
@@ -21,14 +21,14 @@ import static java.lang.String.format;
 
 final class ObjectWriter<T, R> {
     private final ClassModel<T> classModel;
-    private final TypeToken<? extends T> type;
+    private final TypeRef<? extends T> type;
     private final T instance;
     private final FormatUtils<R> formatUtils;
     private final WriteContext context;
 
     ObjectWriter(
             ClassModel<T> classModel,
-            TypeToken<? extends T> type,
+            TypeRef<? extends T> type,
             T instance,
             FormatUtils<R> formatUtils,
             WriteContext context
@@ -78,24 +78,24 @@ final class ObjectWriter<T, R> {
             return;
         }
 
-        TypeToken<Object> typeToken = TypeToken.of(type);
-        TypeAdapter<Object> adapter = context.typeAdapters().getOrThrow(typeToken);
+        TypeRef<Object> typeRef = TypeRef.of(type);
+        TypeAdapter<Object> adapter = context.typeAdapters().getOrThrow(typeRef);
 
         String name = resolveWriteName(property);
         writer.writeName(name);
-        adapter.write(writer, typeToken, value, context);
+        adapter.write(writer, typeRef, value, context);
     }
 
     private void writeExtrasProperty(Writer writer, AnnotatedType type, Object value) throws IOException {
         MapLike<R> extrasMap = formatUtils.createMap(context.typeAdapters(), type);
         extrasMap.putAll((Map<?, ?>) value, context);
 
-        TypeToken<R> typeToken = TypeToken.of(formatUtils.rawType());
-        TypeAdapter<R> adapter = context.typeAdapters().getOrThrow(typeToken);
+        TypeRef<R> typeRef = TypeRef.of(formatUtils.rawType());
+        TypeAdapter<R> adapter = context.typeAdapters().getOrThrow(typeRef);
 
         for (Map.Entry<String, R> entry : extrasMap.asRawMap().entrySet()) {
             writer.writeName(entry.getKey());
-            adapter.write(writer, typeToken, entry.getValue(), context);
+            adapter.write(writer, typeRef, entry.getValue(), context);
         }
     }
 

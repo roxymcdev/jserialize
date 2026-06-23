@@ -3,7 +3,7 @@ package net.roxymc.jserialize.format.bson;
 import io.leangen.geantyref.TypeFactory;
 import net.roxymc.jserialize.adapter.TypeAdapter;
 import net.roxymc.jserialize.adapter.TypeAdapters;
-import net.roxymc.jserialize.type.TypeToken;
+import net.roxymc.jserialize.type.TypeRef;
 import org.bson.codecs.Codec;
 import org.bson.codecs.configuration.CodecProvider;
 import org.bson.codecs.configuration.CodecRegistry;
@@ -23,7 +23,7 @@ public final class TypeAdapterProvider implements CodecProvider {
 
     @Override
     public <T> @Nullable Codec<T> get(Class<T> clazz, CodecRegistry registry) {
-        return get(TypeToken.of(clazz), registry);
+        return get(TypeRef.of(clazz), registry);
     }
 
     @Override
@@ -31,10 +31,10 @@ public final class TypeAdapterProvider implements CodecProvider {
         Type[] typeArgs = typeArguments.toArray(Type[]::new);
         Type type = TypeFactory.parameterizedClass(clazz, typeArgs);
 
-        return get(TypeToken.of(type), registry);
+        return get(TypeRef.of(type), registry);
     }
 
-    private <T> @Nullable Codec<T> get(TypeToken<T> type, CodecRegistry registry) {
+    private <T> @Nullable Codec<T> get(TypeRef<T> type, CodecRegistry registry) {
         TypeAdapter<T> adapter = this.adapters.get(type);
         if (adapter == null) {
             return null;

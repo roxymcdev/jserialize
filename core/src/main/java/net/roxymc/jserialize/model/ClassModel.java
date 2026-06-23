@@ -4,7 +4,7 @@ import net.roxymc.jserialize.model.constructor.ConstructorModel;
 import net.roxymc.jserialize.model.property.PropertyMap;
 import net.roxymc.jserialize.model.resolver.ConstructorResolver;
 import net.roxymc.jserialize.model.resolver.PropertiesResolver;
-import net.roxymc.jserialize.type.TypeToken;
+import net.roxymc.jserialize.type.TypeRef;
 import org.jetbrains.annotations.ApiStatus;
 import org.jspecify.annotations.Nullable;
 
@@ -28,7 +28,7 @@ public interface ClassModel<T> {
 
     @ApiStatus.NonExtendable
     interface Factory {
-        <T> ClassModel<T> create(TypeToken<? extends T> type);
+        <T> ClassModel<T> create(TypeRef<? extends T> type);
 
         <T> ClassModel<T> create(Class<T> type);
 

@@ -1,7 +1,7 @@
 package net.roxymc.jserialize.util;
 
 import io.leangen.geantyref.GenericTypeReflector;
-import net.roxymc.jserialize.type.TypeToken;
+import net.roxymc.jserialize.type.TypeRef;
 
 import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.Type;
@@ -10,7 +10,7 @@ public final class TypeUtils {
     private TypeUtils() {
     }
 
-    public static boolean isPrimitive(TypeToken<?> type) {
+    public static boolean isPrimitive(TypeRef<?> type) {
         return isPrimitive(type.getRawType());
     }
 

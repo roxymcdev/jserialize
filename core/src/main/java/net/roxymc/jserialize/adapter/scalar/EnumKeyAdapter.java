@@ -2,7 +2,7 @@ package net.roxymc.jserialize.adapter.scalar;
 
 import net.roxymc.jserialize.adapter.KeyAdapter;
 import net.roxymc.jserialize.adapter.TypeAdapters;
-import net.roxymc.jserialize.type.TypeToken;
+import net.roxymc.jserialize.type.TypeRef;
 import org.jspecify.annotations.Nullable;
 
 import static net.roxymc.jserialize.util.ObjectUtils.nonNull;
@@ -10,7 +10,7 @@ import static net.roxymc.jserialize.util.ObjectUtils.nonNull;
 public final class EnumKeyAdapter implements KeyAdapter<Enum<?>> {
     private static final KeyAdapter.Factory FACTORY = new KeyAdapter.Factory() {
         @Override
-        public <T> @Nullable KeyAdapter<T> create(TypeToken<T> type, TypeAdapters adapters) {
+        public <T> @Nullable KeyAdapter<T> create(TypeRef<T> type, TypeAdapters adapters) {
             @SuppressWarnings("unchecked")
             Class<? extends Enum<?>> enumType = (Class<? extends Enum<?>>) type.getRawType();
             if (!enumType.isEnum()) {

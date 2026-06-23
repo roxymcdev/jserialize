@@ -8,19 +8,19 @@ import net.roxymc.jserialize.adapter.ReadContext;
 import net.roxymc.jserialize.adapter.TypeAdapter;
 import net.roxymc.jserialize.adapter.TypeAdapters;
 import net.roxymc.jserialize.adapter.WriteContext;
-import net.roxymc.jserialize.type.TypeToken;
+import net.roxymc.jserialize.type.TypeRef;
 import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
 
 final class WrappedTypeAdapter<T> extends com.google.gson.TypeAdapter<T> {
-    private final TypeToken<? extends T> type;
+    private final TypeRef<? extends T> type;
     final TypeAdapter<T> typeAdapter;
 
     private final ReadContext readCtx;
     private final WriteContext writeCtx;
 
-    WrappedTypeAdapter(TypeToken<? extends T> type, TypeAdapter<T> typeAdapter, TypeAdapters typeAdapters) {
+    WrappedTypeAdapter(TypeRef<? extends T> type, TypeAdapter<T> typeAdapter, TypeAdapters typeAdapters) {
         this.type = type;
         this.typeAdapter = typeAdapter;
 

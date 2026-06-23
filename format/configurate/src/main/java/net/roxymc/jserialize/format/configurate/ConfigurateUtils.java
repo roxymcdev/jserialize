@@ -12,7 +12,7 @@ import net.roxymc.jserialize.token.reader.TokenReader;
 import net.roxymc.jserialize.token.reader.ValueTokenizer;
 import net.roxymc.jserialize.token.writer.TokenWriter;
 import net.roxymc.jserialize.token.writer.ValueDetokenizer;
-import net.roxymc.jserialize.type.TypeToken;
+import net.roxymc.jserialize.type.TypeRef;
 import org.jspecify.annotations.Nullable;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.ConfigurationNode;
@@ -48,8 +48,8 @@ final class ConfigurateUtils implements FormatUtils<ConfigurationNode> {
 
     @Override
     public MapLike<ConfigurationNode> createMap(TypeAdapters typeAdapters, AnnotatedType mapType) {
-        TypeToken<Map<?, ?>> typeToken = TypeToken.of(mapType);
-        TypeAdapter<Map<?, ?>> typeAdapter = typeAdapters.getOrThrow(typeToken);
+        TypeRef<Map<?, ?>> typeRef = TypeRef.of(mapType);
+        TypeAdapter<Map<?, ?>> typeAdapter = typeAdapters.getOrThrow(typeRef);
 
         return new MapLike<>() {
             private final ConfigurationNode node = CommentedConfigurationNode.root(
@@ -67,14 +67,14 @@ final class ConfigurateUtils implements FormatUtils<ConfigurationNode> {
             public void putAll(Map<?, ?> map, WriteContext ctx) throws IOException {
                 CommentedConfigurationNode result = CommentedConfigurationNode.root(node.options());
 
-                typeAdapter.write(newWriter0(result), typeToken, map, ctx);
+                typeAdapter.write(newWriter0(result), typeRef, map, ctx);
 
                 node.mergeFrom(result);
             }
 
             @Override
             public @Nullable Map<?, ?> asMap(ReadContext ctx) throws IOException {
-                return typeAdapter.read(newReader0(node), typeToken, ctx);
+                return typeAdapter.read(newReader0(node), typeRef, ctx);
             }
 
             @Override

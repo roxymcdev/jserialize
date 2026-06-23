@@ -11,7 +11,7 @@ import net.roxymc.jserialize.adapter.TypeAdapters;
 import net.roxymc.jserialize.adapter.WriteContext;
 import net.roxymc.jserialize.adapter.object.FormatUtils;
 import net.roxymc.jserialize.adapter.object.MapLike;
-import net.roxymc.jserialize.type.TypeToken;
+import net.roxymc.jserialize.type.TypeRef;
 import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
@@ -37,8 +37,8 @@ final class GsonUtils implements FormatUtils<JsonElement> {
 
     @Override
     public MapLike<JsonElement> createMap(TypeAdapters typeAdapters, AnnotatedType mapType) {
-        TypeToken<Map<?, ?>> typeToken = TypeToken.of(mapType);
-        TypeAdapter<Map<?, ?>> mapAdapter = typeAdapters.getOrThrow(typeToken);
+        TypeRef<Map<?, ?>> typeRef = TypeRef.of(mapType);
+        TypeAdapter<Map<?, ?>> mapAdapter = typeAdapters.getOrThrow(typeRef);
 
         return new MapLike<>() {
             private final JsonObject object = new JsonObject();
@@ -53,7 +53,7 @@ final class GsonUtils implements FormatUtils<JsonElement> {
                 JsonObject result;
 
                 try (JsonTreeWriter writer = new JsonTreeWriter()) {
-                    mapAdapter.write(new GsonWriterAdapter(writer), typeToken, map, ctx);
+                    mapAdapter.write(new GsonWriterAdapter(writer), typeRef, map, ctx);
 
                     result = writer.get().getAsJsonObject();
                 }
@@ -64,7 +64,7 @@ final class GsonUtils implements FormatUtils<JsonElement> {
             @Override
             public @Nullable Map<?, ?> asMap(ReadContext ctx) throws IOException {
                 try (JsonTreeReader reader = new JsonTreeReader(object)) {
-                    return mapAdapter.read(new GsonReaderAdapter(reader), typeToken, ctx);
+                    return mapAdapter.read(new GsonReaderAdapter(reader), typeRef, ctx);
                 }
             }
 

@@ -4,7 +4,7 @@ import com.google.gson.Gson;
 import net.roxymc.jserialize.adapter.KeyAdapter;
 import net.roxymc.jserialize.adapter.TypeAdapter;
 import net.roxymc.jserialize.adapter.TypeAdapters;
-import net.roxymc.jserialize.type.TypeToken;
+import net.roxymc.jserialize.type.TypeRef;
 import org.jspecify.annotations.Nullable;
 
 final class GsonTypeAdapters implements TypeAdapters {
@@ -17,7 +17,7 @@ final class GsonTypeAdapters implements TypeAdapters {
     }
 
     @Override
-    public <T> TypeAdapter<T> get(TypeToken<T> type) {
+    public <T> TypeAdapter<T> get(TypeRef<T> type) {
         @SuppressWarnings("unchecked")
         com.google.gson.reflect.TypeToken<T> typeToken = (com.google.gson.reflect.TypeToken<T>) com.google.gson.reflect.TypeToken.get(type.getType());
         com.google.gson.TypeAdapter<T> adapter = gson.getAdapter(typeToken);
@@ -30,7 +30,7 @@ final class GsonTypeAdapters implements TypeAdapters {
     }
 
     @Override
-    public <T> @Nullable KeyAdapter<T> getKey(TypeToken<T> type) {
+    public <T> @Nullable KeyAdapter<T> getKey(TypeRef<T> type) {
         return adapters.getKey(type);
     }
 }

@@ -3,7 +3,7 @@ package net.roxymc.jserialize.adapter.map;
 import net.roxymc.jserialize.adapter.KeyAdapter;
 import net.roxymc.jserialize.adapter.TypeAdapter;
 import net.roxymc.jserialize.adapter.TypeAdapters;
-import net.roxymc.jserialize.type.TypeToken;
+import net.roxymc.jserialize.type.TypeRef;
 import net.roxymc.jserialize.util.VarHandles;
 import org.jetbrains.annotations.UnknownNullability;
 import org.jspecify.annotations.NonNull;
@@ -20,12 +20,12 @@ import static io.leangen.geantyref.GenericTypeReflector.getExactSuperType;
 final class MapType<K extends @UnknownNullability Object, V extends @UnknownNullability Object> {
     private static final VarHandle MAP_FACTORY_HANDLE = VarHandles.find(MapType.class, "mapFactory", MapFactory.class);
 
-    final TypeToken<? extends Map<K, V>> mapType;
-    final TypeToken<K> keyType;
-    final TypeToken<V> valueType;
+    final TypeRef<? extends Map<K, V>> mapType;
+    final TypeRef<K> keyType;
+    final TypeRef<V> valueType;
     private @Nullable MapFactory<K, V> mapFactory;
 
-    MapType(TypeToken<? extends Map<?, ?>> mapType) {
+    MapType(TypeRef<? extends Map<?, ?>> mapType) {
         AnnotatedType type = getExactSuperType(capture(mapType.getAnnotatedType()), Map.class);
         if (!(type instanceof AnnotatedParameterizedType)) {
             throw new IllegalStateException(mapType.getRawType() + " must be parameterized");
@@ -33,9 +33,9 @@ final class MapType<K extends @UnknownNullability Object, V extends @UnknownNull
 
         AnnotatedParameterizedType ptype = (AnnotatedParameterizedType) type;
 
-        this.mapType = TypeToken.of(ptype);
-        this.keyType = TypeToken.of(ptype.getAnnotatedActualTypeArguments()[0]);
-        this.valueType = TypeToken.of(ptype.getAnnotatedActualTypeArguments()[1]);
+        this.mapType = TypeRef.of(ptype);
+        this.keyType = TypeRef.of(ptype.getAnnotatedActualTypeArguments()[0]);
+        this.valueType = TypeRef.of(ptype.getAnnotatedActualTypeArguments()[1]);
     }
 
     KeyAdapter<@NonNull K> keyAdapter(TypeAdapters adapters) {

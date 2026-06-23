@@ -6,7 +6,7 @@ import net.roxymc.jserialize.adapter.ReadContext;
 import net.roxymc.jserialize.adapter.TypeAdapter;
 import net.roxymc.jserialize.adapter.TypeAdapters;
 import net.roxymc.jserialize.adapter.WriteContext;
-import net.roxymc.jserialize.type.TypeToken;
+import net.roxymc.jserialize.type.TypeRef;
 import org.jspecify.annotations.Nullable;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.serialize.SerializationException;
@@ -26,20 +26,20 @@ public final class TypeAdapterProvider implements TypeSerializer.Annotated<Objec
     }
 
     public boolean hasTypeAdapter(AnnotatedType type) {
-        return adapters.get(TypeToken.of(type)) != null;
+        return adapters.get(TypeRef.of(type)) != null;
     }
 
     @Override
     public @Nullable Object deserialize(AnnotatedType type, ConfigurationNode node) throws SerializationException {
-        TypeToken<Object> typeToken = TypeToken.of(type);
-        TypeAdapter<Object> typeAdapter = adapters.getOrThrow(typeToken);
+        TypeRef<Object> typeRef = TypeRef.of(type);
+        TypeAdapter<Object> typeAdapter = adapters.getOrThrow(typeRef);
 
         Reader reader = ConfigurateUtils.newReader0(node);
 
         try {
             ReadContext context = ReadContext.of(new ConfigurateTypeAdapters(node.options(), adapters), ConfigurateUtils.INSTANCE);
 
-            return typeAdapter.read(reader, typeToken, context);
+            return typeAdapter.read(reader, typeRef, context);
         } catch (IOException e) {
             throw new SerializationException(e);
         }
@@ -47,15 +47,15 @@ public final class TypeAdapterProvider implements TypeSerializer.Annotated<Objec
 
     @Override
     public void serialize(AnnotatedType type, @Nullable Object obj, ConfigurationNode node) throws SerializationException {
-        TypeToken<Object> typeToken = TypeToken.of(type);
-        TypeAdapter<Object> typeAdapter = adapters.getOrThrow(typeToken);
+        TypeRef<Object> typeRef = TypeRef.of(type);
+        TypeAdapter<Object> typeAdapter = adapters.getOrThrow(typeRef);
 
         Writer writer = ConfigurateUtils.newWriter0(node);
 
         try {
             WriteContext context = WriteContext.of(new ConfigurateTypeAdapters(node.options(), adapters), ConfigurateUtils.INSTANCE);
 
-            typeAdapter.write(writer, typeToken, obj, context);
+            typeAdapter.write(writer, typeRef, obj, context);
         } catch (IOException e) {
             throw new SerializationException(e);
         }

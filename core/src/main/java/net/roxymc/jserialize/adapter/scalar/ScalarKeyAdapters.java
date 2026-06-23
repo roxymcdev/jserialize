@@ -3,10 +3,9 @@ package net.roxymc.jserialize.adapter.scalar;
 import io.leangen.geantyref.GenericTypeReflector;
 import net.roxymc.jserialize.adapter.KeyAdapter;
 import net.roxymc.jserialize.adapter.TypeAdapters;
-import net.roxymc.jserialize.type.TypeToken;
+import net.roxymc.jserialize.type.TypeRef;
 import org.jspecify.annotations.Nullable;
 
-import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
@@ -34,7 +33,7 @@ public final class ScalarKeyAdapters {
 
     private static final KeyAdapter.Factory FACTORY = new KeyAdapter.Factory() {
         @Override
-        public <T> @Nullable KeyAdapter<T> create(TypeToken<T> type, TypeAdapters adapters) {
+        public <T> @Nullable KeyAdapter<T> create(TypeRef<T> type, TypeAdapters adapters) {
             Class<?> boxedType = (Class<?>) GenericTypeReflector.box(type.getRawType());
 
             @SuppressWarnings("unchecked")

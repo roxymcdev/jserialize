@@ -3,7 +3,7 @@ package net.roxymc.jserialize.format.configurate;
 import net.roxymc.jserialize.adapter.KeyAdapter;
 import net.roxymc.jserialize.adapter.TypeAdapter;
 import net.roxymc.jserialize.adapter.TypeAdapters;
-import net.roxymc.jserialize.type.TypeToken;
+import net.roxymc.jserialize.type.TypeRef;
 import org.jspecify.annotations.Nullable;
 import org.spongepowered.configurate.ConfigurationOptions;
 import org.spongepowered.configurate.serialize.TypeSerializer;
@@ -21,7 +21,7 @@ final class ConfigurateTypeAdapters implements TypeAdapters {
     }
 
     @Override
-    public <T> TypeAdapter<T> get(TypeToken<T> type) {
+    public <T> TypeAdapter<T> get(TypeRef<T> type) {
         @SuppressWarnings("unchecked")
         TypeSerializer<T> serializer = (TypeSerializer<T>) options.serializers().get(type.getAnnotatedType());
 
@@ -34,7 +34,7 @@ final class ConfigurateTypeAdapters implements TypeAdapters {
     }
 
     @Override
-    public <T> @Nullable KeyAdapter<T> getKey(TypeToken<T> type) {
+    public <T> @Nullable KeyAdapter<T> getKey(TypeRef<T> type) {
         return adapters.getKey(type);
     }
 }

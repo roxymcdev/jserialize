@@ -7,7 +7,7 @@ import net.roxymc.jserialize.model.resolver.ConstructorResolver;
 import net.roxymc.jserialize.model.resolver.PropertiesResolver;
 import net.roxymc.jserialize.model.resolver.SimpleConstructorResolver;
 import net.roxymc.jserialize.model.resolver.SimplePropertiesResolver;
-import net.roxymc.jserialize.type.TypeToken;
+import net.roxymc.jserialize.type.TypeRef;
 import net.roxymc.jserialize.util.TypeUtils;
 
 import java.lang.invoke.MethodHandles;
@@ -32,7 +32,7 @@ final class ClassModelFactoryImpl implements ClassModel.Factory {
     }
 
     @Override
-    public <T> ClassModel<T> create(TypeToken<? extends T> type) {
+    public <T> ClassModel<T> create(TypeRef<? extends T> type) {
         return createUnchecked(type.getRawType());
     }
 

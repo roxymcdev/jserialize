@@ -7,7 +7,7 @@ import net.roxymc.jserialize.adapter.TypeAdapters;
 import net.roxymc.jserialize.adapter.WriteContext;
 import net.roxymc.jserialize.adapter.object.FormatUtils;
 import net.roxymc.jserialize.adapter.object.MapLike;
-import net.roxymc.jserialize.type.TypeToken;
+import net.roxymc.jserialize.type.TypeRef;
 import org.bson.*;
 import org.jspecify.annotations.Nullable;
 
@@ -49,8 +49,8 @@ final class BsonUtils implements FormatUtils<BsonValue> {
 
     @Override
     public MapLike<BsonValue> createMap(TypeAdapters typeAdapters, AnnotatedType mapType) {
-        TypeToken<Map<?, ?>> typeToken = TypeToken.of(mapType);
-        TypeAdapter<Map<?, ?>> mapAdapter = typeAdapters.getOrThrow(typeToken);
+        TypeRef<Map<?, ?>> typeRef = TypeRef.of(mapType);
+        TypeAdapter<Map<?, ?>> mapAdapter = typeAdapters.getOrThrow(typeRef);
 
         return new MapLike<>() {
             private final BsonDocument document = new BsonDocument();
@@ -65,7 +65,7 @@ final class BsonUtils implements FormatUtils<BsonValue> {
                 BsonDocument result = new BsonDocument();
 
                 try (BsonDocumentWriter writer = new BsonDocumentWriter(result)) {
-                    mapAdapter.write(new BsonWriterAdapter(writer), typeToken, map, ctx);
+                    mapAdapter.write(new BsonWriterAdapter(writer), typeRef, map, ctx);
                 }
 
                 document.putAll(result);
@@ -74,7 +74,7 @@ final class BsonUtils implements FormatUtils<BsonValue> {
             @Override
             public @Nullable Map<?, ?> asMap(ReadContext ctx) throws IOException {
                 try (BsonDocumentReader reader = new BsonDocumentReader(document)) {
-                    return mapAdapter.read(new StandardBsonReaderAdapter(reader), typeToken, ctx);
+                    return mapAdapter.read(new StandardBsonReaderAdapter(reader), typeRef, ctx);
                 }
             }
 

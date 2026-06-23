@@ -7,7 +7,7 @@ import net.roxymc.jserialize.adapter.ReadContext;
 import net.roxymc.jserialize.adapter.TypeAdapter;
 import net.roxymc.jserialize.adapter.WriteContext;
 import net.roxymc.jserialize.token.TokenType;
-import net.roxymc.jserialize.type.TypeToken;
+import net.roxymc.jserialize.type.TypeRef;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
@@ -36,7 +36,7 @@ public final class MapAdapter implements TypeAdapter.Mutable<Map<?, ?>> {
         return TypeAdapter.Factory.polymorphic(Map.class, new MapAdapter(providers));
     }
 
-    private <K, V> MapType<K, V> resolveMapType(TypeToken<? extends Map<?, ?>> type) {
+    private <K, V> MapType<K, V> resolveMapType(TypeRef<? extends Map<?, ?>> type) {
         @SuppressWarnings("unchecked")
         MapType<K, V> mapType = (MapType<K, V>) cache.computeIfAbsent(type.getType(), $ -> new MapType<>(type));
         return mapType;
@@ -44,13 +44,13 @@ public final class MapAdapter implements TypeAdapter.Mutable<Map<?, ?>> {
 
     @Override
     public @Nullable Map<?, ?> mutate(
-            Reader reader, TypeToken<? extends Map<?, ?>> type, @Nullable Map<?, ?> value, ReadContext ctx
+            Reader reader, TypeRef<? extends Map<?, ?>> type, @Nullable Map<?, ?> value, ReadContext ctx
     ) throws IOException {
         return mutate0(reader, type, value, ctx);
     }
 
     private <K extends @Nullable Object, V extends @Nullable Object> @Nullable Map<K, V> mutate0(
-            Reader reader, TypeToken<? extends Map<?, ?>> type, @Nullable Map<K, V> map, ReadContext ctx
+            Reader reader, TypeRef<? extends Map<?, ?>> type, @Nullable Map<K, V> map, ReadContext ctx
     ) throws IOException {
         if (reader.peek() == TokenType.NULL) {
             reader.readNull();
@@ -84,13 +84,13 @@ public final class MapAdapter implements TypeAdapter.Mutable<Map<?, ?>> {
 
     @Override
     public void write(
-            Writer writer, TypeToken<? extends Map<?, ?>> type, @Nullable Map<?, ?> value, WriteContext ctx
+            Writer writer, TypeRef<? extends Map<?, ?>> type, @Nullable Map<?, ?> value, WriteContext ctx
     ) throws IOException {
         write0(writer, type, value, ctx);
     }
 
     private <K extends @Nullable Object, V extends @Nullable Object> void write0(
-            Writer writer, TypeToken<? extends Map<?, ?>> type, @Nullable Map<K, V> map, WriteContext ctx
+            Writer writer, TypeRef<? extends Map<?, ?>> type, @Nullable Map<K, V> map, WriteContext ctx
     ) throws IOException {
         if (map == null) {
             writer.writeNull();

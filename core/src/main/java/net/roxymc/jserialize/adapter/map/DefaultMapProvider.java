@@ -1,6 +1,6 @@
 package net.roxymc.jserialize.adapter.map;
 
-import net.roxymc.jserialize.type.TypeToken;
+import net.roxymc.jserialize.type.TypeRef;
 import org.jspecify.annotations.Nullable;
 
 import java.util.LinkedHashMap;
@@ -16,7 +16,7 @@ public final class DefaultMapProvider implements MapProvider {
     }
 
     @Override
-    public <K extends @Nullable Object, V extends @Nullable Object> @Nullable MapFactory<K, V> resolve(TypeToken<? extends Map<K, V>> type) {
+    public <K extends @Nullable Object, V extends @Nullable Object> @Nullable MapFactory<K, V> resolve(TypeRef<? extends Map<K, V>> type) {
         Class<?> rawType = type.getRawType();
 
         if (rawType.isAssignableFrom(LinkedHashMap.class)) {

@@ -6,7 +6,7 @@ import net.roxymc.jserialize.adapter.ReadContext;
 import net.roxymc.jserialize.adapter.TypeAdapter;
 import net.roxymc.jserialize.adapter.WriteContext;
 import net.roxymc.jserialize.token.TokenType;
-import net.roxymc.jserialize.type.TypeToken;
+import net.roxymc.jserialize.type.TypeRef;
 import org.bson.codecs.Codec;
 import org.bson.codecs.DecoderContext;
 import org.bson.codecs.EncoderContext;
@@ -22,7 +22,7 @@ final class WrappedCodec<T> implements TypeAdapter<T> {
     }
 
     @Override
-    public @Nullable T read(Reader reader, TypeToken<? extends T> type, ReadContext context) throws IOException {
+    public @Nullable T read(Reader reader, TypeRef<? extends T> type, ReadContext context) throws IOException {
         if (reader.peek() == TokenType.NULL) {
             return null;
         }
@@ -37,7 +37,7 @@ final class WrappedCodec<T> implements TypeAdapter<T> {
     }
 
     @Override
-    public void write(Writer writer, TypeToken<? extends T> type, @Nullable T value, WriteContext context) throws IOException {
+    public void write(Writer writer, TypeRef<? extends T> type, @Nullable T value, WriteContext context) throws IOException {
         if (value == null) {
             writer.writeNull();
             return;

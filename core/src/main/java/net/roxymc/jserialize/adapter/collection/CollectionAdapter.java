@@ -6,7 +6,7 @@ import net.roxymc.jserialize.adapter.ReadContext;
 import net.roxymc.jserialize.adapter.TypeAdapter;
 import net.roxymc.jserialize.adapter.WriteContext;
 import net.roxymc.jserialize.token.TokenType;
-import net.roxymc.jserialize.type.TypeToken;
+import net.roxymc.jserialize.type.TypeRef;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
@@ -36,7 +36,7 @@ public final class CollectionAdapter implements TypeAdapter.Mutable<Collection<?
         return TypeAdapter.Factory.polymorphic(Collection.class, new CollectionAdapter(providers));
     }
 
-    private <E extends @Nullable Object> CollectionType<E> resolveCollectionType(TypeToken<? extends Collection<?>> type) {
+    private <E extends @Nullable Object> CollectionType<E> resolveCollectionType(TypeRef<? extends Collection<?>> type) {
         @SuppressWarnings("unchecked")
         CollectionType<E> collectionType = (CollectionType<E>) cache.computeIfAbsent(type.getType(), $ -> new CollectionType<>(type));
         return collectionType;
@@ -44,13 +44,13 @@ public final class CollectionAdapter implements TypeAdapter.Mutable<Collection<?
 
     @Override
     public @Nullable Collection<?> mutate(
-            Reader reader, TypeToken<? extends Collection<?>> type, @Nullable Collection<?> value, ReadContext ctx
+            Reader reader, TypeRef<? extends Collection<?>> type, @Nullable Collection<?> value, ReadContext ctx
     ) throws IOException {
         return mutate0(reader, type, value, ctx);
     }
 
     private <E extends @Nullable Object> @Nullable Collection<E> mutate0(
-            Reader reader, TypeToken<? extends Collection<?>> type, @Nullable Collection<E> collection, ReadContext ctx
+            Reader reader, TypeRef<? extends Collection<?>> type, @Nullable Collection<E> collection, ReadContext ctx
     ) throws IOException {
         if (reader.peek() == TokenType.NULL) {
             reader.readNull();
@@ -80,13 +80,13 @@ public final class CollectionAdapter implements TypeAdapter.Mutable<Collection<?
 
     @Override
     public void write(
-            Writer writer, TypeToken<? extends Collection<?>> type, @Nullable Collection<?> value, WriteContext ctx
+            Writer writer, TypeRef<? extends Collection<?>> type, @Nullable Collection<?> value, WriteContext ctx
     ) throws IOException {
         write0(writer, type, value, ctx);
     }
 
     private <E extends @Nullable Object> void write0(
-            Writer writer, TypeToken<? extends Collection<?>> type, @Nullable Collection<E> collection, WriteContext ctx
+            Writer writer, TypeRef<? extends Collection<?>> type, @Nullable Collection<E> collection, WriteContext ctx
     ) throws IOException {
         if (collection == null) {
             writer.writeNull();

@@ -11,30 +11,31 @@ import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
-public class TypeToken<T extends @UnknownNullability Object> {
-    private static final VarHandle RAW_TYPE_HANDLE = VarHandles.find(TypeToken.class, "rawType", Class.class);
+public abstract class TypeRef<T extends @UnknownNullability Object> {
+    private static final VarHandle RAW_TYPE_HANDLE = VarHandles.find(TypeRef.class, "rawType", Class.class);
 
     private final AnnotatedType annotatedType;
     private @Nullable Class<? super T> rawType;
 
-    protected TypeToken() {
+    protected TypeRef() {
         this.annotatedType = extractType();
     }
 
-    private TypeToken(AnnotatedType type) {
+    private TypeRef(AnnotatedType type) {
         this.annotatedType = type;
     }
 
-    public static <T extends @UnknownNullability Object> TypeToken<T> of(Class<T> type) {
+    public static <T extends @UnknownNullability Object> TypeRef<T> of(Class<T> type) {
         return of((Type) type);
     }
 
-    public static <T extends @UnknownNullability Object> TypeToken<T> of(Type type) {
+    public static <T extends @UnknownNullability Object> TypeRef<T> of(Type type) {
         return of(GenericTypeReflector.annotate(type));
     }
 
-    public static <T extends @UnknownNullability Object> TypeToken<T> of(AnnotatedType type) {
-        return new TypeToken<>(type);
+    public static <T extends @UnknownNullability Object> TypeRef<T> of(AnnotatedType type) {
+        return new TypeRef<>(type) {
+        };
     }
 
     public final Type getType() {
@@ -66,7 +67,7 @@ public class TypeToken<T extends @UnknownNullability Object> {
         }
 
         AnnotatedParameterizedType ptype = (AnnotatedParameterizedType) type;
-        if (((ParameterizedType) ptype.getType()).getRawType() != TypeToken.class) {
+        if (((ParameterizedType) ptype.getType()).getRawType() != TypeRef.class) {
             throw new IllegalStateException("does not directly extend TypeToken");
         }
 
@@ -84,11 +85,11 @@ public class TypeToken<T extends @UnknownNullability Object> {
             return true;
         }
 
-        if (!(obj instanceof TypeToken)) {
+        if (!(obj instanceof TypeRef)) {
             return false;
         }
 
-        TypeToken<?> that = (TypeToken<?>) obj;
+        TypeRef<?> that = (TypeRef<?>) obj;
         return this.annotatedType.equals(that.annotatedType);
     }
 

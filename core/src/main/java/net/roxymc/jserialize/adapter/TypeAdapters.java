@@ -5,7 +5,7 @@ import net.roxymc.jserialize.adapter.map.MapAdapter;
 import net.roxymc.jserialize.adapter.object.ObjectAdapter;
 import net.roxymc.jserialize.adapter.scalar.EnumKeyAdapter;
 import net.roxymc.jserialize.adapter.scalar.ScalarKeyAdapters;
-import net.roxymc.jserialize.type.TypeToken;
+import net.roxymc.jserialize.type.TypeRef;
 import org.jetbrains.annotations.ApiStatus;
 import org.jspecify.annotations.Nullable;
 
@@ -24,16 +24,16 @@ public interface TypeAdapters {
     }
 
     default <T> @Nullable TypeAdapter<T> get(Class<T> type) {
-        return get(TypeToken.of(type));
+        return get(TypeRef.of(type));
     }
 
-    <T> @Nullable TypeAdapter<T> get(TypeToken<T> type);
+    <T> @Nullable TypeAdapter<T> get(TypeRef<T> type);
 
     default <T> TypeAdapter<T> getOrThrow(Class<T> type) {
-        return getOrThrow(TypeToken.of(type));
+        return getOrThrow(TypeRef.of(type));
     }
 
-    default <T> TypeAdapter<T> getOrThrow(TypeToken<T> type) {
+    default <T> TypeAdapter<T> getOrThrow(TypeRef<T> type) {
         TypeAdapter<T> adapter = get(type);
         if (adapter != null) {
             return adapter;
@@ -43,16 +43,16 @@ public interface TypeAdapters {
     }
 
     default <T> @Nullable KeyAdapter<T> getKey(Class<T> type) {
-        return getKey(TypeToken.of(type));
+        return getKey(TypeRef.of(type));
     }
 
-    <T> @Nullable KeyAdapter<T> getKey(TypeToken<T> type);
+    <T> @Nullable KeyAdapter<T> getKey(TypeRef<T> type);
 
     default <T> KeyAdapter<T> getKeyOrThrow(Class<T> type) {
-        return getKeyOrThrow(TypeToken.of(type));
+        return getKeyOrThrow(TypeRef.of(type));
     }
 
-    default <T> KeyAdapter<T> getKeyOrThrow(TypeToken<T> type) {
+    default <T> KeyAdapter<T> getKeyOrThrow(TypeRef<T> type) {
         KeyAdapter<T> adapter = getKey(type);
         if (adapter != null) {
             return adapter;

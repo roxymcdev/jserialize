@@ -3,7 +3,7 @@ package net.roxymc.jserialize.format.bson;
 import net.roxymc.jserialize.adapter.KeyAdapter;
 import net.roxymc.jserialize.adapter.TypeAdapter;
 import net.roxymc.jserialize.adapter.TypeAdapters;
-import net.roxymc.jserialize.type.TypeToken;
+import net.roxymc.jserialize.type.TypeRef;
 import org.bson.codecs.Codec;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.jspecify.annotations.Nullable;
@@ -21,9 +21,9 @@ final class BsonTypeAdapters implements TypeAdapters {
         this.adapters = adapters;
     }
 
-    private <T> Codec<T> getCodec(TypeToken<? extends T> typeToken) {
-        Type type = typeToken.getType();
-        Class<?> rawType = typeToken.getRawType();
+    private <T> Codec<T> getCodec(TypeRef<? extends T> typeRef) {
+        Type type = typeRef.getType();
+        Class<?> rawType = typeRef.getRawType();
 
         if (!(type instanceof ParameterizedType)) {
             @SuppressWarnings("unchecked")
@@ -39,7 +39,7 @@ final class BsonTypeAdapters implements TypeAdapters {
     }
 
     @Override
-    public <T> TypeAdapter<T> get(TypeToken<T> type) {
+    public <T> TypeAdapter<T> get(TypeRef<T> type) {
         Codec<T> codec = getCodec(type);
 
         if (codec instanceof WrappedTypeAdapter) {
@@ -50,7 +50,7 @@ final class BsonTypeAdapters implements TypeAdapters {
     }
 
     @Override
-    public <T> @Nullable KeyAdapter<T> getKey(TypeToken<T> type) {
+    public <T> @Nullable KeyAdapter<T> getKey(TypeRef<T> type) {
         return adapters.getKey(type);
     }
 }

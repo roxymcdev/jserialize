@@ -12,7 +12,7 @@ import net.roxymc.jserialize.model.property.PropertyModel;
 import net.roxymc.jserialize.model.property.meta.PropertyKind;
 import net.roxymc.jserialize.model.property.meta.PropertyMeta;
 import net.roxymc.jserialize.token.TokenType;
-import net.roxymc.jserialize.type.TypeToken;
+import net.roxymc.jserialize.type.TypeRef;
 import net.roxymc.jserialize.util.TypeUtils;
 import org.jspecify.annotations.Nullable;
 
@@ -23,14 +23,14 @@ import static io.leangen.geantyref.GenericTypeReflector.*;
 
 final class ObjectReader<T, R> {
     private final ClassModel<T> classModel;
-    private final TypeToken<? extends T> type;
+    private final TypeRef<? extends T> type;
     private final @Nullable T instance;
     private final FormatUtils<R> formatUtils;
     private final ReadContext context;
 
     ObjectReader(
             ClassModel<T> classModel,
-            TypeToken<? extends T> type,
+            TypeRef<? extends T> type,
             @Nullable T instance,
             FormatUtils<R> formatUtils,
             ReadContext context
@@ -56,8 +56,8 @@ final class ObjectReader<T, R> {
                 return;
             }
 
-            TypeToken<?> typeToken = TypeToken.of(type);
-            KeyAdapter<?> adapter = context.typeAdapters().getKeyOrThrow(typeToken);
+            TypeRef<?> typeRef = TypeRef.of(type);
+            KeyAdapter<?> adapter = context.typeAdapters().getKeyOrThrow(typeRef);
 
             builder.property(property, adapter.decode(context.key()));
         });
@@ -136,8 +136,8 @@ final class ObjectReader<T, R> {
             return null;
         }
 
-        TypeToken<Object> typeToken = TypeToken.of(type);
-        TypeAdapter<Object> adapter = context.typeAdapters().getOrThrow(typeToken);
+        TypeRef<Object> typeRef = TypeRef.of(type);
+        TypeAdapter<Object> adapter = context.typeAdapters().getOrThrow(typeRef);
 
         R rawValue = readRawValue(reader);
         if (rawValue == null) {
@@ -149,21 +149,21 @@ final class ObjectReader<T, R> {
 
         if (!(adapter instanceof TypeAdapter.Mutable)) {
             return parent -> adapter.read(
-                    valueReader, typeToken, context.withParent(parent)
+                    valueReader, typeRef, context.withParent(parent)
             );
         }
 
         TypeAdapter.Mutable<Object> mutableAdapter = (TypeAdapter.Mutable<Object>) adapter;
         return (PropertyValue.Mutable<?>) (parent, instance) -> mutableAdapter.mutate(
-                valueReader, typeToken, instance, context.withParent(parent)
+                valueReader, typeRef, instance, context.withParent(parent)
         );
     }
 
     private @Nullable R readRawValue(Reader reader) throws IOException {
-        TypeToken<R> typeToken = TypeToken.of(formatUtils.rawType());
-        TypeAdapter<R> adapter = context.typeAdapters().getOrThrow(typeToken);
+        TypeRef<R> typeRef = TypeRef.of(formatUtils.rawType());
+        TypeAdapter<R> adapter = context.typeAdapters().getOrThrow(typeRef);
 
-        return adapter.read(reader, typeToken, context.withParent(null).withKey(null));
+        return adapter.read(reader, typeRef, context.withParent(null).withKey(null));
     }
 
     private @Nullable AnnotatedType resolveReadType(PropertyModel property) {

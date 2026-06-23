@@ -3,7 +3,7 @@ package net.roxymc.jserialize.adapter;
 import io.leangen.geantyref.GenericTypeReflector;
 import net.roxymc.jserialize.Reader;
 import net.roxymc.jserialize.Writer;
-import net.roxymc.jserialize.type.TypeToken;
+import net.roxymc.jserialize.type.TypeRef;
 import org.jetbrains.annotations.Contract;
 import org.jspecify.annotations.Nullable;
 
@@ -17,35 +17,35 @@ public interface TypeAdapter<T> extends TypeReader<T>, TypeWriter<T> {
             private final TypeWriter<T> writer0 = writer;
 
             @Override
-            public @Nullable T read(Reader reader, TypeToken<? extends T> type, ReadContext context) throws IOException {
+            public @Nullable T read(Reader reader, TypeRef<? extends T> type, ReadContext context) throws IOException {
                 return reader0.read(reader, type, context);
             }
 
             @Override
-            public void write(Writer writer, TypeToken<? extends T> type, @Nullable T value, WriteContext context) throws IOException {
+            public void write(Writer writer, TypeRef<? extends T> type, @Nullable T value, WriteContext context) throws IOException {
                 writer0.write(writer, type, value, context);
             }
         };
     }
 
     @Override
-    @Nullable T read(Reader reader, TypeToken<? extends T> type, ReadContext context) throws IOException;
+    @Nullable T read(Reader reader, TypeRef<? extends T> type, ReadContext context) throws IOException;
 
     @Override
-    void write(Writer writer, TypeToken<? extends T> type, @Nullable T value, WriteContext context) throws IOException;
+    void write(Writer writer, TypeRef<? extends T> type, @Nullable T value, WriteContext context) throws IOException;
 
     interface Mutable<T> extends TypeAdapter<T> {
         @Override
-        default @Nullable T read(Reader reader, TypeToken<? extends T> type, ReadContext context) throws IOException {
+        default @Nullable T read(Reader reader, TypeRef<? extends T> type, ReadContext context) throws IOException {
             return mutate(reader, type, null, context);
         }
 
         @Contract("_, _, !null, _ -> param3")
-        @Nullable T mutate(Reader reader, TypeToken<? extends T> type, @Nullable T value, ReadContext context) throws IOException;
+        @Nullable T mutate(Reader reader, TypeRef<? extends T> type, @Nullable T value, ReadContext context) throws IOException;
     }
 
     interface Factory {
-        static Factory predicate(Predicate<? super TypeToken<?>> predicate, TypeAdapter<?> adapter) {
+        static Factory predicate(Predicate<? super TypeRef<?>> predicate, TypeAdapter<?> adapter) {
             return new PredicateTypeAdapterFactory(predicate, adapter);
         }
 
@@ -53,11 +53,11 @@ public interface TypeAdapter<T> extends TypeReader<T>, TypeWriter<T> {
             return predicate(subtype -> type.isAssignableFrom(subtype.getRawType()), adapter);
         }
 
-        static <T> Factory polymorphic(TypeToken<? extends T> type, TypeAdapter<T> adapter) {
+        static <T> Factory polymorphic(TypeRef<? extends T> type, TypeAdapter<T> adapter) {
             return predicate(subtype -> GenericTypeReflector.isSuperType(type.getType(), subtype.getType()), adapter);
         }
 
-        static <T> Factory exact(TypeToken<? extends T> type, TypeAdapter<T> adapter) {
+        static <T> Factory exact(TypeRef<? extends T> type, TypeAdapter<T> adapter) {
             return predicate(subtype -> type.getType().equals(subtype.getType()), adapter);
         }
 
@@ -65,6 +65,6 @@ public interface TypeAdapter<T> extends TypeReader<T>, TypeWriter<T> {
             return predicate(subtype -> type.equals(subtype.getRawType()), adapter);
         }
 
-        <T> @Nullable TypeAdapter<T> create(TypeToken<T> type, TypeAdapters adapters);
+        <T> @Nullable TypeAdapter<T> create(TypeRef<T> type, TypeAdapters adapters);
     }
 }
