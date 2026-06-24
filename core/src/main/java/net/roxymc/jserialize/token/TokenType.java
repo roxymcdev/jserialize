@@ -81,7 +81,7 @@ public abstract class TokenType {
             this.hasValue = hasValue;
         }
 
-        public boolean isHasValue() {
+        public boolean hasValue() {
             return hasValue;
         }
     }

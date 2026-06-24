@@ -51,7 +51,7 @@ public final class SimpleTokenizer implements Tokenizer<Token> {
     public void skipValue() {
         TokenType type = peek();
 
-        if (!type.kind().isHasValue()) {
+        if (!type.kind().hasValue()) {
             throw new IllegalStateException(type + "does not support this operation");
         }
 

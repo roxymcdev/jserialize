@@ -81,7 +81,7 @@ final class GsonReaderAdapter extends AbstractReader {
 
     @Override
     public void skipValue() throws IOException {
-        checkToken(peek(), type -> type.kind().isHasValue());
+        checkToken(peek(), type -> type.kind().hasValue());
         reader.skipValue();
     }
 }
