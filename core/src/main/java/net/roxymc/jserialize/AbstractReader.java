@@ -1,11 +1,13 @@
 package net.roxymc.jserialize;
 
 import net.roxymc.jserialize.token.TokenType;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.function.Predicate;
 
 import static java.lang.String.format;
 
+@ApiStatus.NonExtendable
 public abstract class AbstractReader implements Reader {
     protected final void checkToken(TokenType current, TokenType expected) {
         if (current != expected) {

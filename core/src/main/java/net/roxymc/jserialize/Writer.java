@@ -2,9 +2,11 @@ package net.roxymc.jserialize;
 
 import net.roxymc.jserialize.token.TokenType;
 import net.roxymc.jserialize.token.TokenTypes;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.io.IOException;
 
+@ApiStatus.NonExtendable
 public interface Writer {
     void write(TokenType.NonValued tokenType) throws IOException;
 
