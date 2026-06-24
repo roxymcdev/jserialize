@@ -110,7 +110,7 @@ public final class ValueTokenizer<V> implements Tokenizer<V> {
         TokenType type = peek();
         Entry<V> entry = stack.element();
 
-        if (!type.kind().hasValue()) {
+        if (!type.kind().marksValue()) {
             throw new IllegalStateException(type + " does not support this operation");
         }
 

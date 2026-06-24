@@ -13,10 +13,10 @@ public final class TokenTypes {
     public static final TokenType.Valued<Integer> INT = valued(Kind.SCALAR, IntToken::new);
     public static final TokenType.Valued<Long> LONG = valued(Kind.SCALAR, LongToken::new);
     public static final TokenType.Valued<Double> DOUBLE = valued(Kind.SCALAR, DoubleToken::new);
-    public static final TokenType.Virtual NUMERIC = virtual();
+    public static final TokenType.Virtual NUMERIC = virtual(Kind.SCALAR);
     public static final TokenType.Valued<byte[]> BINARY = valued(Kind.SCALAR, BinaryToken::new);
     public static final TokenType.NonValued NULL = nonValued(Kind.NULL, () -> Tokens.NULL);
-    public static final TokenType.Virtual END = virtual();
+    public static final TokenType.Virtual END = virtual(Kind.END);
 
     private TokenTypes() {
     }

@@ -104,7 +104,7 @@ final class StandardBsonReaderAdapter extends AbstractReader implements BsonRead
 
     @Override
     public void skipValue() {
-        checkToken(peek(), type -> type.kind().hasValue());
+        checkToken(peek(), type -> type.kind().marksValue());
         reader.skipValue();
     }
 }

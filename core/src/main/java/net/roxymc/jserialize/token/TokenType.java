@@ -25,8 +25,8 @@ public abstract class TokenType {
         return new Valued<>(kind, tokenFactory);
     }
 
-    public static Virtual virtual() {
-        return new Virtual();
+    public static Virtual virtual(Kind kind) {
+        return new Virtual(kind);
     }
 
     public Kind kind() {
@@ -61,8 +61,8 @@ public abstract class TokenType {
     }
 
     public static final class Virtual extends TokenType {
-        private Virtual() {
-            super(Kind.VIRTUAL);
+        private Virtual(Kind kind) {
+            super(kind);
         }
     }
 
@@ -72,17 +72,17 @@ public abstract class TokenType {
         STRUCTURE_END(false),
         SCALAR(true),
         NULL(true),
-        VIRTUAL(false),
+        END(false),
         ;
 
-        private final boolean hasValue;
+        private final boolean marksValue;
 
-        Kind(boolean hasValue) {
-            this.hasValue = hasValue;
+        Kind(boolean marksValue) {
+            this.marksValue = marksValue;
         }
 
-        public boolean hasValue() {
-            return hasValue;
+        public boolean marksValue() {
+            return marksValue;
         }
     }
 }
