@@ -25,6 +25,7 @@ public abstract class TokenType {
         return new Valued<>(kind, tokenFactory);
     }
 
+    @ApiStatus.Internal
     public static Virtual virtual(Kind kind) {
         return new Virtual(kind);
     }
