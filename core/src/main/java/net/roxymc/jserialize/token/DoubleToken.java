@@ -1,9 +1,5 @@
 package net.roxymc.jserialize.token;
 
-import net.roxymc.jserialize.Writer;
-
-import java.io.IOException;
-
 public final class DoubleToken implements NumberToken<Double> {
     private final double value;
 
@@ -21,13 +17,8 @@ public final class DoubleToken implements NumberToken<Double> {
     }
 
     @Override
-    public void write(Writer writer) throws IOException {
-        writer.writeDouble(doubleValue());
-    }
-
-    @Override
-    public TokenType type() {
-        return TokenType.DOUBLE;
+    public TokenType.Valued<Double> type() {
+        return TokenTypes.DOUBLE;
     }
 
     @Override

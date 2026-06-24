@@ -19,5 +19,5 @@ public interface ValueAccessor<V> {
 
     TokenType getTokenType(V value);
 
-    ScalarToken<?> toToken(V value);
+    Token toToken(V value);
 }

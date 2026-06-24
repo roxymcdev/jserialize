@@ -2,6 +2,7 @@ package net.roxymc.jserialize.token.reader;
 
 import net.roxymc.jserialize.token.Token;
 import net.roxymc.jserialize.token.TokenType;
+import net.roxymc.jserialize.token.TokenTypes;
 import org.jspecify.annotations.Nullable;
 
 import java.util.Iterator;
@@ -49,21 +50,22 @@ public final class SimpleTokenizer implements Tokenizer<Token> {
     @Override
     public void skipValue() {
         TokenType type = peek();
-        if (type.kind() != TokenType.Kind.VALUE) {
+
+        if (!type.kind().isHasValue()) {
             throw new IllegalStateException(type + "does not support this operation");
         }
 
         next(); // skip the value
 
-        if (type == TokenType.OBJECT_START) {
-            while (peek() != TokenType.OBJECT_END) {
+        if (type == TokenTypes.OBJECT_START) {
+            while (peek() != TokenTypes.OBJECT_END) {
                 next(); // skip name
                 skipValue();
             }
 
             next(); // skip object end
-        } else if (type == TokenType.ARRAY_START) {
-            while (peek() != TokenType.ARRAY_END) {
+        } else if (type == TokenTypes.ARRAY_START) {
+            while (peek() != TokenTypes.ARRAY_END) {
                 skipValue();
             }
 

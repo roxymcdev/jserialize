@@ -1,12 +1,8 @@
 package net.roxymc.jserialize.token;
 
-import net.roxymc.jserialize.Writer;
-
-import java.io.IOException;
-
 import static net.roxymc.jserialize.util.ObjectUtils.nonNull;
 
-public final class BinaryToken extends AbstractScalarToken<byte[]> {
+public final class BinaryToken extends AbstractValuedToken<byte[]> implements ScalarToken<byte[]> {
     private final byte[] value;
 
     public BinaryToken(byte[] value) {
@@ -19,12 +15,7 @@ public final class BinaryToken extends AbstractScalarToken<byte[]> {
     }
 
     @Override
-    public void write(Writer writer) throws IOException {
-        writer.writeBinary(value());
-    }
-
-    @Override
-    public TokenType type() {
-        return TokenType.BINARY;
+    public TokenType.Valued<byte[]> type() {
+        return TokenTypes.BINARY;
     }
 }

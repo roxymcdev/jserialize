@@ -1,9 +1,6 @@
 package net.roxymc.jserialize.token.writer;
 
-import net.roxymc.jserialize.token.NameToken;
-import net.roxymc.jserialize.token.ScalarToken;
-import net.roxymc.jserialize.token.Token;
-import net.roxymc.jserialize.token.ValueAccessor;
+import net.roxymc.jserialize.token.*;
 import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayDeque;
@@ -36,7 +33,7 @@ public final class ValueDetokenizer<V> implements Detokenizer<V> {
             return;
         }
 
-        if (token == Token.OBJECT_END) {
+        if (token == Tokens.OBJECT_END) {
             checkNoPendingName();
 
             V container = stack.peek();
@@ -48,7 +45,7 @@ public final class ValueDetokenizer<V> implements Detokenizer<V> {
             return;
         }
 
-        if (token == Token.ARRAY_END) {
+        if (token == Tokens.ARRAY_END) {
             V container = stack.peek();
             if (container == null || !accessor.isArray(container)) {
                 throw new IllegalStateException("no array to end");
@@ -63,14 +60,14 @@ public final class ValueDetokenizer<V> implements Detokenizer<V> {
             return;
         }
 
-        if (token == Token.OBJECT_START) {
+        if (token == Tokens.OBJECT_START) {
             V container = value();
             accessor.setScalar(container, Collections.emptyMap());
             stack.push(container);
             return;
         }
 
-        if (token == Token.ARRAY_START) {
+        if (token == Tokens.ARRAY_START) {
             V container = value();
             accessor.setScalar(container, Collections.emptyList());
             stack.push(container);

@@ -1,9 +1,6 @@
 package net.roxymc.jserialize.token.reader;
 
-import net.roxymc.jserialize.token.NameToken;
-import net.roxymc.jserialize.token.Token;
-import net.roxymc.jserialize.token.TokenType;
-import net.roxymc.jserialize.token.ValueAccessor;
+import net.roxymc.jserialize.token.*;
 import org.jspecify.annotations.Nullable;
 
 import java.util.*;
@@ -47,25 +44,25 @@ public final class ValueTokenizer<V> implements Tokenizer<V> {
             ContainerEntry<V> container = (ContainerEntry<V>) entry;
 
             if (!container.started) {
-                return container.isObject ? TokenType.OBJECT_START : TokenType.ARRAY_START;
+                return container.isObject ? TokenTypes.OBJECT_START : TokenTypes.ARRAY_START;
             }
 
             if (value == null && !container.hasNext()) {
-                return container.isObject ? TokenType.OBJECT_END : TokenType.ARRAY_END;
+                return container.isObject ? TokenTypes.OBJECT_END : TokenTypes.ARRAY_END;
             }
         }
 
         if (value != null) {
             if (entry instanceof ContainerEntry && ((ContainerEntry<V>) entry).isObject) {
-                return TokenType.NAME;
+                return TokenTypes.NAME;
             }
 
             if (accessor.isObject(value)) {
-                return TokenType.OBJECT_START;
+                return TokenTypes.OBJECT_START;
             }
 
             if (accessor.isArray(value)) {
-                return TokenType.ARRAY_START;
+                return TokenTypes.ARRAY_START;
             }
 
             return accessor.getTokenType(value);
@@ -82,25 +79,25 @@ public final class ValueTokenizer<V> implements Tokenizer<V> {
         TokenType type = peek();
         Entry<V> entry = stack.element();
 
-        if (type == TokenType.OBJECT_START || type == TokenType.ARRAY_START) {
+        if (type == TokenTypes.OBJECT_START || type == TokenTypes.ARRAY_START) {
             V current = entry.pop();
 
             if (current == null) {
-                return type == TokenType.OBJECT_START ? Token.OBJECT_START : Token.ARRAY_START;
+                return type == TokenTypes.OBJECT_START ? Tokens.OBJECT_START : Tokens.ARRAY_START;
             }
 
             push(current);
             return next();
         }
 
-        if (type == TokenType.OBJECT_END || type == TokenType.ARRAY_END) {
+        if (type == TokenTypes.OBJECT_END || type == TokenTypes.ARRAY_END) {
             stack.pop();
-            return type == TokenType.OBJECT_END ? Token.OBJECT_END : Token.ARRAY_END;
+            return type == TokenTypes.OBJECT_END ? Tokens.OBJECT_END : Tokens.ARRAY_END;
         }
 
         V value = Objects.requireNonNull(entry.pop());
 
-        if (type == TokenType.NAME) {
+        if (type == TokenTypes.NAME) {
             push(value);
             return new NameToken(accessor.getName(value));
         }
@@ -113,11 +110,11 @@ public final class ValueTokenizer<V> implements Tokenizer<V> {
         TokenType type = peek();
         Entry<V> entry = stack.element();
 
-        if (type.kind() == TokenType.Kind.MARKER) {
+        if (!type.kind().isHasValue()) {
             throw new IllegalStateException(type + " does not support this operation");
         }
 
-        if (type == TokenType.OBJECT_START || type == TokenType.ARRAY_START) {
+        if (type == TokenTypes.OBJECT_START || type == TokenTypes.ARRAY_START) {
             ContainerEntry<V> container = ((ContainerEntry<V>) entry);
 
             if (!container.started) {

@@ -1,12 +1,8 @@
 package net.roxymc.jserialize.token;
 
-import net.roxymc.jserialize.Writer;
-
-import java.io.IOException;
-
 import static net.roxymc.jserialize.util.ObjectUtils.nonNull;
 
-public final class StringToken extends AbstractScalarToken<String> {
+public final class StringToken extends AbstractValuedToken<String> implements ScalarToken<String> {
     private final String value;
 
     public StringToken(String value) {
@@ -19,12 +15,7 @@ public final class StringToken extends AbstractScalarToken<String> {
     }
 
     @Override
-    public void write(Writer writer) throws IOException {
-        writer.writeString(value());
-    }
-
-    @Override
-    public TokenType type() {
-        return TokenType.STRING;
+    public TokenType.Valued<String> type() {
+        return TokenTypes.STRING;
     }
 }

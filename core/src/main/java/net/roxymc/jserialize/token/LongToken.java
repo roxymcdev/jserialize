@@ -1,9 +1,5 @@
 package net.roxymc.jserialize.token;
 
-import net.roxymc.jserialize.Writer;
-
-import java.io.IOException;
-
 public final class LongToken implements NumberToken<Long> {
     private final long value;
 
@@ -21,13 +17,8 @@ public final class LongToken implements NumberToken<Long> {
     }
 
     @Override
-    public void write(Writer writer) throws IOException {
-        writer.writeLong(longValue());
-    }
-
-    @Override
-    public TokenType type() {
-        return TokenType.LONG;
+    public TokenType.Valued<Long> type() {
+        return TokenTypes.LONG;
     }
 
     @Override

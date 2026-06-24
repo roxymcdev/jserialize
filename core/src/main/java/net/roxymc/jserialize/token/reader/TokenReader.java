@@ -1,7 +1,11 @@
 package net.roxymc.jserialize.token.reader;
 
 import net.roxymc.jserialize.AbstractReader;
-import net.roxymc.jserialize.token.*;
+import net.roxymc.jserialize.token.TokenType;
+import net.roxymc.jserialize.token.TokenTypes;
+import net.roxymc.jserialize.token.ValuedToken;
+
+import java.io.IOException;
 
 import static net.roxymc.jserialize.util.ObjectUtils.nonNull;
 
@@ -19,92 +23,26 @@ public final class TokenReader<V> extends AbstractReader {
     @Override
     public TokenType peek() {
         if (!tokenizer.hasNext()) {
-            return TokenType.END;
+            return TokenTypes.END;
         }
 
         return tokenizer.peek();
     }
 
-    private <T extends Token> T pop(Class<T> type) {
-        return type.cast(tokenizer.next());
-    }
+    @Override
+    public void read(TokenType.NonValued tokenType) throws IOException {
+        checkToken(peek(), tokenType);
 
-    private void pop(Token expected) {
-        if (tokenizer.next() != expected) {
-            throw new IllegalStateException("token mismatch");
-        }
+        tokenizer.next();
     }
 
     @Override
-    public String readName() {
-        checkToken(peek(), TokenType.NAME);
-        return pop(NameToken.class).value();
-    }
+    public <T> T read(TokenType.Valued<T> tokenType) throws IOException {
+        checkToken(peek(), tokenType);
 
-    @Override
-    public void readObjectStart() {
-        checkToken(peek(), TokenType.OBJECT_START);
-        pop(Token.OBJECT_START);
-    }
-
-    @Override
-    public void readObjectEnd() {
-        checkToken(peek(), TokenType.OBJECT_END);
-        pop(Token.OBJECT_END);
-    }
-
-    @Override
-    public void readArrayStart() {
-        checkToken(peek(), TokenType.ARRAY_START);
-        pop(Token.ARRAY_START);
-    }
-
-    @Override
-    public void readArrayEnd() {
-        checkToken(peek(), TokenType.ARRAY_END);
-        pop(Token.ARRAY_END);
-    }
-
-    @Override
-    public String readString() {
-        checkToken(peek(), TokenType.STRING);
-        return pop(StringToken.class).value();
-    }
-
-    @Override
-    public boolean readBoolean() {
-        checkToken(peek(), TokenType.BOOLEAN);
-        return pop(BooleanToken.class).booleanValue();
-    }
-
-    @Override
-    public int readInt() {
-        checkToken(peek(), TokenType.INT);
-        return pop(IntToken.class).intValue();
-    }
-
-    @Override
-    public long readLong() {
-        checkToken(peek(), TokenType.LONG);
-        return pop(LongToken.class).longValue();
-    }
-
-    @Override
-    public double readDouble() {
-        checkToken(peek(), TokenType.DOUBLE);
-        return pop(DoubleToken.class).doubleValue();
-    }
-
-    @Override
-    public byte[] readBinary() {
-        checkToken(peek(), TokenType.BINARY);
-        return pop(BinaryToken.class).value();
-    }
-
-    @Override
-    public void readNull() {
-        checkToken(peek(), TokenType.NULL);
-        pop(ScalarToken.NULL);
+        @SuppressWarnings("unchecked")
+        ValuedToken<T> token = (ValuedToken<T>) tokenizer.next();
+        return token.value();
     }
 
     @Override

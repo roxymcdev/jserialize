@@ -1,35 +1,64 @@
 package net.roxymc.jserialize;
 
 import net.roxymc.jserialize.token.TokenType;
+import net.roxymc.jserialize.token.TokenTypes;
 
 import java.io.IOException;
 
 public interface Reader {
     TokenType peek() throws IOException;
 
-    String readName() throws IOException;
+    void read(TokenType.NonValued tokenType) throws IOException;
 
-    void readObjectStart() throws IOException;
+    <T> T read(TokenType.Valued<T> tokenType) throws IOException;
 
-    void readObjectEnd() throws IOException;
+    default String readName() throws IOException {
+        return read(TokenTypes.NAME);
+    }
 
-    void readArrayStart() throws IOException;
+    default void readObjectStart() throws IOException {
+        read(TokenTypes.OBJECT_START);
+    }
 
-    void readArrayEnd() throws IOException;
+    default void readObjectEnd() throws IOException {
+        read(TokenTypes.OBJECT_END);
+    }
 
-    String readString() throws IOException;
+    default void readArrayStart() throws IOException {
+        read(TokenTypes.ARRAY_START);
+    }
 
-    boolean readBoolean() throws IOException;
+    default void readArrayEnd() throws IOException {
+        read(TokenTypes.ARRAY_END);
+    }
 
-    int readInt() throws IOException;
+    default String readString() throws IOException {
+        return read(TokenTypes.STRING);
+    }
 
-    long readLong() throws IOException;
+    default boolean readBoolean() throws IOException {
+        return read(TokenTypes.BOOLEAN);
+    }
 
-    double readDouble() throws IOException;
+    default int readInt() throws IOException {
+        return read(TokenTypes.INT);
+    }
 
-    byte[] readBinary() throws IOException;
+    default long readLong() throws IOException {
+        return read(TokenTypes.LONG);
+    }
 
-    void readNull() throws IOException;
+    default double readDouble() throws IOException {
+        return read(TokenTypes.DOUBLE);
+    }
+
+    default byte[] readBinary() throws IOException {
+        return read(TokenTypes.BINARY);
+    }
+
+    default void readNull() throws IOException {
+        read(TokenTypes.NULL);
+    }
 
     void skipValue() throws IOException;
 }

@@ -1,7 +1,7 @@
 package net.roxymc.jserialize.format.configurate;
 
 import net.roxymc.jserialize.token.AbstractValueAccessor;
-import net.roxymc.jserialize.token.ScalarToken;
+import net.roxymc.jserialize.token.Token;
 import net.roxymc.jserialize.token.TokenType;
 import org.jspecify.annotations.Nullable;
 import org.spongepowered.configurate.ConfigurationNode;
@@ -65,7 +65,7 @@ final class ConfigurationNodeAccessor extends AbstractValueAccessor<Configuratio
     }
 
     @Override
-    public ScalarToken<?> toToken(ConfigurationNode value) {
+    public Token toToken(ConfigurationNode value) {
         if (value.isMap() || value.isList()) {
             throw new IllegalArgumentException("value is not a scalar");
         }

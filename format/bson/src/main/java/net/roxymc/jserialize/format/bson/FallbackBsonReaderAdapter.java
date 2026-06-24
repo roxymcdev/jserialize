@@ -1,11 +1,15 @@
 package net.roxymc.jserialize.format.bson;
 
 import net.roxymc.jserialize.AbstractReader;
+import net.roxymc.jserialize.format.TokenTypeInfo;
 import net.roxymc.jserialize.token.TokenType;
+import net.roxymc.jserialize.token.TokenTypes;
 import org.bson.BsonReader;
 import org.bson.BsonType;
+import org.bson.BsonWriter;
 import org.jspecify.annotations.Nullable;
 
+import java.io.IOException;
 import java.util.ArrayDeque;
 import java.util.Deque;
 
@@ -44,41 +48,61 @@ final class FallbackBsonReaderAdapter extends AbstractReader implements BsonRead
                 if (container == null) {
                     // that's the best way we can handle this case,
                     // unfortunately BsonReader interface doesn't expose much info
-                    return tokenType = TokenType.END;
+                    return tokenType = TokenTypes.END;
                 }
 
-                return tokenType = (container == Container.OBJECT ? TokenType.OBJECT_END : TokenType.ARRAY_END);
+                return tokenType = (container == Container.OBJECT ? TokenTypes.OBJECT_END : TokenTypes.ARRAY_END);
             }
 
-            if (containerStack.peek() == Container.OBJECT && lastTokenType != TokenType.NAME) {
-                return tokenType = TokenType.NAME;
+            if (containerStack.peek() == Container.OBJECT && lastTokenType != TokenTypes.NAME) {
+                return tokenType = TokenTypes.NAME;
             }
 
-            switch (bsonType) {
-                case DOCUMENT:
-                    return tokenType = TokenType.OBJECT_START;
-                case ARRAY:
-                    return tokenType = TokenType.ARRAY_START;
-                case BOOLEAN:
-                    return tokenType = TokenType.BOOLEAN;
-                case STRING:
-                    return tokenType = TokenType.STRING;
-                case INT32:
-                    return tokenType = TokenType.INT;
-                case INT64:
-                    return tokenType = TokenType.LONG;
-                case DOUBLE:
-                    return tokenType = TokenType.DOUBLE;
-                case BINARY:
-                    return tokenType = TokenType.BINARY;
-                case NULL:
-                    return tokenType = TokenType.NULL;
-                default:
-                    return tokenType = TokenType.UNKNOWN;
-            }
+            return tokenType = BsonUtils.TOKEN_TYPES.fromNative(bsonType);
         } finally {
             lastTokenType = tokenType;
         }
+    }
+
+    @Override
+    public void read(TokenType.NonValued tokenType) throws IOException {
+        checkToken(peek(), tokenType);
+
+        if (tokenType == TokenTypes.OBJECT_START) {
+            readObjectStart();
+            return;
+        } else if (tokenType == TokenTypes.OBJECT_END) {
+            readObjectEnd();
+            return;
+        } else if (tokenType == TokenTypes.ARRAY_START) {
+            readArrayStart();
+            return;
+        } else if (tokenType == TokenTypes.ARRAY_END) {
+            readArrayEnd();
+            return;
+        }
+
+        TokenTypeInfo.NonValued<BsonReader, BsonWriter> info = BsonUtils.TOKEN_TYPES.get(tokenType);
+        if (info == null) {
+            throw notSupported(tokenType);
+        }
+
+        info.read(reader);
+        resetToken();
+    }
+
+    @Override
+    public <T> T read(TokenType.Valued<T> tokenType) throws IOException {
+        checkToken(peek(), tokenType);
+
+        TokenTypeInfo.Valued<BsonReader, BsonWriter, T> info = BsonUtils.TOKEN_TYPES.get(tokenType);
+        if (info == null) {
+            throw notSupported(tokenType);
+        }
+
+        T value = info.read(reader);
+        resetToken();
+        return value;
     }
 
     void resetToken() {
@@ -93,17 +117,8 @@ final class FallbackBsonReaderAdapter extends AbstractReader implements BsonRead
     }
 
     @Override
-    public String readName() {
-        checkToken(peek(), TokenType.NAME);
-
-        String value = reader.readName();
-        resetToken();
-        return value;
-    }
-
-    @Override
     public void readObjectStart() {
-        checkToken(peek(), TokenType.OBJECT_START);
+        checkToken(peek(), TokenTypes.OBJECT_START);
 
         reader.readStartDocument();
         containerStack.push(Container.OBJECT);
@@ -112,7 +127,7 @@ final class FallbackBsonReaderAdapter extends AbstractReader implements BsonRead
 
     @Override
     public void readObjectEnd() {
-        checkToken(peek(), TokenType.OBJECT_END);
+        checkToken(peek(), TokenTypes.OBJECT_END);
 
         reader.readEndDocument();
         containerStack.pop();
@@ -121,7 +136,7 @@ final class FallbackBsonReaderAdapter extends AbstractReader implements BsonRead
 
     @Override
     public void readArrayStart() {
-        checkToken(peek(), TokenType.ARRAY_START);
+        checkToken(peek(), TokenTypes.ARRAY_START);
 
         reader.readStartArray();
         containerStack.push(Container.ARRAY);
@@ -130,7 +145,7 @@ final class FallbackBsonReaderAdapter extends AbstractReader implements BsonRead
 
     @Override
     public void readArrayEnd() {
-        checkToken(peek(), TokenType.ARRAY_END);
+        checkToken(peek(), TokenTypes.ARRAY_END);
 
         reader.readEndArray();
         containerStack.pop();
@@ -138,17 +153,8 @@ final class FallbackBsonReaderAdapter extends AbstractReader implements BsonRead
     }
 
     @Override
-    public String readString() {
-        checkToken(peek(), TokenType.STRING);
-
-        String value = reader.readString();
-        resetToken();
-        return value;
-    }
-
-    @Override
     public boolean readBoolean() {
-        checkToken(peek(), TokenType.BOOLEAN);
+        checkToken(peek(), TokenTypes.BOOLEAN);
 
         boolean value = reader.readBoolean();
         resetToken();
@@ -157,7 +163,7 @@ final class FallbackBsonReaderAdapter extends AbstractReader implements BsonRead
 
     @Override
     public int readInt() {
-        checkToken(peek(), TokenType.INT);
+        checkToken(peek(), TokenTypes.INT);
 
         int value = reader.readInt32();
         resetToken();
@@ -166,7 +172,7 @@ final class FallbackBsonReaderAdapter extends AbstractReader implements BsonRead
 
     @Override
     public long readLong() {
-        checkToken(peek(), TokenType.LONG);
+        checkToken(peek(), TokenTypes.LONG);
 
         long value = reader.readInt64();
         resetToken();
@@ -175,7 +181,7 @@ final class FallbackBsonReaderAdapter extends AbstractReader implements BsonRead
 
     @Override
     public double readDouble() {
-        checkToken(peek(), TokenType.DOUBLE);
+        checkToken(peek(), TokenTypes.DOUBLE);
 
         double value = reader.readDouble();
         resetToken();
@@ -183,25 +189,8 @@ final class FallbackBsonReaderAdapter extends AbstractReader implements BsonRead
     }
 
     @Override
-    public byte[] readBinary() {
-        checkToken(peek(), TokenType.BINARY);
-
-        byte[] value = reader.readBinaryData().getData();
-        resetToken();
-        return value;
-    }
-
-    @Override
-    public void readNull() {
-        checkToken(peek(), TokenType.NULL);
-
-        reader.readNull();
-        resetToken();
-    }
-
-    @Override
     public void skipValue() {
-        checkToken(peek(), type -> type.kind().isValue());
+        checkToken(peek(), type -> type.kind().isHasValue());
 
         reader.skipValue();
         resetToken();
