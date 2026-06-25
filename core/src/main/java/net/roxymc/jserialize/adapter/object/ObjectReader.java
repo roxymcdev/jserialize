@@ -18,6 +18,7 @@ import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
 import java.lang.reflect.AnnotatedType;
+import java.util.Map;
 
 import static io.leangen.geantyref.GenericTypeReflector.*;
 
@@ -102,8 +103,8 @@ final class ObjectReader<T, R> {
         reader.readObjectEnd();
 
         if (extrasMap != null) {
-            builder.property(extrasProperty, parent -> extrasMap.asMap(
-                    context.withParent(parent).withKey(extrasProperty.name())
+            builder.property(extrasProperty, (PropertyValue.Mutable<Map<?, ?>>) (parent, instance) -> extrasMap.asMap(
+                    instance, context.withParent(parent).withKey(extrasProperty.name())
             ));
         }
 

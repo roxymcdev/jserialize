@@ -49,7 +49,7 @@ final class ConfigurateUtils implements FormatUtils<ConfigurationNode> {
     @Override
     public MapLike<ConfigurationNode> createMap(TypeAdapters typeAdapters, AnnotatedType mapType) {
         TypeRef<Map<?, ?>> typeRef = TypeRef.of(mapType);
-        TypeAdapter<Map<?, ?>> typeAdapter = typeAdapters.getOrThrow(typeRef);
+        TypeAdapter<Map<?, ?>> mapAdapter = typeAdapters.getOrThrow(typeRef);
 
         return new MapLike<>() {
             private final ConfigurationNode node = CommentedConfigurationNode.root(
@@ -67,14 +67,20 @@ final class ConfigurateUtils implements FormatUtils<ConfigurationNode> {
             public void putAll(Map<?, ?> map, WriteContext ctx) throws IOException {
                 CommentedConfigurationNode result = CommentedConfigurationNode.root(node.options());
 
-                typeAdapter.write(newWriter0(result), typeRef, map, ctx);
+                mapAdapter.write(newWriter0(result), typeRef, map, ctx);
 
                 node.mergeFrom(result);
             }
 
             @Override
-            public @Nullable Map<?, ?> asMap(ReadContext ctx) throws IOException {
-                return typeAdapter.read(newReader0(node), typeRef, ctx);
+            public @Nullable Map<?, ?> asMap(@Nullable Map<?, ?> instance, ReadContext ctx) throws IOException {
+                Reader readerAdapter = newReader0(node);
+
+                if (!(mapAdapter instanceof TypeAdapter.Mutable)) {
+                    return mapAdapter.read(readerAdapter, typeRef, ctx);
+                }
+
+                return ((TypeAdapter.Mutable<Map<?, ?>>) mapAdapter).mutate(readerAdapter, typeRef, instance, ctx);
             }
 
             @Override

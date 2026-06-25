@@ -14,7 +14,7 @@ public interface MapLike<R> {
 
     void putAll(Map<?, ?> map, WriteContext ctx) throws IOException;
 
-    @Nullable Map<?, ?> asMap(ReadContext ctx) throws IOException;
+    @Nullable Map<?, ?> asMap(@Nullable Map<?, ?> instance, ReadContext ctx) throws IOException;
 
     Map<String, R> asRawMap();
 }

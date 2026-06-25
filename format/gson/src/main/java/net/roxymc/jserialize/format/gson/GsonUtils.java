@@ -62,9 +62,15 @@ final class GsonUtils implements FormatUtils<JsonElement> {
             }
 
             @Override
-            public @Nullable Map<?, ?> asMap(ReadContext ctx) throws IOException {
+            public @Nullable Map<?, ?> asMap(@Nullable Map<?, ?> instance, ReadContext ctx) throws IOException {
                 try (JsonTreeReader reader = new JsonTreeReader(object)) {
-                    return mapAdapter.read(new GsonReaderAdapter(reader), typeRef, ctx);
+                    Reader readerAdapter = new GsonReaderAdapter(reader);
+
+                    if (!(mapAdapter instanceof TypeAdapter.Mutable)) {
+                        return mapAdapter.read(readerAdapter, typeRef, ctx);
+                    }
+
+                    return ((TypeAdapter.Mutable<Map<?, ?>>) mapAdapter).mutate(readerAdapter, typeRef, instance, ctx);
                 }
             }
 

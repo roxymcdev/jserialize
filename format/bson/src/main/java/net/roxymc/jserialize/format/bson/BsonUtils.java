@@ -72,9 +72,15 @@ final class BsonUtils implements FormatUtils<BsonValue> {
             }
 
             @Override
-            public @Nullable Map<?, ?> asMap(ReadContext ctx) throws IOException {
+            public @Nullable Map<?, ?> asMap(@Nullable Map<?, ?> instance, ReadContext ctx) throws IOException {
                 try (BsonDocumentReader reader = new BsonDocumentReader(document)) {
-                    return mapAdapter.read(new StandardBsonReaderAdapter(reader), typeRef, ctx);
+                    Reader readerAdapter = new StandardBsonReaderAdapter(reader);
+
+                    if (!(mapAdapter instanceof TypeAdapter.Mutable)) {
+                        return mapAdapter.read(readerAdapter, typeRef, ctx);
+                    }
+
+                    return ((TypeAdapter.Mutable<Map<?, ?>>) mapAdapter).mutate(readerAdapter, typeRef, instance, ctx);
                 }
             }
 
