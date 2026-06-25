@@ -4,6 +4,7 @@ import io.leangen.geantyref.GenericTypeReflector;
 import net.roxymc.jserialize.Reader;
 import net.roxymc.jserialize.Writer;
 import net.roxymc.jserialize.type.TypeRef;
+import net.roxymc.jserialize.util.TypeUtils;
 import org.jetbrains.annotations.Contract;
 import org.jspecify.annotations.Nullable;
 
@@ -63,6 +64,18 @@ public interface TypeAdapter<T> extends TypeReader<T>, TypeWriter<T> {
 
         static <T> Factory exactRaw(Class<? super T> type, TypeAdapter<T> adapter) {
             return predicate(subtype -> type.equals(subtype.getRawType()), adapter);
+        }
+
+        static <T> Factory exactBoxed(Class<? super T> type, TypeAdapter<T> adapter) {
+            if (TypeUtils.isPrimitive(type)) {
+                throw new IllegalArgumentException("type cannot be primitive");
+            }
+
+            return predicate(subtype -> type.equals(GenericTypeReflector.box(subtype.getRawType())), adapter);
+        }
+
+        static Factory composite(Factory... factories) {
+            return new CompositeTypeAdapterFactory(factories);
         }
 
         <T> @Nullable TypeAdapter<T> create(TypeRef<T> type, TypeAdapters adapters);

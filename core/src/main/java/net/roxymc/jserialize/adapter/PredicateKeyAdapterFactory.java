@@ -17,7 +17,7 @@ final class PredicateKeyAdapterFactory implements KeyAdapter.Factory {
     }
 
     @Override
-    public <T> @Nullable KeyAdapter<T> create(TypeRef<T> type, TypeAdapters adapters) {
+    public <T> @Nullable KeyAdapter<T> createKey(TypeRef<T> type, TypeAdapters adapters) {
         @SuppressWarnings("unchecked")
         KeyAdapter<T> adapter = (KeyAdapter<T>) this.adapter;
         return predicate.test(type) ? adapter : null;

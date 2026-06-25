@@ -3,6 +3,7 @@ package net.roxymc.jserialize.adapter.scalar;
 import net.roxymc.jserialize.adapter.KeyAdapter;
 import net.roxymc.jserialize.adapter.TypeAdapters;
 import net.roxymc.jserialize.type.TypeRef;
+import net.roxymc.jserialize.util.TypeUtils;
 import org.jspecify.annotations.Nullable;
 
 import static net.roxymc.jserialize.util.ObjectUtils.nonNull;
@@ -10,10 +11,9 @@ import static net.roxymc.jserialize.util.ObjectUtils.nonNull;
 public final class EnumKeyAdapter implements KeyAdapter<Enum<?>> {
     private static final KeyAdapter.Factory FACTORY = new KeyAdapter.Factory() {
         @Override
-        public <T> @Nullable KeyAdapter<T> create(TypeRef<T> type, TypeAdapters adapters) {
-            @SuppressWarnings("unchecked")
-            Class<? extends Enum<?>> enumType = (Class<? extends Enum<?>>) type.getRawType();
-            if (!enumType.isEnum()) {
+        public <T> @Nullable KeyAdapter<T> createKey(TypeRef<T> type, TypeAdapters adapters) {
+            Class<? super T> enumType = type.getRawType();
+            if (!TypeUtils.isEnum(enumType)) {
                 return null;
             }
 
@@ -23,9 +23,9 @@ public final class EnumKeyAdapter implements KeyAdapter<Enum<?>> {
         }
     };
 
-    private final Class<? extends Enum<?>> enumType;
+    private final Class<?> enumType;
 
-    private EnumKeyAdapter(Class<? extends Enum<?>> enumType) {
+    private EnumKeyAdapter(Class<?> enumType) {
         this.enumType = enumType;
     }
 
@@ -35,13 +35,7 @@ public final class EnumKeyAdapter implements KeyAdapter<Enum<?>> {
 
     @Override
     public @Nullable Enum<?> decode(@Nullable String value) {
-        if (value == null) {
-            return null;
-        }
-
-        @SuppressWarnings({"unchecked", "rawtypes"})
-        Enum<?> resolved = Enum.valueOf((Class) enumType, value);
-        return resolved;
+        return value != null ? Enum.valueOf(enumType.asSubclass(Enum.class), value) : null;
     }
 
     @Override

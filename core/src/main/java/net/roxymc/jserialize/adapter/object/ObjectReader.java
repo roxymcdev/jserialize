@@ -1,7 +1,7 @@
 package net.roxymc.jserialize.adapter.object;
 
 import net.roxymc.jserialize.Reader;
-import net.roxymc.jserialize.adapter.KeyAdapter;
+import net.roxymc.jserialize.adapter.KeyDecoder;
 import net.roxymc.jserialize.adapter.ReadContext;
 import net.roxymc.jserialize.adapter.TypeAdapter;
 import net.roxymc.jserialize.creator.InstanceCreator;
@@ -58,9 +58,9 @@ final class ObjectReader<T, R> {
             }
 
             TypeRef<?> typeRef = TypeRef.of(type);
-            KeyAdapter<?> adapter = context.typeAdapters().getKeyOrThrow(typeRef);
+            KeyDecoder<?> decoder = context.typeAdapters().getKeyOrThrow(typeRef);
 
-            builder.property(property, adapter.decode(context.key()));
+            builder.property(property, decoder.decode(context.key()));
         });
 
         PropertyModel extrasProperty = classModel.properties().get(PropertyKind.EXTRAS);

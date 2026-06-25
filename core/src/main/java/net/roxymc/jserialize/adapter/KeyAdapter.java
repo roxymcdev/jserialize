@@ -2,6 +2,7 @@ package net.roxymc.jserialize.adapter;
 
 import io.leangen.geantyref.GenericTypeReflector;
 import net.roxymc.jserialize.type.TypeRef;
+import net.roxymc.jserialize.util.TypeUtils;
 import org.jspecify.annotations.Nullable;
 
 import java.util.function.Predicate;
@@ -48,6 +49,18 @@ public interface KeyAdapter<T> extends KeyDecoder<T>, KeyEncoder<T> {
             return predicate(subtype -> type.equals(subtype.getRawType()), adapter);
         }
 
-        <T> @Nullable KeyAdapter<T> create(TypeRef<T> type, TypeAdapters adapters);
+        static <T> Factory exactBoxed(Class<? super T> type, KeyAdapter<T> adapter) {
+            if (TypeUtils.isPrimitive(type)) {
+                throw new IllegalArgumentException("type cannot be primitive");
+            }
+
+            return predicate(subtype -> type.equals(GenericTypeReflector.box(subtype.getRawType())), adapter);
+        }
+
+        static Factory composite(Factory... factories) {
+            return new CompositeKeyAdapterFactory(factories);
+        }
+
+        <T> @Nullable KeyAdapter<T> createKey(TypeRef<T> type, TypeAdapters adapters);
     }
 }

@@ -1,7 +1,7 @@
 package net.roxymc.jserialize.adapter.object;
 
 import net.roxymc.jserialize.Writer;
-import net.roxymc.jserialize.adapter.TypeAdapter;
+import net.roxymc.jserialize.adapter.TypeWriter;
 import net.roxymc.jserialize.adapter.WriteContext;
 import net.roxymc.jserialize.model.ClassModel;
 import net.roxymc.jserialize.model.property.GetterRef;
@@ -78,24 +78,23 @@ final class ObjectWriter<T, R> {
             return;
         }
 
-        TypeRef<Object> typeRef = TypeRef.of(type);
-        TypeAdapter<Object> adapter = context.typeAdapters().getOrThrow(typeRef);
-
         String name = resolveWriteName(property);
         writer.writeName(name);
-        adapter.write(writer, typeRef, value, context);
+
+        context.write(writer, TypeRef.of(type), value);
     }
 
     private void writeExtrasProperty(Writer writer, AnnotatedType type, Object value) throws IOException {
         MapLike<R> extrasMap = formatUtils.createMap(context.typeAdapters(), type);
         extrasMap.putAll((Map<?, ?>) value, context);
 
-        TypeRef<R> typeRef = TypeRef.of(formatUtils.rawType());
-        TypeAdapter<R> adapter = context.typeAdapters().getOrThrow(typeRef);
+        TypeRef<R> rawType = TypeRef.of(formatUtils.rawType());
+        TypeWriter<R> rawWriter = context.typeAdapters().getOrThrow(rawType);
 
         for (Map.Entry<String, R> entry : extrasMap.asRawMap().entrySet()) {
             writer.writeName(entry.getKey());
-            adapter.write(writer, typeRef, entry.getValue(), context);
+
+            rawWriter.write(writer, rawType, entry.getValue(), context);
         }
     }
 

@@ -18,7 +18,7 @@ final class TypeAdaptersImpl implements TypeAdapters {
     @SuppressWarnings({"NullableProblems", "DataFlowIssue"}) // IntelliJ has existential issues
     private TypeAdaptersImpl(BuilderImpl builder) {
         this.typeAdapters = new Registry<>(builder.typeAdapters, (factory, type) -> factory.create(type, this));
-        this.keyAdapters = new Registry<>(builder.keyAdapters, (factory, type) -> factory.create(type, this));
+        this.keyAdapters = new Registry<>(builder.keyAdapters, (factory, type) -> factory.createKey(type, this));
     }
 
     @Override
@@ -33,6 +33,32 @@ final class TypeAdaptersImpl implements TypeAdapters {
         @SuppressWarnings("unchecked")
         KeyAdapter<T> adapter = (KeyAdapter<T>) keyAdapters.get(nonNull(type, "type")).orElse(null);
         return adapter;
+    }
+
+    @Override
+    public @Nullable <T> TypeAdapter<T> create(TypeRef<T> type, TypeAdapters adapters) {
+        for (TypeAdapter.Factory factory : typeAdapters.factories) {
+            TypeAdapter<T> adapter = factory.create(type, this);
+
+            if (adapter != null) {
+                return adapter;
+            }
+        }
+
+        return null;
+    }
+
+    @Override
+    public @Nullable <T> KeyAdapter<T> createKey(TypeRef<T> type, TypeAdapters adapters) {
+        for (KeyAdapter.Factory factory : keyAdapters.factories) {
+            KeyAdapter<T> adapter = factory.createKey(type, this);
+
+            if (adapter != null) {
+                return adapter;
+            }
+        }
+
+        return null;
     }
 
     private static final class Registry<F, A> {
@@ -80,11 +106,10 @@ final class TypeAdaptersImpl implements TypeAdapters {
 
         @Override
         public Builder addAll(TypeAdapters adapters) {
-            TypeAdaptersImpl adaptersImpl = (TypeAdaptersImpl) nonNull(adapters, "adapters");
+            nonNull(adapters, "adapters");
 
-            typeAdapters.addAll(adaptersImpl.typeAdapters.factories);
-            keyAdapters.addAll(adaptersImpl.keyAdapters.factories);
-
+            typeAdapters.add(adapters);
+            keyAdapters.add(adapters);
             return this;
         }
 

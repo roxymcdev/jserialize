@@ -2,10 +2,7 @@ package net.roxymc.jserialize.adapter.map;
 
 import net.roxymc.jserialize.Reader;
 import net.roxymc.jserialize.Writer;
-import net.roxymc.jserialize.adapter.KeyAdapter;
-import net.roxymc.jserialize.adapter.ReadContext;
-import net.roxymc.jserialize.adapter.TypeAdapter;
-import net.roxymc.jserialize.adapter.WriteContext;
+import net.roxymc.jserialize.adapter.*;
 import net.roxymc.jserialize.token.TokenTypes;
 import net.roxymc.jserialize.type.TypeRef;
 import org.jspecify.annotations.NonNull;
@@ -17,6 +14,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static net.roxymc.jserialize.util.ObjectUtils.nonNull;
+import static net.roxymc.jserialize.util.TypeChecks.checkAssignable;
 
 public final class MapAdapter implements TypeAdapter.Mutable<Map<?, ?>> {
     private static final TypeAdapter.Factory FACTORY = factory(DefaultMapProvider.INSTANCE);
@@ -52,6 +50,8 @@ public final class MapAdapter implements TypeAdapter.Mutable<Map<?, ?>> {
     private <K extends @Nullable Object, V extends @Nullable Object> @Nullable Map<K, V> mutate0(
             Reader reader, TypeRef<? extends Map<?, ?>> type, @Nullable Map<K, V> map, ReadContext ctx
     ) throws IOException {
+        checkAssignable(Map.class, type.getRawType());
+
         if (reader.peek() == TokenTypes.NULL) {
             reader.readNull();
             return map;
@@ -63,16 +63,16 @@ public final class MapAdapter implements TypeAdapter.Mutable<Map<?, ?>> {
             map = mapType.createMap(providers);
         }
 
-        KeyAdapter<@NonNull K> keyAdapter = mapType.keyAdapter(ctx.typeAdapters());
-        TypeAdapter<@NonNull V> valueAdapter = mapType.valueAdapter(ctx.typeAdapters());
+        KeyDecoder<@NonNull K> keyDecoder = ctx.typeAdapters().getKeyOrThrow(mapType.keyType);
+        TypeReader<@NonNull V> valueReader = ctx.typeAdapters().getOrThrow(mapType.valueType);
 
         reader.readObjectStart();
 
         while (reader.peek() == TokenTypes.NAME) {
             String name = reader.readName();
 
-            K key = keyAdapter.decode(name);
-            V value = valueAdapter.read(reader, mapType.valueType, ctx.withKey(name));
+            K key = keyDecoder.decode(name);
+            V value = valueReader.read(reader, mapType.valueType, ctx.withKey(name));
 
             map.put(key, value);
         }
@@ -92,6 +92,8 @@ public final class MapAdapter implements TypeAdapter.Mutable<Map<?, ?>> {
     private <K extends @Nullable Object, V extends @Nullable Object> void write0(
             Writer writer, TypeRef<? extends Map<?, ?>> type, @Nullable Map<K, V> map, WriteContext ctx
     ) throws IOException {
+        checkAssignable(Map.class, type.getRawType());
+
         if (map == null) {
             writer.writeNull();
             return;
@@ -99,16 +101,16 @@ public final class MapAdapter implements TypeAdapter.Mutable<Map<?, ?>> {
 
         MapType<K, V> mapType = resolveMapType(type);
 
-        KeyAdapter<@NonNull K> keyAdapter = mapType.keyAdapter(ctx.typeAdapters());
-        TypeAdapter<@NonNull V> valueAdapter = mapType.valueAdapter(ctx.typeAdapters());
+        KeyEncoder<@NonNull K> keyEncoder = ctx.typeAdapters().getKeyOrThrow(mapType.keyType);
+        TypeWriter<@NonNull V> valueWriter = ctx.typeAdapters().getOrThrow(mapType.valueType);
 
         writer.writeObjectStart();
 
         for (Map.Entry<K, V> entry : map.entrySet()) {
-            String name = keyAdapter.encode(entry.getKey());
+            String name = keyEncoder.encode(entry.getKey());
             writer.writeName(name);
 
-            valueAdapter.write(writer, mapType.valueType, entry.getValue(), ctx);
+            valueWriter.write(writer, mapType.valueType, entry.getValue(), ctx);
         }
 
         writer.writeObjectEnd();

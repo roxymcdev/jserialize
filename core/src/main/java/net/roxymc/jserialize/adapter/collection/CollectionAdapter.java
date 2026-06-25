@@ -2,9 +2,7 @@ package net.roxymc.jserialize.adapter.collection;
 
 import net.roxymc.jserialize.Reader;
 import net.roxymc.jserialize.Writer;
-import net.roxymc.jserialize.adapter.ReadContext;
-import net.roxymc.jserialize.adapter.TypeAdapter;
-import net.roxymc.jserialize.adapter.WriteContext;
+import net.roxymc.jserialize.adapter.*;
 import net.roxymc.jserialize.token.TokenTypes;
 import net.roxymc.jserialize.type.TypeRef;
 import org.jspecify.annotations.NonNull;
@@ -17,6 +15,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static net.roxymc.jserialize.util.ObjectUtils.nonNull;
+import static net.roxymc.jserialize.util.TypeChecks.checkAssignable;
 
 public final class CollectionAdapter implements TypeAdapter.Mutable<Collection<?>> {
     private static final TypeAdapter.Factory FACTORY = factory(DefaultCollectionProvider.INSTANCE);
@@ -52,6 +51,8 @@ public final class CollectionAdapter implements TypeAdapter.Mutable<Collection<?
     private <E extends @Nullable Object> @Nullable Collection<E> mutate0(
             Reader reader, TypeRef<? extends Collection<?>> type, @Nullable Collection<E> collection, ReadContext ctx
     ) throws IOException {
+        checkAssignable(Collection.class, type.getRawType());
+
         if (reader.peek() == TokenTypes.NULL) {
             reader.readNull();
             return collection;
@@ -63,12 +64,12 @@ public final class CollectionAdapter implements TypeAdapter.Mutable<Collection<?
             collection = collectionType.createCollection(providers);
         }
 
-        TypeAdapter<@NonNull E> elementAdapter = collectionType.elementAdapter(ctx.typeAdapters());
+        TypeReader<@NonNull E> elementReader = ctx.typeAdapters().getOrThrow(collectionType.elementType);
 
         reader.readArrayStart();
 
         for (int index = 0; reader.peek() != TokenTypes.ARRAY_END; index++) {
-            E element = elementAdapter.read(reader, collectionType.elementType, ctx);
+            E element = elementReader.read(reader, collectionType.elementType, ctx);
 
             collection.add(element);
         }
@@ -88,6 +89,8 @@ public final class CollectionAdapter implements TypeAdapter.Mutable<Collection<?
     private <E extends @Nullable Object> void write0(
             Writer writer, TypeRef<? extends Collection<?>> type, @Nullable Collection<E> collection, WriteContext ctx
     ) throws IOException {
+        checkAssignable(Collection.class, type.getRawType());
+
         if (collection == null) {
             writer.writeNull();
             return;
@@ -95,12 +98,12 @@ public final class CollectionAdapter implements TypeAdapter.Mutable<Collection<?
 
         CollectionType<E> collectionType = resolveCollectionType(type);
 
-        TypeAdapter<@NonNull E> elementAdapter = collectionType.elementAdapter(ctx.typeAdapters());
+        TypeWriter<@NonNull E> elementWriter = ctx.typeAdapters().getOrThrow(collectionType.elementType);
 
         writer.writeArrayStart();
 
         for (E element : collection) {
-            elementAdapter.write(writer, collectionType.elementType, element, ctx);
+            elementWriter.write(writer, collectionType.elementType, element, ctx);
         }
 
         writer.writeArrayEnd();

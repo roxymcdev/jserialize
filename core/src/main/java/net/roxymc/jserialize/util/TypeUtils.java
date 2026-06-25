@@ -28,4 +28,8 @@ public final class TypeUtils {
 
         return GenericTypeReflector.annotate(boxedType, type.getAnnotations());
     }
+
+    public static boolean isEnum(Class<?> type) {
+        return type.isEnum() || (type.getSuperclass() != null && type.getSuperclass().isEnum());
+    }
 }

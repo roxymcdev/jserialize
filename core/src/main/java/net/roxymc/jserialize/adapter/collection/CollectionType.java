@@ -1,11 +1,8 @@
 package net.roxymc.jserialize.adapter.collection;
 
-import net.roxymc.jserialize.adapter.TypeAdapter;
-import net.roxymc.jserialize.adapter.TypeAdapters;
 import net.roxymc.jserialize.type.TypeRef;
 import net.roxymc.jserialize.util.VarHandles;
 import org.jetbrains.annotations.UnknownNullability;
-import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 import java.lang.invoke.VarHandle;
@@ -19,24 +16,21 @@ import static io.leangen.geantyref.GenericTypeReflector.getExactSuperType;
 final class CollectionType<E extends @UnknownNullability Object> {
     private static final VarHandle COLLECTION_FACTORY_HANDLE = VarHandles.find(CollectionType.class, "collectionFactory", CollectionFactory.class);
 
-    final TypeRef<? extends Collection<E>> collectionType;
+    private final TypeRef<? extends Collection<E>> collectionType;
     final TypeRef<E> elementType;
+
     private @Nullable CollectionFactory<E> collectionFactory;
 
     CollectionType(TypeRef<? extends Collection<?>> collectionType) {
         AnnotatedType type = getExactSuperType(capture(collectionType.getAnnotatedType()), Collection.class);
         if (!(type instanceof AnnotatedParameterizedType)) {
-            throw new IllegalStateException(collectionType.getType() + " must be parameterized ");
+            throw new IllegalStateException(collectionType.getType() + " must be a parameterized Collection");
         }
 
         AnnotatedParameterizedType ptype = (AnnotatedParameterizedType) type;
 
         this.collectionType = TypeRef.of(ptype);
         this.elementType = TypeRef.of(ptype.getAnnotatedActualTypeArguments()[0]);
-    }
-
-    TypeAdapter<@NonNull E> elementAdapter(TypeAdapters adapters) {
-        return adapters.getOrThrow(elementType);
     }
 
     @SuppressWarnings("unchecked")
