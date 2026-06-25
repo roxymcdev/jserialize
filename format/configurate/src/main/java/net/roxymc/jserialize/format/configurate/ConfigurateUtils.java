@@ -8,10 +8,8 @@ import net.roxymc.jserialize.adapter.TypeAdapters;
 import net.roxymc.jserialize.adapter.WriteContext;
 import net.roxymc.jserialize.adapter.object.FormatUtils;
 import net.roxymc.jserialize.adapter.object.MapLike;
-import net.roxymc.jserialize.token.reader.TokenReader;
-import net.roxymc.jserialize.token.reader.ValueTokenizer;
-import net.roxymc.jserialize.token.writer.TokenWriter;
-import net.roxymc.jserialize.token.writer.ValueDetokenizer;
+import net.roxymc.jserialize.format.tree.TreeReader;
+import net.roxymc.jserialize.format.tree.TreeWriter;
 import net.roxymc.jserialize.type.TypeRef;
 import org.jspecify.annotations.Nullable;
 import org.spongepowered.configurate.CommentedConfigurationNode;
@@ -29,11 +27,11 @@ final class ConfigurateUtils implements FormatUtils<ConfigurationNode> {
     }
 
     static Reader newReader0(ConfigurationNode node) {
-        return new TokenReader<>(new ValueTokenizer<>(node, ConfigurationNodeAccessor.INSTANCE));
+        return new TreeReader<>(ConfigurationNodeAccessor.INSTANCE, node);
     }
 
     static Writer newWriter0(ConfigurationNode node) {
-        return new TokenWriter<>(new ValueDetokenizer<>(node, ConfigurationNodeAccessor.INSTANCE));
+        return new TreeWriter<>(ConfigurationNodeAccessor.INSTANCE, node);
     }
 
     @Override
