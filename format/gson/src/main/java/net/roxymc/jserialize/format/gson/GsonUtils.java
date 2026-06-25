@@ -26,7 +26,7 @@ import java.util.Map;
 
 final class GsonUtils implements FormatUtils<JsonElement> {
     static final TokenTypeRegistry<JsonToken, JsonReader, JsonWriter> TOKEN_TYPES = TokenTypeRegistry.create(builder -> builder
-            .bind(TokenTypes.NAME, null, JsonReader::nextName, JsonWriter::name)
+            .bind(TokenTypes.NAME, JsonToken.NAME, JsonReader::nextName, JsonWriter::name)
             .bind(TokenTypes.OBJECT_START, JsonToken.BEGIN_OBJECT, JsonReader::beginObject, JsonWriter::beginObject)
             .bind(TokenTypes.OBJECT_END, JsonToken.END_OBJECT, JsonReader::endObject, JsonWriter::endObject)
             .bind(TokenTypes.ARRAY_START, JsonToken.BEGIN_ARRAY, JsonReader::beginArray, JsonWriter::beginArray)
