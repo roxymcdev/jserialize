@@ -1,82 +1,89 @@
 package net.roxymc.jserialize.token;
 
-import net.roxymc.jserialize.Reader;
-import net.roxymc.jserialize.util.IOFunction;
-import org.jspecify.annotations.Nullable;
+import org.jetbrains.annotations.ApiStatus;
 
-import java.io.IOException;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
-public enum TokenType {
-    NAME(Kind.MARKER, reader -> new NameToken(reader.readName())),
-    OBJECT_START(Kind.VALUE, reader -> {
-        reader.readObjectStart();
-        return Token.OBJECT_START;
-    }),
-    OBJECT_END(Kind.MARKER, reader -> {
-        reader.readObjectEnd();
-        return Token.OBJECT_END;
-    }),
-    ARRAY_START(Kind.VALUE, reader -> {
-        reader.readArrayStart();
-        return Token.ARRAY_START;
-    }),
-    ARRAY_END(Kind.MARKER, reader -> {
-        reader.readArrayEnd();
-        return Token.ARRAY_END;
-    }),
-    STRING(Kind.VALUE_SCALAR, reader -> new StringToken(reader.readString())),
-    BOOLEAN(Kind.VALUE_SCALAR, reader -> reader.readBoolean() ? BooleanToken.TRUE : BooleanToken.FALSE),
-    INT(Kind.VALUE_SCALAR, reader -> new IntToken(reader.readInt())),
-    LONG(Kind.VALUE_SCALAR, reader -> new LongToken(reader.readLong())),
-    DOUBLE(Kind.VALUE_SCALAR, reader -> new DoubleToken(reader.readDouble())),
-    NUMBER(Kind.VALUE_SCALAR, reader -> {
-        TokenType peek = reader.peek();
+import static net.roxymc.jserialize.util.ObjectUtils.nonNull;
 
-        switch (peek) {
-            case INT:
-            case LONG:
-                return peek.read(reader);
-            default:
-                return DOUBLE.read(reader);
-        }
-    }),
-    BINARY(Kind.VALUE_SCALAR, reader -> new BinaryToken(reader.readBinary())),
-    NULL(Kind.VALUE_SCALAR, reader -> {
-        reader.readNull();
-        return ScalarToken.NULL;
-    }),
-    UNKNOWN(Kind.VALUE_SCALAR, null),
-    END(Kind.MARKER, null),
-    ;
-
+@ApiStatus.NonExtendable
+public abstract class TokenType {
     private final Kind kind;
-    private final @Nullable IOFunction<Reader, Token> read;
 
-    TokenType(Kind kind, @Nullable IOFunction<Reader, Token> read) {
+    private TokenType(Kind kind) {
         this.kind = kind;
-        this.read = read;
+    }
+
+    @ApiStatus.Internal
+    public static NonValued nonValued(Kind kind, Supplier<Token> token) {
+        return new NonValued(kind, token);
+    }
+
+    @ApiStatus.Internal
+    public static <T> Valued<T> valued(Kind kind, Function<T, ? extends ValuedToken<T>> tokenFactory) {
+        return new Valued<>(kind, tokenFactory);
+    }
+
+    @ApiStatus.Internal
+    public static Virtual virtual(Kind kind) {
+        return new Virtual(kind);
     }
 
     public Kind kind() {
         return kind;
     }
 
-    public Token read(Reader reader) throws IOException {
-        if (read == null) {
-            throw new UnsupportedOperationException(this + " does not support this operation");
+    public static final class NonValued extends TokenType {
+        private final Supplier<Token> token;
+
+        @ApiStatus.Internal
+        private NonValued(Kind kind, Supplier<Token> token) {
+            super(kind);
+            this.token = token;
         }
 
-        return read.apply(reader);
+        public Token create() {
+            return token.get();
+        }
+    }
+
+    public static final class Valued<T> extends TokenType {
+        private final Function<T, ? extends ValuedToken<T>> tokenFactory;
+
+        private Valued(Kind kind, Function<T, ? extends ValuedToken<T>> tokenFactory) {
+            super(kind);
+            this.tokenFactory = tokenFactory;
+        }
+
+        public ValuedToken<T> create(T value) {
+            return tokenFactory.apply(nonNull(value, "value"));
+        }
+    }
+
+    public static final class Virtual extends TokenType {
+        private Virtual(Kind kind) {
+            super(kind);
+        }
     }
 
     public enum Kind {
-        MARKER,
-        VALUE,
-        VALUE_SCALAR,
+        NAME(false),
+        STRUCTURE_START(true),
+        STRUCTURE_END(false),
+        SCALAR(true),
+        NULL(true),
+        END(false),
         ;
 
-        public boolean isValue() {
-            return this == VALUE || this == VALUE_SCALAR;
+        private final boolean marksValue;
+
+        Kind(boolean marksValue) {
+            this.marksValue = marksValue;
+        }
+
+        public boolean marksValue() {
+            return marksValue;
         }
     }
 }

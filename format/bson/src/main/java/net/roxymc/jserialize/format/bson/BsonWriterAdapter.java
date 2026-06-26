@@ -1,8 +1,12 @@
 package net.roxymc.jserialize.format.bson;
 
 import net.roxymc.jserialize.AbstractWriter;
-import org.bson.BsonBinary;
+import net.roxymc.jserialize.format.TokenTypeInfo;
+import net.roxymc.jserialize.token.TokenType;
+import org.bson.BsonReader;
 import org.bson.BsonWriter;
+
+import java.io.IOException;
 
 final class BsonWriterAdapter extends AbstractWriter {
     final BsonWriter writer;
@@ -12,33 +16,23 @@ final class BsonWriterAdapter extends AbstractWriter {
     }
 
     @Override
-    public void writeName(String name) {
-        writer.writeName(name);
+    public void write(TokenType.NonValued tokenType) throws IOException {
+        TokenTypeInfo.NonValued<BsonReader, BsonWriter> info = BsonUtils.TOKEN_TYPES.get(tokenType);
+        if (info == null) {
+            throw notSupported(tokenType);
+        }
+
+        info.write(writer);
     }
 
     @Override
-    public void writeObjectStart() {
-        writer.writeStartDocument();
-    }
+    public <T> void write(TokenType.Valued<T> tokenType, T value) throws IOException {
+        TokenTypeInfo.Valued<BsonReader, BsonWriter, T> info = BsonUtils.TOKEN_TYPES.get(tokenType);
+        if (info == null) {
+            throw notSupported(tokenType);
+        }
 
-    @Override
-    public void writeObjectEnd() {
-        writer.writeEndDocument();
-    }
-
-    @Override
-    public void writeArrayStart() {
-        writer.writeStartArray();
-    }
-
-    @Override
-    public void writeArrayEnd() {
-        writer.writeEndArray();
-    }
-
-    @Override
-    public void writeString(String value) {
-        writer.writeString(value);
+        info.write(writer, value);
     }
 
     @Override
@@ -59,15 +53,5 @@ final class BsonWriterAdapter extends AbstractWriter {
     @Override
     public void writeDouble(double value) {
         writer.writeDouble(value);
-    }
-
-    @Override
-    public void writeBinary(byte[] value) {
-        writer.writeBinaryData(new BsonBinary(value));
-    }
-
-    @Override
-    public void writeNull() {
-        writer.writeNull();
     }
 }

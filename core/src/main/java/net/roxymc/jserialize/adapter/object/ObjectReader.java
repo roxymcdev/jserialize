@@ -11,7 +11,7 @@ import net.roxymc.jserialize.model.property.MethodRef;
 import net.roxymc.jserialize.model.property.PropertyModel;
 import net.roxymc.jserialize.model.property.meta.PropertyKind;
 import net.roxymc.jserialize.model.property.meta.PropertyMeta;
-import net.roxymc.jserialize.token.TokenType;
+import net.roxymc.jserialize.token.TokenTypes;
 import net.roxymc.jserialize.type.TypeRef;
 import net.roxymc.jserialize.util.TypeUtils;
 import org.jspecify.annotations.Nullable;
@@ -74,7 +74,7 @@ final class ObjectReader<T, R> {
             extrasMap = null;
         }
 
-        while (reader.peek() == TokenType.NAME) {
+        while (reader.peek() == TokenTypes.NAME) {
             String name = reader.readName();
 
             try {

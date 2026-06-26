@@ -4,5 +4,6 @@ import net.roxymc.jserialize.Reader;
 import org.bson.BsonReader;
 
 interface BsonReaderAdapter extends Reader {
+
     BsonReader getBsonReader();
 }

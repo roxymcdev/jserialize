@@ -122,10 +122,12 @@ public final class InstanceCreator<T> {
         }
 
         if (value instanceof PropertyValue.Mutable) {
+            @SuppressWarnings("unchecked")
+            PropertyValue.Mutable<Object> mutableValue = (PropertyValue.Mutable<Object>) value;
+
             Object currentValue = property.getter().get(instance);
 
-            //noinspection unchecked,rawtypes
-            ((PropertyValue.Mutable) value).mutate(instance, currentValue);
+            mutableValue.mutate(instance, currentValue);
             return;
         }
 

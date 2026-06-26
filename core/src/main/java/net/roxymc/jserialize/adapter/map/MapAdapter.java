@@ -6,7 +6,7 @@ import net.roxymc.jserialize.adapter.KeyAdapter;
 import net.roxymc.jserialize.adapter.ReadContext;
 import net.roxymc.jserialize.adapter.TypeAdapter;
 import net.roxymc.jserialize.adapter.WriteContext;
-import net.roxymc.jserialize.token.TokenType;
+import net.roxymc.jserialize.token.TokenTypes;
 import net.roxymc.jserialize.type.TypeRef;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
@@ -52,7 +52,7 @@ public final class MapAdapter implements TypeAdapter.Mutable<Map<?, ?>> {
     private <K extends @Nullable Object, V extends @Nullable Object> @Nullable Map<K, V> mutate0(
             Reader reader, TypeRef<? extends Map<?, ?>> type, @Nullable Map<K, V> map, ReadContext ctx
     ) throws IOException {
-        if (reader.peek() == TokenType.NULL) {
+        if (reader.peek() == TokenTypes.NULL) {
             reader.readNull();
             return map;
         }
@@ -68,7 +68,7 @@ public final class MapAdapter implements TypeAdapter.Mutable<Map<?, ?>> {
 
         reader.readObjectStart();
 
-        while (reader.peek() == TokenType.NAME) {
+        while (reader.peek() == TokenTypes.NAME) {
             String name = reader.readName();
 
             K key = keyAdapter.decode(name);

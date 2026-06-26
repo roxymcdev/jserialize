@@ -1,29 +1,62 @@
 package net.roxymc.jserialize;
 
+import net.roxymc.jserialize.token.TokenType;
+import net.roxymc.jserialize.token.TokenTypes;
+import org.jetbrains.annotations.ApiStatus;
+
 import java.io.IOException;
 
+@ApiStatus.NonExtendable
 public interface Writer {
-    void writeName(String name) throws IOException;
+    void write(TokenType.NonValued tokenType) throws IOException;
 
-    void writeObjectStart() throws IOException;
+    <T> void write(TokenType.Valued<T> tokenType, T value) throws IOException;
 
-    void writeObjectEnd() throws IOException;
+    default void writeName(String name) throws IOException {
+        write(TokenTypes.NAME, name);
+    }
 
-    void writeArrayStart() throws IOException;
+    default void writeObjectStart() throws IOException {
+        write(TokenTypes.OBJECT_START);
+    }
 
-    void writeArrayEnd() throws IOException;
+    default void writeObjectEnd() throws IOException {
+        write(TokenTypes.OBJECT_END);
+    }
 
-    void writeString(String value) throws IOException;
+    default void writeArrayStart() throws IOException {
+        write(TokenTypes.ARRAY_START);
+    }
 
-    void writeBoolean(boolean value) throws IOException;
+    default void writeArrayEnd() throws IOException {
+        write(TokenTypes.ARRAY_END);
+    }
 
-    void writeInt(int value) throws IOException;
+    default void writeString(String value) throws IOException {
+        write(TokenTypes.STRING, value);
+    }
 
-    void writeLong(long value) throws IOException;
+    default void writeBoolean(boolean value) throws IOException {
+        write(TokenTypes.BOOLEAN, value);
+    }
 
-    void writeDouble(double value) throws IOException;
+    default void writeInt(int value) throws IOException {
+        write(TokenTypes.INT, value);
+    }
 
-    void writeBinary(byte[] value) throws IOException;
+    default void writeLong(long value) throws IOException {
+        write(TokenTypes.LONG, value);
+    }
 
-    void writeNull() throws IOException;
+    default void writeDouble(double value) throws IOException {
+        write(TokenTypes.DOUBLE, value);
+    }
+
+    default void writeBinary(byte[] value) throws IOException {
+        write(TokenTypes.BINARY, value);
+    }
+
+    default void writeNull() throws IOException {
+        write(TokenTypes.NULL);
+    }
 }

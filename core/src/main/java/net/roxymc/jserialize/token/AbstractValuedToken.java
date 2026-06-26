@@ -1,10 +1,12 @@
 package net.roxymc.jserialize.token;
 
+import org.jetbrains.annotations.ApiStatus;
 import org.jspecify.annotations.Nullable;
 
 import java.util.Objects;
 
-abstract class AbstractScalarToken<T extends @Nullable Object> implements ScalarToken<T> {
+@ApiStatus.Internal
+public abstract class AbstractValuedToken<T> implements ValuedToken<T> {
     @Override
     public int hashCode() {
         return Objects.hashCode(value());
@@ -20,7 +22,7 @@ abstract class AbstractScalarToken<T extends @Nullable Object> implements Scalar
             return false;
         }
 
-        ScalarToken<?> that = (ScalarToken<?>) obj;
+        ValuedToken<?> that = (ValuedToken<?>) obj;
         return Objects.equals(this.value(), that.value());
     }
 }

@@ -5,8 +5,8 @@ import net.roxymc.jserialize.Writer;
 import net.roxymc.jserialize.adapter.ReadContext;
 import net.roxymc.jserialize.adapter.TypeAdapter;
 import net.roxymc.jserialize.adapter.WriteContext;
-import net.roxymc.jserialize.token.reader.TokenReader;
-import net.roxymc.jserialize.token.writer.TokenWriter;
+import net.roxymc.jserialize.format.tree.TreeReader;
+import net.roxymc.jserialize.format.tree.TreeWriter;
 import net.roxymc.jserialize.type.TypeRef;
 import org.jspecify.annotations.Nullable;
 import org.spongepowered.configurate.ConfigurationNode;
@@ -24,14 +24,14 @@ final class WrappedTypeSerializer<T> implements TypeAdapter<T> {
     @Override
     public T read(Reader reader, TypeRef<? extends T> type, ReadContext context) throws IOException {
         @SuppressWarnings("unchecked")
-        TokenReader<ConfigurationNode> tokenReader = (TokenReader<ConfigurationNode>) reader;
-        return serializer.deserialize(type.getAnnotatedType(), tokenReader.tokenizer().nextValue());
+        TreeReader<ConfigurationNode> tokenReader = (TreeReader<ConfigurationNode>) reader;
+        return serializer.deserialize(type.getAnnotatedType(), tokenReader.currentValue());
     }
 
     @Override
     public void write(Writer writer, TypeRef<? extends T> type, @Nullable T value, WriteContext context) throws IOException {
         @SuppressWarnings("unchecked")
-        TokenWriter<ConfigurationNode> tokenWriter = (TokenWriter<ConfigurationNode>) writer;
-        serializer.serialize(type.getAnnotatedType(), value, tokenWriter.detokenizer().value());
+        TreeWriter<ConfigurationNode> tokenWriter = (TreeWriter<ConfigurationNode>) writer;
+        serializer.serialize(type.getAnnotatedType(), value, tokenWriter.currentValue());
     }
 }

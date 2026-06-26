@@ -7,7 +7,7 @@ import net.roxymc.jserialize.adapter.TypeAdapter;
 import net.roxymc.jserialize.adapter.WriteContext;
 import net.roxymc.jserialize.annotation.JSerializable;
 import net.roxymc.jserialize.model.ClassModel;
-import net.roxymc.jserialize.token.TokenType;
+import net.roxymc.jserialize.token.TokenTypes;
 import net.roxymc.jserialize.type.TypeRef;
 import net.roxymc.jserialize.util.TypeUtils;
 import org.jspecify.annotations.Nullable;
@@ -46,7 +46,7 @@ public final class ObjectAdapter<T> implements TypeAdapter.Mutable<T> {
 
     @Override
     public @Nullable T mutate(Reader reader, TypeRef<? extends T> type, @Nullable T value, ReadContext ctx) throws IOException {
-        if (reader.peek() == TokenType.NULL) {
+        if (reader.peek() == TokenTypes.NULL) {
             reader.readNull();
             return value;
         }

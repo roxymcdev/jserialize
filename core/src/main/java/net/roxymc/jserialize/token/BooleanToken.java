@@ -1,9 +1,5 @@
 package net.roxymc.jserialize.token;
 
-import net.roxymc.jserialize.Writer;
-
-import java.io.IOException;
-
 public final class BooleanToken implements ScalarToken<Boolean> {
     public static final BooleanToken TRUE = new BooleanToken(true);
     public static final BooleanToken FALSE = new BooleanToken(false);
@@ -12,6 +8,10 @@ public final class BooleanToken implements ScalarToken<Boolean> {
 
     private BooleanToken(boolean value) {
         this.value = value;
+    }
+
+    public static BooleanToken of(boolean value) {
+        return value ? TRUE : FALSE;
     }
 
     public boolean booleanValue() {
@@ -24,13 +24,8 @@ public final class BooleanToken implements ScalarToken<Boolean> {
     }
 
     @Override
-    public void write(Writer writer) throws IOException {
-        writer.writeBoolean(booleanValue());
-    }
-
-    @Override
-    public TokenType type() {
-        return TokenType.BOOLEAN;
+    public TokenType.Valued<Boolean> type() {
+        return TokenTypes.BOOLEAN;
     }
 
     @Override

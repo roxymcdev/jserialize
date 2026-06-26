@@ -5,7 +5,7 @@ import net.roxymc.jserialize.Writer;
 import net.roxymc.jserialize.adapter.ReadContext;
 import net.roxymc.jserialize.adapter.TypeAdapter;
 import net.roxymc.jserialize.adapter.WriteContext;
-import net.roxymc.jserialize.token.TokenType;
+import net.roxymc.jserialize.token.TokenTypes;
 import net.roxymc.jserialize.type.TypeRef;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
@@ -52,7 +52,7 @@ public final class CollectionAdapter implements TypeAdapter.Mutable<Collection<?
     private <E extends @Nullable Object> @Nullable Collection<E> mutate0(
             Reader reader, TypeRef<? extends Collection<?>> type, @Nullable Collection<E> collection, ReadContext ctx
     ) throws IOException {
-        if (reader.peek() == TokenType.NULL) {
+        if (reader.peek() == TokenTypes.NULL) {
             reader.readNull();
             return collection;
         }
@@ -67,7 +67,7 @@ public final class CollectionAdapter implements TypeAdapter.Mutable<Collection<?
 
         reader.readArrayStart();
 
-        for (int index = 0; reader.peek() != TokenType.ARRAY_END; index++) {
+        for (int index = 0; reader.peek() != TokenTypes.ARRAY_END; index++) {
             E element = elementAdapter.read(reader, collectionType.elementType, ctx);
 
             collection.add(element);

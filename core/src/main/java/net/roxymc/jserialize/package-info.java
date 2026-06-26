@@ -1,4 +1,4 @@
 @NullMarked
-package net.roxymc.jserialize.token.reader;
+package net.roxymc.jserialize;
 
 import org.jspecify.annotations.NullMarked;
