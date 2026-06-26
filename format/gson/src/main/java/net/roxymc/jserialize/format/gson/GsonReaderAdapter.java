@@ -43,6 +43,8 @@ final class GsonReaderAdapter extends AbstractReader {
     public <T> T read(TokenType.Valued<T> tokenType) throws IOException {
         if (tokenType == TokenTypes.INT || tokenType == TokenTypes.LONG || tokenType == TokenTypes.DOUBLE) {
             checkToken(peek(), TokenTypes.NUMERIC);
+        } else if (tokenType == TokenTypes.STRING) {
+            checkToken(peek(), type -> type == TokenTypes.STRING || type == TokenTypes.NUMERIC);
         } else {
             checkToken(peek(), tokenType);
         }
