@@ -2,23 +2,24 @@ package net.roxymc.jserialize.format.bson.token;
 
 import net.roxymc.jserialize.token.AbstractScalarToken;
 import net.roxymc.jserialize.token.TokenType;
+import org.bson.BsonBinary;
 
 import static net.roxymc.jserialize.util.ObjectUtils.nonNull;
 
-public final class JavaScriptToken extends AbstractScalarToken<String> {
-    private final String value;
+public final class BsonBinaryToken extends AbstractScalarToken<BsonBinary> {
+    private final BsonBinary value;
 
-    public JavaScriptToken(String value) {
+    public BsonBinaryToken(BsonBinary value) {
         this.value = nonNull(value, "value");
     }
 
     @Override
-    public String value() {
+    public BsonBinary value() {
         return value;
     }
 
     @Override
-    public TokenType.Valued<String> type() {
-        return BsonTokenTypes.JAVA_SCRIPT;
+    public TokenType.Valued<BsonBinary> type() {
+        return BsonTokenTypes.BINARY;
     }
 }

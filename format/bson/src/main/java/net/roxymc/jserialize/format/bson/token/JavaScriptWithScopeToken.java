@@ -1,11 +1,11 @@
 package net.roxymc.jserialize.format.bson.token;
 
-import net.roxymc.jserialize.token.AbstractValuedToken;
+import net.roxymc.jserialize.token.AbstractScalarToken;
 import net.roxymc.jserialize.token.TokenType;
 
 import static net.roxymc.jserialize.util.ObjectUtils.nonNull;
 
-public final class JavaScriptWithScopeToken extends AbstractValuedToken<String> {
+public final class JavaScriptWithScopeToken extends AbstractScalarToken<String> {
     private final String value;
 
     public JavaScriptWithScopeToken(String value) {

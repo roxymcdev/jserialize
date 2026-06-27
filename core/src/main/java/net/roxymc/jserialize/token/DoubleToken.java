@@ -1,5 +1,7 @@
 package net.roxymc.jserialize.token;
 
+import net.roxymc.jserialize.util.NumberUtils;
+
 public final class DoubleToken implements NumberToken<Double> {
     private final double value;
 
@@ -37,6 +39,6 @@ public final class DoubleToken implements NumberToken<Double> {
         }
 
         DoubleToken that = (DoubleToken) obj;
-        return this.value == that.value;
+        return NumberUtils.equals(this.value, that.value);
     }
 }

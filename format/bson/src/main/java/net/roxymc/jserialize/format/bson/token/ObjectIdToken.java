@@ -1,12 +1,12 @@
 package net.roxymc.jserialize.format.bson.token;
 
-import net.roxymc.jserialize.token.AbstractValuedToken;
+import net.roxymc.jserialize.token.AbstractScalarToken;
 import net.roxymc.jserialize.token.TokenType;
 import org.bson.types.ObjectId;
 
 import static net.roxymc.jserialize.util.ObjectUtils.nonNull;
 
-public final class ObjectIdToken extends AbstractValuedToken<ObjectId> {
+public final class ObjectIdToken extends AbstractScalarToken<ObjectId> {
     private final ObjectId value;
 
     public ObjectIdToken(ObjectId value) {

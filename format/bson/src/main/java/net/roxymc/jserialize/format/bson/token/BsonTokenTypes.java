@@ -2,6 +2,7 @@ package net.roxymc.jserialize.format.bson.token;
 
 import net.roxymc.jserialize.token.TokenType;
 import net.roxymc.jserialize.token.TokenType.Kind;
+import org.bson.BsonBinary;
 import org.bson.BsonDbPointer;
 import org.bson.BsonRegularExpression;
 import org.bson.types.Decimal128;
@@ -11,6 +12,7 @@ import static net.roxymc.jserialize.token.TokenType.nonValued;
 import static net.roxymc.jserialize.token.TokenType.valued;
 
 public final class BsonTokenTypes {
+    public static final TokenType.Valued<BsonBinary> BINARY = valued(Kind.SCALAR, BsonBinaryToken::new);
     public static final TokenType.NonValued UNDEFINED = nonValued(Kind.NULL, () -> BsonTokens.UNDEFINED);
     public static final TokenType.Valued<ObjectId> OBJECT_ID = valued(Kind.SCALAR, ObjectIdToken::new);
     public static final TokenType.Valued<Long> DATE_TIME = valued(Kind.SCALAR, DateTimeToken::new);

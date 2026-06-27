@@ -1,9 +1,9 @@
 package net.roxymc.jserialize.format.bson.token;
 
-import net.roxymc.jserialize.token.AbstractValuedToken;
+import net.roxymc.jserialize.token.AbstractScalarToken;
 import net.roxymc.jserialize.token.TokenType;
 
-public final class DateTimeToken extends AbstractValuedToken<Long> {
+public final class DateTimeToken extends AbstractScalarToken<Long> {
     private final long value;
 
     public DateTimeToken(long value) {

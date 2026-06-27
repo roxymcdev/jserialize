@@ -2,6 +2,7 @@ package net.roxymc.jserialize.format.bson;
 
 import net.roxymc.jserialize.AbstractReader;
 import net.roxymc.jserialize.format.TokenTypeInfo;
+import net.roxymc.jserialize.format.bson.token.BsonTokenTypes;
 import net.roxymc.jserialize.token.TokenType;
 import net.roxymc.jserialize.token.TokenTypes;
 import org.bson.AbstractBsonReader;
@@ -68,7 +69,11 @@ final class StandardBsonReaderAdapter extends AbstractReader implements BsonRead
 
     @Override
     public <T> T read(TokenType.Valued<T> tokenType) throws IOException {
-        checkToken(peek(), tokenType);
+        if (tokenType == BsonTokenTypes.BINARY) {
+            checkToken(peek(), TokenTypes.BINARY);
+        } else {
+            checkToken(peek(), tokenType);
+        }
 
         TokenTypeInfo.Valued<BsonReader, BsonWriter, T> info = BsonUtils.TOKEN_TYPES.get(tokenType);
         if (info == null) {

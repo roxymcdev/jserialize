@@ -2,7 +2,7 @@ package net.roxymc.jserialize.token;
 
 import static net.roxymc.jserialize.util.ObjectUtils.nonNull;
 
-public final class BinaryToken extends AbstractValuedToken<byte[]> implements ScalarToken<byte[]> {
+public final class BinaryToken extends AbstractScalarToken<byte[]> {
     private final byte[] value;
 
     public BinaryToken(byte[] value) {

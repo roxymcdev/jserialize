@@ -2,7 +2,7 @@ package net.roxymc.jserialize.token;
 
 import static net.roxymc.jserialize.util.ObjectUtils.nonNull;
 
-public final class StringToken extends AbstractValuedToken<String> implements ScalarToken<String> {
+public final class StringToken extends AbstractScalarToken<String> {
     private final String value;
 
     public StringToken(String value) {

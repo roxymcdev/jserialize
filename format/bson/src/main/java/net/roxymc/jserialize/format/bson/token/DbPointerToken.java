@@ -1,12 +1,12 @@
 package net.roxymc.jserialize.format.bson.token;
 
-import net.roxymc.jserialize.token.AbstractValuedToken;
+import net.roxymc.jserialize.token.AbstractScalarToken;
 import net.roxymc.jserialize.token.TokenType;
 import org.bson.BsonDbPointer;
 
 import static net.roxymc.jserialize.util.ObjectUtils.nonNull;
 
-public final class DbPointerToken extends AbstractValuedToken<BsonDbPointer> {
+public final class DbPointerToken extends AbstractScalarToken<BsonDbPointer> {
     private final BsonDbPointer value;
 
     public DbPointerToken(BsonDbPointer value) {

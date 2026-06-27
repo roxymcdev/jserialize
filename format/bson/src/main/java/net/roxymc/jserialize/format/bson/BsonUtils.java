@@ -36,6 +36,7 @@ final class BsonUtils implements FormatUtils<BsonValue> {
                     (writer, value) -> writer.writeBinaryData(new BsonBinary(value))
             )
             .bind(TokenTypes.NULL, BsonType.NULL, BsonReader::readNull, BsonWriter::writeNull)
+            .bind(BsonTokenTypes.BINARY, null, BsonReader::readBinaryData, BsonWriter::writeBinaryData)
             .bind(BsonTokenTypes.UNDEFINED, BsonType.UNDEFINED, BsonReader::readUndefined, BsonWriter::writeUndefined)
             .bind(BsonTokenTypes.OBJECT_ID, BsonType.OBJECT_ID, BsonReader::readObjectId, BsonWriter::writeObjectId)
             .bind(BsonTokenTypes.DATE_TIME, BsonType.DATE_TIME, BsonReader::readDateTime, BsonWriter::writeDateTime)

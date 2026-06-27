@@ -1,12 +1,12 @@
 package net.roxymc.jserialize.format.bson.token;
 
-import net.roxymc.jserialize.token.AbstractValuedToken;
+import net.roxymc.jserialize.token.AbstractScalarToken;
 import net.roxymc.jserialize.token.TokenType;
 import org.bson.BsonRegularExpression;
 
 import static net.roxymc.jserialize.util.ObjectUtils.nonNull;
 
-public final class RegularExpressionToken extends AbstractValuedToken<BsonRegularExpression> {
+public final class RegularExpressionToken extends AbstractScalarToken<BsonRegularExpression> {
     private final BsonRegularExpression value;
 
     public RegularExpressionToken(BsonRegularExpression value) {
