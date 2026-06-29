@@ -9,6 +9,7 @@ import net.roxymc.jserialize.adapter.scalar.EnumAdapter;
 import net.roxymc.jserialize.adapter.scalar.EnumKeyAdapter;
 import net.roxymc.jserialize.adapter.scalar.ScalarAdapters;
 import net.roxymc.jserialize.adapter.scalar.ScalarKeyAdapters;
+import net.roxymc.jserialize.adapter.temporal.TemporalAdapters;
 import net.roxymc.jserialize.type.TypeRef;
 import org.jetbrains.annotations.ApiStatus;
 import org.jspecify.annotations.Nullable;
@@ -19,6 +20,7 @@ public interface TypeAdapters extends TypeAdapter.Factory, KeyAdapter.Factory {
             .add(ScalarAdapters.factory())
             .add(EnumAdapter.factory())
             .add(AtomicAdapters.factory())
+            .add(TemporalAdapters.factory())
             .add(ArrayAdapter.factory())
             .add(CollectionAdapter.factory())
             .add(MapAdapter.factory())
