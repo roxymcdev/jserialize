@@ -47,8 +47,12 @@ public final class ObjectAdapter<T> implements TypeAdapter.Mutable<T> {
     @Override
     public @Nullable T mutate(Reader reader, TypeRef<? extends T> type, @Nullable T value, ReadContext ctx) throws IOException {
         if (reader.peek() == TokenTypes.NULL) {
+            if (value != null) {
+                throw new IllegalStateException("Cannot mutate value with null");
+            }
+
             reader.readNull();
-            return value;
+            return null;
         }
 
         try {

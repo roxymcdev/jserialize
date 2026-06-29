@@ -55,6 +55,11 @@ public final class CollectionAdapter implements TypeAdapter.Mutable<Collection<?
 
         if (reader.peek() == TokenTypes.NULL) {
             reader.readNull();
+
+            if (collection != null) {
+                collection.clear();
+            }
+
             return collection;
         }
 

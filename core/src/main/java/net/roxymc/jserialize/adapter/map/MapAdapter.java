@@ -54,6 +54,11 @@ public final class MapAdapter implements TypeAdapter.Mutable<Map<?, ?>> {
 
         if (reader.peek() == TokenTypes.NULL) {
             reader.readNull();
+
+            if (map != null) {
+                map.clear();
+            }
+
             return map;
         }
 

@@ -2,9 +2,7 @@ package net.roxymc.jserialize.adapter.array;
 
 import net.roxymc.jserialize.Reader;
 import net.roxymc.jserialize.Writer;
-import net.roxymc.jserialize.adapter.ReadContext;
-import net.roxymc.jserialize.adapter.TypeAdapter;
-import net.roxymc.jserialize.adapter.WriteContext;
+import net.roxymc.jserialize.adapter.*;
 import net.roxymc.jserialize.token.TokenTypes;
 import net.roxymc.jserialize.type.TypeRef;
 import org.jspecify.annotations.Nullable;
@@ -37,13 +35,14 @@ public final class ArrayAdapter implements TypeAdapter<Object> {
         }
 
         TypeRef<Object> componentType = resolveComponentType(type);
+        TypeReader<Object> componentReader = ctx.typeAdapters().getOrThrow(componentType);
 
         reader.readArrayStart();
 
         List<@Nullable Object> buffer = new ArrayList<>();
 
-        while (reader.peek() != TokenTypes.ARRAY_END) {
-            buffer.add(ctx.read(reader, componentType));
+        for (int index = 0; reader.peek() != TokenTypes.ARRAY_END; index++) {
+            buffer.add(componentReader.read(reader, componentType, ctx));
         }
 
         reader.readArrayEnd();
@@ -58,7 +57,7 @@ public final class ArrayAdapter implements TypeAdapter<Object> {
     }
 
     @Override
-    public void write(Writer writer, TypeRef<? extends Object> type, @Nullable Object value, WriteContext context) throws IOException {
+    public void write(Writer writer, TypeRef<? extends Object> type, @Nullable Object value, WriteContext ctx) throws IOException {
         if (!type.getRawType().isArray()) {
             throw new IllegalStateException(type.getRawType() + " is not an array");
         }
@@ -69,13 +68,14 @@ public final class ArrayAdapter implements TypeAdapter<Object> {
         }
 
         TypeRef<Object> componentType = resolveComponentType(type);
+        TypeWriter<Object> componentWriter = ctx.typeAdapters().getOrThrow(componentType);
 
         writer.writeArrayStart();
 
         int length = Array.getLength(value);
 
         for (int i = 0; i < length; i++) {
-            context.write(writer, componentType, Array.get(value, i));
+            componentWriter.write(writer, componentType, Array.get(value, i), ctx);
         }
 
         writer.writeArrayEnd();

@@ -20,6 +20,10 @@ final class CharacterAdapter implements TypeAdapter<Character> {
         checkAssignable(Character.class, GenericTypeReflector.box(type.getRawType()));
 
         if (reader.peek() == TokenTypes.NULL) {
+            if (type.getRawType().isPrimitive()) {
+                throw new IllegalStateException("Cannot read null into primitive " + type.getRawType());
+            }
+
             reader.readNull();
             return null;
         }
@@ -37,6 +41,10 @@ final class CharacterAdapter implements TypeAdapter<Character> {
         checkAssignable(Character.class, GenericTypeReflector.box(type.getRawType()));
 
         if (value == null) {
+            if (type.getRawType().isPrimitive()) {
+                throw new IllegalStateException("Cannot write null for primitive " + type.getRawType());
+            }
+
             writer.writeNull();
             return;
         }

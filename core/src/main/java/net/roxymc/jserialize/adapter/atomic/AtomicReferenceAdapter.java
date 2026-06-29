@@ -5,6 +5,7 @@ import net.roxymc.jserialize.Writer;
 import net.roxymc.jserialize.adapter.ReadContext;
 import net.roxymc.jserialize.adapter.TypeAdapter;
 import net.roxymc.jserialize.adapter.WriteContext;
+import net.roxymc.jserialize.token.TokenTypes;
 import net.roxymc.jserialize.type.TypeRef;
 import org.jetbrains.annotations.UnknownNullability;
 import org.jspecify.annotations.NonNull;
@@ -37,7 +38,7 @@ final class AtomicReferenceAdapter implements TypeAdapter.Mutable<AtomicReferenc
 
         V value;
 
-        if (valueAdapter instanceof TypeAdapter.Mutable) {
+        if (valueAdapter instanceof TypeAdapter.Mutable && reader.peek() != TokenTypes.NULL) {
             V oldValue = ref != null ? ref.get() : null;
 
             value = ((TypeAdapter.Mutable<@NonNull V>) valueAdapter).mutate(reader, valueType, oldValue, ctx);
@@ -45,15 +46,14 @@ final class AtomicReferenceAdapter implements TypeAdapter.Mutable<AtomicReferenc
             value = valueAdapter.read(reader, valueType, ctx);
         }
 
-        if (value == null) {
-            return ref;
-        }
-
-        if (ref == null) {
+        if (ref == null && value != null) {
             ref = new AtomicReference<>();
         }
 
-        ref.set(value);
+        if (ref != null) {
+            ref.set(value);
+        }
+
         return ref;
     }
 

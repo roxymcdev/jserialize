@@ -19,6 +19,10 @@ abstract class AbstractNumberAdapter<N extends Number> implements TypeAdapter<N>
     protected final Class<N> numberType;
 
     protected AbstractNumberAdapter(Class<N> numberType) {
+        if (numberType.isPrimitive()) {
+            throw new IllegalArgumentException("numberType cannot be primitive");
+        }
+
         this.numberType = numberType;
     }
 
@@ -29,6 +33,10 @@ abstract class AbstractNumberAdapter<N extends Number> implements TypeAdapter<N>
         TokenType tokenType = reader.peek();
 
         if (tokenType == TokenTypes.NULL) {
+            if (type.getRawType().isPrimitive()) {
+                throw new IllegalStateException("Cannot read null into primitive " + type.getRawType());
+            }
+
             reader.readNull();
             return null;
         }
@@ -79,6 +87,10 @@ abstract class AbstractNumberAdapter<N extends Number> implements TypeAdapter<N>
         checkAssignable(numberType, GenericTypeReflector.box(type.getRawType()));
 
         if (value == null) {
+            if (type.getRawType().isPrimitive()) {
+                throw new IllegalStateException("Cannot write null for primitive " + type.getRawType());
+            }
+
             writer.writeNull();
             return;
         }
