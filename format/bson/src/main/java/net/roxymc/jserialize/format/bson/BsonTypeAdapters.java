@@ -5,6 +5,7 @@ import net.roxymc.jserialize.adapter.TypeAdapter;
 import net.roxymc.jserialize.adapter.TypeAdapters;
 import net.roxymc.jserialize.type.TypeRef;
 import org.bson.codecs.Codec;
+import org.bson.codecs.configuration.CodecConfigurationException;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.jspecify.annotations.Nullable;
 
@@ -21,26 +22,34 @@ final class BsonTypeAdapters implements TypeAdapters {
         this.adapters = adapters;
     }
 
-    private <T> Codec<T> getCodec(TypeRef<? extends T> typeRef) {
+    private <T> @Nullable Codec<T> getCodec(TypeRef<? extends T> typeRef) {
         Type type = typeRef.getType();
         Class<?> rawType = typeRef.getRawType();
 
-        if (!(type instanceof ParameterizedType)) {
+        try {
+            if (!(type instanceof ParameterizedType)) {
+                @SuppressWarnings("unchecked")
+                Codec<T> codec = (Codec<T>) registry.get(rawType);
+                return codec;
+            }
+
+            List<Type> typeArgs = List.of(((ParameterizedType) type).getActualTypeArguments());
+
             @SuppressWarnings("unchecked")
-            Codec<T> codec = (Codec<T>) registry.get(rawType);
+            Codec<T> codec = (Codec<T>) registry.get(rawType, typeArgs);
             return codec;
+        } catch (CodecConfigurationException e) {
+            return null;
         }
-
-        List<Type> typeArgs = List.of(((ParameterizedType) type).getActualTypeArguments());
-
-        @SuppressWarnings("unchecked")
-        Codec<T> codec = (Codec<T>) registry.get(rawType, typeArgs);
-        return codec;
     }
 
     @Override
-    public <T> TypeAdapter<T> get(TypeRef<T> type) {
+    public <T> @Nullable TypeAdapter<T> get(TypeRef<T> type) {
         Codec<T> codec = getCodec(type);
+
+        if (codec == null) {
+            return null;
+        }
 
         if (codec instanceof WrappedTypeAdapter) {
             return ((WrappedTypeAdapter<T>) codec).typeAdapter;
@@ -52,5 +61,15 @@ final class BsonTypeAdapters implements TypeAdapters {
     @Override
     public <T> @Nullable KeyAdapter<T> getKey(TypeRef<T> type) {
         return adapters.getKey(type);
+    }
+
+    @Override
+    public @Nullable <T> TypeAdapter<T> create(TypeRef<T> type, TypeAdapters adapters) {
+        return get(type);
+    }
+
+    @Override
+    public @Nullable <T> KeyAdapter<T> createKey(TypeRef<T> type, TypeAdapters adapters) {
+        return adapters.createKey(type, adapters);
     }
 }

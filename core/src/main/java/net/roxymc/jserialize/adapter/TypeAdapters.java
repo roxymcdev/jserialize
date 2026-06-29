@@ -71,6 +71,12 @@ public interface TypeAdapters extends TypeAdapter.Factory, KeyAdapter.Factory {
         throw new IllegalStateException("Could not find key adapter for " + type.getAnnotatedType());
     }
 
+    @Override
+    @Nullable <T> TypeAdapter<T> create(TypeRef<T> type, TypeAdapters adapters);
+
+    @Override
+    @Nullable <T> KeyAdapter<T> createKey(TypeRef<T> type, TypeAdapters adapters);
+
     @ApiStatus.NonExtendable
     interface Builder {
         Builder add(TypeAdapter.Factory factory);
