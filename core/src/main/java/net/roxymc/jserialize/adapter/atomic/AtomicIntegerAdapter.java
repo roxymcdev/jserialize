@@ -5,7 +5,6 @@ import net.roxymc.jserialize.Writer;
 import net.roxymc.jserialize.adapter.ReadContext;
 import net.roxymc.jserialize.adapter.TypeAdapter;
 import net.roxymc.jserialize.adapter.WriteContext;
-import net.roxymc.jserialize.token.TokenTypes;
 import net.roxymc.jserialize.type.TypeRef;
 import org.jspecify.annotations.Nullable;
 
@@ -17,34 +16,32 @@ import static net.roxymc.jserialize.util.TypeChecks.checkAssignable;
 final class AtomicIntegerAdapter implements TypeAdapter.Mutable<AtomicInteger> {
     @Override
     public @Nullable AtomicInteger mutate(
-            Reader reader, TypeRef<? extends AtomicInteger> type, @Nullable AtomicInteger value, ReadContext ctx
+            Reader reader, TypeRef<? extends AtomicInteger> type, @Nullable AtomicInteger ref, ReadContext ctx
     ) throws IOException {
         checkAssignable(AtomicInteger.class, type.getRawType());
 
-        if (reader.peek() == TokenTypes.NULL) {
-            reader.readNull();
-            return value;
-        }
+        Integer value = ctx.read(reader, int.class);
 
         if (value == null) {
-            value = new AtomicInteger();
+            return ref;
         }
 
-        value.set(reader.readInt());
-        return value;
+        if (ref == null) {
+            ref = new AtomicInteger();
+        }
+
+        ref.set(value);
+        return ref;
     }
 
     @Override
     public void write(
-            Writer writer, TypeRef<? extends AtomicInteger> type, @Nullable AtomicInteger value, WriteContext ctx
+            Writer writer, TypeRef<? extends AtomicInteger> type, @Nullable AtomicInteger ref, WriteContext ctx
     ) throws IOException {
         checkAssignable(AtomicInteger.class, type.getRawType());
 
-        if (value == null) {
-            writer.writeNull();
-            return;
-        }
+        Integer value = ref != null ? ref.get() : null;
 
-        writer.writeInt(value.get());
+        ctx.write(writer, int.class, value);
     }
 }

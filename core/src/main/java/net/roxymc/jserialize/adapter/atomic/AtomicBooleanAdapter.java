@@ -5,7 +5,6 @@ import net.roxymc.jserialize.Writer;
 import net.roxymc.jserialize.adapter.ReadContext;
 import net.roxymc.jserialize.adapter.TypeAdapter;
 import net.roxymc.jserialize.adapter.WriteContext;
-import net.roxymc.jserialize.token.TokenTypes;
 import net.roxymc.jserialize.type.TypeRef;
 import org.jspecify.annotations.Nullable;
 
@@ -17,34 +16,32 @@ import static net.roxymc.jserialize.util.TypeChecks.checkAssignable;
 final class AtomicBooleanAdapter implements TypeAdapter.Mutable<AtomicBoolean> {
     @Override
     public @Nullable AtomicBoolean mutate(
-            Reader reader, TypeRef<? extends AtomicBoolean> type, @Nullable AtomicBoolean value, ReadContext ctx
+            Reader reader, TypeRef<? extends AtomicBoolean> type, @Nullable AtomicBoolean ref, ReadContext ctx
     ) throws IOException {
         checkAssignable(AtomicBoolean.class, type.getRawType());
 
-        if (reader.peek() == TokenTypes.NULL) {
-            reader.readNull();
-            return value;
-        }
+        Boolean value = ctx.read(reader, boolean.class);
 
         if (value == null) {
-            value = new AtomicBoolean();
+            return ref;
         }
 
-        value.set(reader.readBoolean());
-        return value;
+        if (ref == null) {
+            ref = new AtomicBoolean();
+        }
+
+        ref.set(value);
+        return ref;
     }
 
     @Override
     public void write(
-            Writer writer, TypeRef<? extends AtomicBoolean> type, @Nullable AtomicBoolean value, WriteContext ctx
+            Writer writer, TypeRef<? extends AtomicBoolean> type, @Nullable AtomicBoolean ref, WriteContext ctx
     ) throws IOException {
         checkAssignable(AtomicBoolean.class, type.getRawType());
 
-        if (value == null) {
-            writer.writeNull();
-            return;
-        }
+        Boolean value = ref != null ? ref.get() : null;
 
-        writer.writeBoolean(value.get());
+        ctx.write(writer, boolean.class, value);
     }
 }

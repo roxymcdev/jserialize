@@ -5,7 +5,6 @@ import net.roxymc.jserialize.Writer;
 import net.roxymc.jserialize.adapter.ReadContext;
 import net.roxymc.jserialize.adapter.TypeAdapter;
 import net.roxymc.jserialize.adapter.WriteContext;
-import net.roxymc.jserialize.token.TokenTypes;
 import net.roxymc.jserialize.type.TypeRef;
 import org.jspecify.annotations.Nullable;
 
@@ -17,34 +16,32 @@ import static net.roxymc.jserialize.util.TypeChecks.checkAssignable;
 final class AtomicLongAdapter implements TypeAdapter.Mutable<AtomicLong> {
     @Override
     public @Nullable AtomicLong mutate(
-            Reader reader, TypeRef<? extends AtomicLong> type, @Nullable AtomicLong value, ReadContext ctx
+            Reader reader, TypeRef<? extends AtomicLong> type, @Nullable AtomicLong ref, ReadContext ctx
     ) throws IOException {
         checkAssignable(AtomicLong.class, type.getRawType());
 
-        if (reader.peek() == TokenTypes.NULL) {
-            reader.readNull();
-            return value;
-        }
+        Long value = ctx.read(reader, long.class);
 
         if (value == null) {
-            value = new AtomicLong();
+            return ref;
         }
 
-        value.set(reader.readLong());
-        return value;
+        if (ref == null) {
+            ref = new AtomicLong();
+        }
+
+        ref.set(value);
+        return ref;
     }
 
     @Override
     public void write(
-            Writer writer, TypeRef<? extends AtomicLong> type, @Nullable AtomicLong value, WriteContext ctx
+            Writer writer, TypeRef<? extends AtomicLong> type, @Nullable AtomicLong ref, WriteContext ctx
     ) throws IOException {
         checkAssignable(AtomicLong.class, type.getRawType());
 
-        if (value == null) {
-            writer.writeNull();
-            return;
-        }
+        Long value = ref != null ? ref.get() : null;
 
-        writer.writeLong(value.get());
+        ctx.write(writer, long.class, value);
     }
 }
