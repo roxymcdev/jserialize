@@ -4,7 +4,6 @@ import io.leangen.geantyref.GenericTypeReflector;
 import net.roxymc.jserialize.Reader;
 import net.roxymc.jserialize.Writer;
 import net.roxymc.jserialize.type.TypeRef;
-import net.roxymc.jserialize.util.TypeUtils;
 import org.jetbrains.annotations.Contract;
 import org.jspecify.annotations.Nullable;
 
@@ -67,7 +66,7 @@ public interface TypeAdapter<T> extends TypeReader<T>, TypeWriter<T> {
         }
 
         static <T> Factory exactBoxed(Class<? super T> type, TypeAdapter<T> adapter) {
-            if (TypeUtils.isPrimitive(type)) {
+            if (type.isPrimitive()) {
                 throw new IllegalArgumentException("type cannot be primitive");
             }
 

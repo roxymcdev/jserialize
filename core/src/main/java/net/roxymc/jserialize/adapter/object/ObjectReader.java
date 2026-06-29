@@ -13,7 +13,6 @@ import net.roxymc.jserialize.model.property.meta.PropertyKind;
 import net.roxymc.jserialize.model.property.meta.PropertyMeta;
 import net.roxymc.jserialize.token.TokenTypes;
 import net.roxymc.jserialize.type.TypeRef;
-import net.roxymc.jserialize.util.TypeUtils;
 import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
@@ -171,7 +170,7 @@ final class ObjectReader<T, R> {
         PropertyMeta meta = property.meta();
 
         if (instance == null && property.parameterType() != null) {
-            return TypeUtils.box(resolveType(property.parameterType(), capture(type.getAnnotatedType())));
+            return resolveType(property.parameterType(), capture(type.getAnnotatedType()));
         }
 
         MethodRef method = null;
@@ -187,6 +186,6 @@ final class ObjectReader<T, R> {
         }
 
         AnnotatedType supertype = getExactSuperType(capture(type.getAnnotatedType()), method.declaringClass());
-        return TypeUtils.box(resolveType(method.valueType(), supertype));
+        return resolveType(method.valueType(), supertype);
     }
 }

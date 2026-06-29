@@ -9,7 +9,6 @@ import net.roxymc.jserialize.model.property.PropertyModel;
 import net.roxymc.jserialize.model.property.meta.PropertyKind;
 import net.roxymc.jserialize.model.property.meta.PropertyMeta;
 import net.roxymc.jserialize.type.TypeRef;
-import net.roxymc.jserialize.util.TypeUtils;
 
 import java.io.IOException;
 import java.lang.reflect.AnnotatedType;
@@ -68,7 +67,7 @@ final class ObjectWriter<T, R> {
         }
 
         AnnotatedType declaringType = getExactSuperType(capture(type.getAnnotatedType()), getter.declaringClass());
-        AnnotatedType type = TypeUtils.box(resolveType(getter.valueType(), declaringType));
+        AnnotatedType type = resolveType(getter.valueType(), declaringType);
 
         if (meta != null && meta.kind() == PropertyKind.EXTRAS) {
             // if it's an extras property, it never writes null

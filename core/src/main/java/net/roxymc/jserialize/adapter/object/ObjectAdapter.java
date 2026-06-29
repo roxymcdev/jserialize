@@ -9,11 +9,9 @@ import net.roxymc.jserialize.annotation.JSerializable;
 import net.roxymc.jserialize.model.ClassModel;
 import net.roxymc.jserialize.token.TokenTypes;
 import net.roxymc.jserialize.type.TypeRef;
-import net.roxymc.jserialize.util.TypeUtils;
 import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
-import java.util.function.Predicate;
 
 public final class ObjectAdapter<T> implements TypeAdapter.Mutable<T> {
     private static final TypeAdapter.Factory FACTORY = factory(ClassModel.factory());
@@ -30,7 +28,7 @@ public final class ObjectAdapter<T> implements TypeAdapter.Mutable<T> {
     }
 
     public static TypeAdapter.Factory factory(ClassModel.Factory factory) {
-        return TypeAdapter.Factory.predicate(Predicate.not(TypeUtils::isPrimitive), new ObjectAdapter<>(factory));
+        return TypeAdapter.Factory.predicate(type -> !type.getRawType().isPrimitive(), new ObjectAdapter<>(factory));
     }
 
     public static TypeAdapter.Factory annotatedFactory() {
@@ -39,7 +37,7 @@ public final class ObjectAdapter<T> implements TypeAdapter.Mutable<T> {
 
     public static TypeAdapter.Factory annotatedFactory(ClassModel.Factory factory) {
         return TypeAdapter.Factory.predicate(
-                type -> !TypeUtils.isPrimitive(type) && type.getAnnotatedType().isAnnotationPresent(JSerializable.class),
+                type -> !type.getRawType().isPrimitive() && type.getAnnotatedType().isAnnotationPresent(JSerializable.class),
                 new ObjectAdapter<>(factory)
         );
     }

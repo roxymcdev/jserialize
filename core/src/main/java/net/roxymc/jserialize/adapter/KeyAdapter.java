@@ -2,7 +2,6 @@ package net.roxymc.jserialize.adapter;
 
 import io.leangen.geantyref.GenericTypeReflector;
 import net.roxymc.jserialize.type.TypeRef;
-import net.roxymc.jserialize.util.TypeUtils;
 import org.jspecify.annotations.Nullable;
 
 import java.util.function.Predicate;
@@ -50,7 +49,7 @@ public interface KeyAdapter<T> extends KeyDecoder<T>, KeyEncoder<T> {
         }
 
         static <T> Factory exactBoxed(Class<? super T> type, KeyAdapter<T> adapter) {
-            if (TypeUtils.isPrimitive(type)) {
+            if (type.isPrimitive()) {
                 throw new IllegalArgumentException("type cannot be primitive");
             }
 
