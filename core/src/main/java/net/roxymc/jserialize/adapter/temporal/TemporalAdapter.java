@@ -12,22 +12,24 @@ import org.jspecify.annotations.Nullable;
 import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.Temporal;
-import java.time.temporal.TemporalAccessor;
+import java.time.temporal.TemporalQuery;
 
 import static net.roxymc.jserialize.util.ObjectUtils.nonNull;
 import static net.roxymc.jserialize.util.TypeChecks.checkAssignable;
 
-abstract class AbstractTemporalAdapter<T extends Temporal> implements TypeAdapter<T> {
+final class TemporalAdapter<T extends Temporal> implements TypeAdapter<T> {
     private final Class<T> type;
-    protected final DateTimeFormatter formatter;
+    private final DateTimeFormatter formatter;
+    private final TemporalQuery<T> query;
 
-    protected AbstractTemporalAdapter(Class<T> type, DateTimeFormatter formatter) {
+    TemporalAdapter(Class<T> type, DateTimeFormatter formatter, TemporalQuery<T> query) {
         this.type = nonNull(type, "type");
         this.formatter = nonNull(formatter, "formatter");
+        this.query = nonNull(query, "query");
     }
 
     @Override
-    public final @Nullable T read(Reader reader, TypeRef<? extends T> typeRef, ReadContext ctx) throws IOException {
+    public @Nullable T read(Reader reader, TypeRef<? extends T> typeRef, ReadContext ctx) throws IOException {
         checkAssignable(type, typeRef.getRawType());
 
         if (reader.peek() == TokenTypes.NULL) {
@@ -35,13 +37,11 @@ abstract class AbstractTemporalAdapter<T extends Temporal> implements TypeAdapte
             return null;
         }
 
-        return formatter.parse(reader.readString(), this::from);
+        return formatter.parse(reader.readString(), query);
     }
 
-    protected abstract T from(TemporalAccessor temporal);
-
     @Override
-    public final void write(Writer writer, TypeRef<? extends T> typeRef, @Nullable T value, WriteContext ctx) throws IOException {
+    public void write(Writer writer, TypeRef<? extends T> typeRef, @Nullable T value, WriteContext ctx) throws IOException {
         checkAssignable(type, typeRef.getRawType());
 
         if (value == null) {

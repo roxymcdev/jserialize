@@ -1,20 +1,17 @@
 package net.roxymc.jserialize.adapter.temporal;
 
-import net.roxymc.jserialize.adapter.TypeAdapter;
+import net.roxymc.jserialize.adapter.KeyAdapter;
 
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.Temporal;
 import java.time.temporal.TemporalQuery;
-import java.util.Date;
 
-import static net.roxymc.jserialize.adapter.TypeAdapter.Factory.exactRaw;
+import static net.roxymc.jserialize.adapter.KeyAdapter.Factory.exactRaw;
 
-public final class TemporalAdapters {
-    public static final TypeAdapter<Date> DATE = new DateAdapter();
-
-    private static final TypeAdapter.Factory FACTORY = TypeAdapter.Factory.composite(
-            exactRaw(Date.class, DATE),
+public final class TemporalKeyAdapters {
+    private static final KeyAdapter.Factory FACTORY = KeyAdapter.Factory.composite(
+            DateKeyAdapter.FACTORY,
             factory(Instant.class, DateTimeFormatter.ISO_INSTANT, Instant::from),
             factory(LocalDate.class, DateTimeFormatter.ISO_LOCAL_DATE, LocalDate::from),
             factory(LocalTime.class, DateTimeFormatter.ISO_LOCAL_TIME, LocalTime::from),
@@ -23,16 +20,16 @@ public final class TemporalAdapters {
             factory(ZonedDateTime.class, DateTimeFormatter.ISO_ZONED_DATE_TIME, ZonedDateTime::from)
     );
 
-    private TemporalAdapters() {
+    private TemporalKeyAdapters() {
     }
 
-    public static TypeAdapter.Factory factory() {
+    public static KeyAdapter.Factory factory() {
         return FACTORY;
     }
 
-    public static <T extends Temporal> TypeAdapter.Factory factory(
+    public static <T extends Temporal> KeyAdapter.Factory factory(
             Class<T> type, DateTimeFormatter formatter, TemporalQuery<T> query
     ) {
-        return exactRaw(type, new TemporalAdapter<>(type, formatter, query));
+        return exactRaw(type, new TemporalKeyAdapter<>(formatter, query));
     }
 }
