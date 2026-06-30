@@ -64,7 +64,7 @@ final class BsonTypeAdapters implements TypeAdapters {
     }
 
     @Override
-    public @Nullable <T> TypeAdapter<T> create(TypeRef<T> type, TypeAdapters adapters) {
+    public @Nullable <T> TypeAdapter<T> create(TypeRef<T> type) {
         return get(type);
     }
 

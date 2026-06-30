@@ -17,7 +17,7 @@ final class PredicateTypeAdapterFactory implements TypeAdapter.Factory {
     }
 
     @Override
-    public <T> @Nullable TypeAdapter<T> create(TypeRef<T> type, TypeAdapters adapters) {
+    public <T> @Nullable TypeAdapter<T> create(TypeRef<T> type) {
         @SuppressWarnings("unchecked")
         TypeAdapter<T> adapter = (TypeAdapter<T>) this.adapter;
         return predicate.test(type) ? adapter : null;

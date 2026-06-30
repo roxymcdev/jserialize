@@ -17,7 +17,7 @@ final class TypeAdaptersImpl implements TypeAdapters {
 
     @SuppressWarnings({"NullableProblems", "DataFlowIssue"}) // IntelliJ has existential issues
     private TypeAdaptersImpl(BuilderImpl builder) {
-        this.typeAdapters = new Registry<>(builder.typeAdapters, (factory, type) -> factory.create(type, this));
+        this.typeAdapters = new Registry<>(builder.typeAdapters, TypeAdapter.Factory::create);
         this.keyAdapters = new Registry<>(builder.keyAdapters, (factory, type) -> factory.createKey(type, this));
     }
 
@@ -36,16 +36,8 @@ final class TypeAdaptersImpl implements TypeAdapters {
     }
 
     @Override
-    public @Nullable <T> TypeAdapter<T> create(TypeRef<T> type, TypeAdapters adapters) {
-        for (TypeAdapter.Factory factory : typeAdapters.factories) {
-            TypeAdapter<T> adapter = factory.create(type, adapters);
-
-            if (adapter != null) {
-                return adapter;
-            }
-        }
-
-        return null;
+    public @Nullable <T> TypeAdapter<T> create(TypeRef<T> type) {
+        return get(type);
     }
 
     @Override

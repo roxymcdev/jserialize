@@ -77,6 +77,6 @@ public interface TypeAdapter<T> extends TypeReader<T>, TypeWriter<T> {
             return new CompositeTypeAdapterFactory(factories);
         }
 
-        <T> @Nullable TypeAdapter<T> create(TypeRef<T> type, TypeAdapters adapters);
+        <T> @Nullable TypeAdapter<T> create(TypeRef<T> type);
     }
 }
