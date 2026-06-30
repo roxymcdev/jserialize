@@ -15,7 +15,7 @@ import static net.roxymc.jserialize.util.TypeChecks.checkAssignable;
 
 final class AtomicLongAdapter implements TypeAdapter.Mutable<AtomicLong> {
     @Override
-    public @Nullable AtomicLong mutate(
+    public AtomicLong mutate(
             Reader reader, TypeRef<? extends AtomicLong> type, @Nullable AtomicLong ref, ReadContext ctx
     ) throws IOException {
         checkAssignable(AtomicLong.class, type.getRawType());
@@ -23,7 +23,7 @@ final class AtomicLongAdapter implements TypeAdapter.Mutable<AtomicLong> {
         Long value = ctx.read(reader, long.class);
 
         if (value == null) {
-            return ref;
+            throw new IllegalStateException("Cannot cannot set AtomicLong to null");
         }
 
         if (ref == null) {

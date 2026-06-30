@@ -15,7 +15,7 @@ import static net.roxymc.jserialize.util.TypeChecks.checkAssignable;
 
 final class AtomicBooleanAdapter implements TypeAdapter.Mutable<AtomicBoolean> {
     @Override
-    public @Nullable AtomicBoolean mutate(
+    public AtomicBoolean mutate(
             Reader reader, TypeRef<? extends AtomicBoolean> type, @Nullable AtomicBoolean ref, ReadContext ctx
     ) throws IOException {
         checkAssignable(AtomicBoolean.class, type.getRawType());
@@ -23,7 +23,7 @@ final class AtomicBooleanAdapter implements TypeAdapter.Mutable<AtomicBoolean> {
         Boolean value = ctx.read(reader, boolean.class);
 
         if (value == null) {
-            return ref;
+            throw new IllegalStateException("Cannot cannot set AtomicBoolean to null");
         }
 
         if (ref == null) {
