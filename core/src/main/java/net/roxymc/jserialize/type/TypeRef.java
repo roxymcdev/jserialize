@@ -1,28 +1,27 @@
 package net.roxymc.jserialize.type;
 
 import io.leangen.geantyref.GenericTypeReflector;
-import net.roxymc.jserialize.util.VarHandles;
 import org.jetbrains.annotations.UnknownNullability;
-import org.jspecify.annotations.Nullable;
 
-import java.lang.invoke.VarHandle;
 import java.lang.reflect.AnnotatedParameterizedType;
 import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
 public abstract class TypeRef<T extends @UnknownNullability Object> {
-    private static final VarHandle RAW_TYPE_HANDLE = VarHandles.find(TypeRef.class, "rawType", Class.class);
-
     private final AnnotatedType annotatedType;
-    private @Nullable Class<? super T> rawType;
+    private final Class<? super T> rawType;
 
+    @SuppressWarnings("unchecked")
     protected TypeRef() {
-        this.annotatedType = extractType();
+        this.annotatedType = GenericTypeReflector.toCanonical(extractType());
+        this.rawType = (Class<? super T>) GenericTypeReflector.erase(getType());
     }
 
+    @SuppressWarnings("unchecked")
     private TypeRef(AnnotatedType type) {
-        this.annotatedType = type;
+        this.annotatedType = GenericTypeReflector.toCanonical(type);
+        this.rawType = (Class<? super T>) GenericTypeReflector.erase(getType());
     }
 
     public static <T extends @UnknownNullability Object> TypeRef<T> of(Class<T> type) {
@@ -46,29 +45,20 @@ public abstract class TypeRef<T extends @UnknownNullability Object> {
         return annotatedType;
     }
 
-    @SuppressWarnings("unchecked")
     public final Class<? super T> getRawType() {
-        Class<? super T> value = (Class<? super T>) RAW_TYPE_HANDLE.getAcquire(this);
-
-        if (value == null) {
-            Class<? super T> erased = (Class<? super T>) GenericTypeReflector.erase(getType());
-            Class<? super T> witness = (Class<? super T>) RAW_TYPE_HANDLE.compareAndExchangeRelease(this, null, erased);
-
-            value = witness != null ? witness : erased;
-        }
-
-        return value;
+        return rawType;
     }
 
     private AnnotatedType extractType() {
         AnnotatedType type = getClass().getAnnotatedSuperclass();
+
         if (!(type instanceof AnnotatedParameterizedType)) {
             throw new IllegalStateException("missing type parameters");
         }
 
         AnnotatedParameterizedType ptype = (AnnotatedParameterizedType) type;
         if (((ParameterizedType) ptype.getType()).getRawType() != TypeRef.class) {
-            throw new IllegalStateException("does not directly extend TypeToken");
+            throw new IllegalStateException("does not directly extend TypeRef");
         }
 
         return ptype.getAnnotatedActualTypeArguments()[0];
@@ -95,6 +85,6 @@ public abstract class TypeRef<T extends @UnknownNullability Object> {
 
     @Override
     public final String toString() {
-        return "TypeToken[" + getType() + "]";
+        return "TypeRef[" + getType() + "]";
     }
 }

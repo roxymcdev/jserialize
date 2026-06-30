@@ -64,9 +64,7 @@ final class TypeAdaptersImpl implements TypeAdapters {
         }
 
         private Optional<A> get(TypeRef<?> type) {
-            AnnotatedType targetType = GenericTypeReflector.toCanonicalBoxed(type.getAnnotatedType());
-
-            return cache.computeIfAbsent(targetType, $ -> {
+            return cache.computeIfAbsent(type.getAnnotatedType(), $ -> {
                 for (F factory : factories) {
                     A adapter = creator.apply(factory, type);
 
