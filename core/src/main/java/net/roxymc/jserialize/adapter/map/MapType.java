@@ -1,12 +1,7 @@
 package net.roxymc.jserialize.adapter.map;
 
-import net.roxymc.jserialize.adapter.KeyAdapter;
-import net.roxymc.jserialize.adapter.TypeAdapter;
-import net.roxymc.jserialize.adapter.TypeAdapters;
 import net.roxymc.jserialize.type.TypeRef;
 import net.roxymc.jserialize.util.VarHandles;
-import org.jetbrains.annotations.UnknownNullability;
-import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 import java.lang.invoke.VarHandle;
@@ -17,18 +12,19 @@ import java.util.Map;
 import static io.leangen.geantyref.GenericTypeReflector.capture;
 import static io.leangen.geantyref.GenericTypeReflector.getExactSuperType;
 
-final class MapType<K extends @UnknownNullability Object, V extends @UnknownNullability Object> {
+final class MapType<K, V> {
     private static final VarHandle MAP_FACTORY_HANDLE = VarHandles.find(MapType.class, "mapFactory", MapFactory.class);
 
     final TypeRef<? extends Map<K, V>> mapType;
     final TypeRef<K> keyType;
     final TypeRef<V> valueType;
+
     private @Nullable MapFactory<K, V> mapFactory;
 
-    MapType(TypeRef<? extends Map<?, ?>> mapType) {
+    MapType(TypeRef<? extends Map<K, V>> mapType) {
         AnnotatedType type = getExactSuperType(capture(mapType.getAnnotatedType()), Map.class);
         if (!(type instanceof AnnotatedParameterizedType)) {
-            throw new IllegalStateException(mapType.getRawType() + " must be parameterized");
+            throw new IllegalStateException(mapType.getRawType() + " must be a parameterized Map");
         }
 
         AnnotatedParameterizedType ptype = (AnnotatedParameterizedType) type;
@@ -36,14 +32,6 @@ final class MapType<K extends @UnknownNullability Object, V extends @UnknownNull
         this.mapType = TypeRef.of(ptype);
         this.keyType = TypeRef.of(ptype.getAnnotatedActualTypeArguments()[0]);
         this.valueType = TypeRef.of(ptype.getAnnotatedActualTypeArguments()[1]);
-    }
-
-    KeyAdapter<@NonNull K> keyAdapter(TypeAdapters adapters) {
-        return adapters.getKeyOrThrow(keyType);
-    }
-
-    TypeAdapter<@NonNull V> valueAdapter(TypeAdapters adapters) {
-        return adapters.getOrThrow(valueType);
     }
 
     @SuppressWarnings("unchecked")

@@ -1,32 +1,21 @@
 package net.roxymc.jserialize.adapter.scalar;
 
+import net.roxymc.jserialize.adapter.AbstractKeyAdapter;
 import net.roxymc.jserialize.adapter.KeyAdapter;
-import net.roxymc.jserialize.adapter.TypeAdapters;
 import net.roxymc.jserialize.type.TypeRef;
-import org.jspecify.annotations.Nullable;
+import net.roxymc.jserialize.util.TypeUtils;
 
-import static net.roxymc.jserialize.util.ObjectUtils.nonNull;
+public final class EnumKeyAdapter<E extends Enum<E>> extends AbstractKeyAdapter<E> {
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private static final Factory FACTORY = Factory.<Enum>where(TypeUtils::isEnum, (type, $) -> new EnumKeyAdapter(type));
 
-public final class EnumKeyAdapter implements KeyAdapter<Enum<?>> {
-    private static final KeyAdapter.Factory FACTORY = new KeyAdapter.Factory() {
-        @Override
-        public <T> @Nullable KeyAdapter<T> create(TypeRef<T> type, TypeAdapters adapters) {
-            @SuppressWarnings("unchecked")
-            Class<? extends Enum<?>> enumType = (Class<? extends Enum<?>>) type.getRawType();
-            if (!enumType.isEnum()) {
-                return null;
-            }
+    private final TypeRef<E> enumType;
+    private final Class<E> enumClass;
 
-            @SuppressWarnings("unchecked")
-            KeyAdapter<T> adapter = (KeyAdapter<T>) new EnumKeyAdapter(enumType);
-            return adapter;
-        }
-    };
-
-    private final Class<? extends Enum<?>> enumType;
-
-    private EnumKeyAdapter(Class<? extends Enum<?>> enumType) {
+    @SuppressWarnings("unchecked")
+    private EnumKeyAdapter(TypeRef<E> enumType) {
         this.enumType = enumType;
+        this.enumClass = (Class<E>) enumType.getRawType();
     }
 
     public static KeyAdapter.Factory factory() {
@@ -34,18 +23,12 @@ public final class EnumKeyAdapter implements KeyAdapter<Enum<?>> {
     }
 
     @Override
-    public @Nullable Enum<?> decode(@Nullable String value) {
-        if (value == null) {
-            return null;
-        }
-
-        @SuppressWarnings({"unchecked", "rawtypes"})
-        Enum<?> resolved = Enum.valueOf((Class) enumType, value);
-        return resolved;
+    protected E parse(String value) {
+        return Enum.valueOf(enumClass, value);
     }
 
     @Override
-    public String encode(@Nullable Enum<?> value) {
-        return nonNull(value, "value").name();
+    public TypeRef<? extends E> type() {
+        return enumType;
     }
 }

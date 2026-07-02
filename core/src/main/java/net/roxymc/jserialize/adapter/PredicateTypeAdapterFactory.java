@@ -8,18 +8,22 @@ import java.util.function.Predicate;
 import static net.roxymc.jserialize.util.ObjectUtils.nonNull;
 
 final class PredicateTypeAdapterFactory implements TypeAdapter.Factory {
-    private final TypeAdapter<?> adapter;
     private final Predicate<? super TypeRef<?>> predicate;
+    private final TypeAdapter.TypedFactory<?> factory;
 
-    PredicateTypeAdapterFactory(Predicate<? super TypeRef<?>> predicate, TypeAdapter<?> adapter) {
-        this.adapter = nonNull(adapter, "adapter");
+    PredicateTypeAdapterFactory(Predicate<? super TypeRef<?>> predicate, TypeAdapter.TypedFactory<?> factory) {
         this.predicate = nonNull(predicate, "predicate");
+        this.factory = nonNull(factory, "factory");
     }
 
     @Override
-    public <T> @Nullable TypeAdapter<T> create(TypeRef<T> type, TypeAdapters adapters) {
+    public <T> @Nullable TypeAdapter<T> create(TypeRef<T> type) {
+        if (!predicate.test(type)) {
+            return null;
+        }
+
         @SuppressWarnings("unchecked")
-        TypeAdapter<T> adapter = (TypeAdapter<T>) this.adapter;
-        return predicate.test(type) ? adapter : null;
+        TypeAdapter<T> adapter = ((TypeAdapter.TypedFactory<T>) this.factory).create(type);
+        return adapter;
     }
 }

@@ -98,7 +98,7 @@ final class BsonUtils implements FormatUtils<BsonValue> {
                 BsonDocument result = new BsonDocument();
 
                 try (BsonDocumentWriter writer = new BsonDocumentWriter(result)) {
-                    mapAdapter.write(new BsonWriterAdapter(writer), typeRef, map, ctx);
+                    mapAdapter.write(new BsonWriterAdapter(writer), map, ctx);
                 }
 
                 document.putAll(result);
@@ -110,10 +110,10 @@ final class BsonUtils implements FormatUtils<BsonValue> {
                     Reader readerAdapter = new StandardBsonReaderAdapter(reader);
 
                     if (!(mapAdapter instanceof TypeAdapter.Mutable)) {
-                        return mapAdapter.read(readerAdapter, typeRef, ctx);
+                        return mapAdapter.read(readerAdapter, ctx);
                     }
 
-                    return ((TypeAdapter.Mutable<Map<?, ?>>) mapAdapter).mutate(readerAdapter, typeRef, instance, ctx);
+                    return ((TypeAdapter.Mutable<Map<?, ?>>) mapAdapter).mutate(readerAdapter, instance, ctx);
                 }
             }
 

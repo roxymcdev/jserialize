@@ -8,8 +8,6 @@ import org.jspecify.annotations.Nullable;
 import org.spongepowered.configurate.ConfigurationOptions;
 import org.spongepowered.configurate.serialize.TypeSerializer;
 
-import java.util.Objects;
-
 final class ConfigurateTypeAdapters implements TypeAdapters {
     // TODO we should use TypeSerializers when MapLike is gone (see usages)
     final ConfigurationOptions options;
@@ -21,20 +19,33 @@ final class ConfigurateTypeAdapters implements TypeAdapters {
     }
 
     @Override
-    public <T> TypeAdapter<T> get(TypeRef<T> type) {
+    public <T> @Nullable TypeAdapter<T> get(TypeRef<T> type) {
         @SuppressWarnings("unchecked")
         TypeSerializer<T> serializer = (TypeSerializer<T>) options.serializers().get(type.getAnnotatedType());
+
+        if (serializer == null) {
+            return null;
+        }
 
         if (serializer instanceof TypeAdapterProvider) {
             return ((TypeAdapterProvider) serializer).adapters.getOrThrow(type);
         }
 
-        Objects.requireNonNull(serializer);
-        return new WrappedTypeSerializer<>(serializer);
+        return new WrappedTypeSerializer<>(type, serializer);
     }
 
     @Override
     public <T> @Nullable KeyAdapter<T> getKey(TypeRef<T> type) {
         return adapters.getKey(type);
+    }
+
+    @Override
+    public @Nullable <T> TypeAdapter<T> create(TypeRef<T> type) {
+        return get(type);
+    }
+
+    @Override
+    public @Nullable <T> KeyAdapter<T> createKey(TypeRef<T> type, TypeAdapters adapters) {
+        return adapters.createKey(type, adapters);
     }
 }

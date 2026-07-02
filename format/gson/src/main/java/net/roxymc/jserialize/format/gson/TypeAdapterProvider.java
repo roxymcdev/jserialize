@@ -26,6 +26,6 @@ public final class TypeAdapterProvider implements TypeAdapterFactory {
         }
 
         GsonTypeAdapters adapters = new GsonTypeAdapters(gson, this.adapters);
-        return new WrappedTypeAdapter<>(type, adapter, adapters);
+        return new WrappedTypeAdapter<>(adapter, adapters);
     }
 }

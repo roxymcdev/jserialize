@@ -11,60 +11,54 @@ import java.io.IOException;
 import java.util.function.Predicate;
 
 public interface TypeAdapter<T> extends TypeReader<T>, TypeWriter<T> {
-    static <T> TypeAdapter<T> of(TypeReader<T> reader, TypeWriter<T> writer) {
-        return new TypeAdapter<>() {
-            private final TypeReader<T> reader0 = reader;
-            private final TypeWriter<T> writer0 = writer;
-
-            @Override
-            public @Nullable T read(Reader reader, TypeRef<? extends T> type, ReadContext context) throws IOException {
-                return reader0.read(reader, type, context);
-            }
-
-            @Override
-            public void write(Writer writer, TypeRef<? extends T> type, @Nullable T value, WriteContext context) throws IOException {
-                writer0.write(writer, type, value, context);
-            }
-        };
-    }
+    @Override
+    @Nullable T read(Reader reader, ReadContext context) throws IOException;
 
     @Override
-    @Nullable T read(Reader reader, TypeRef<? extends T> type, ReadContext context) throws IOException;
+    void write(Writer writer, @Nullable T value, WriteContext context) throws IOException;
 
-    @Override
-    void write(Writer writer, TypeRef<? extends T> type, @Nullable T value, WriteContext context) throws IOException;
+    TypeRef<? extends T> type();
 
     interface Mutable<T> extends TypeAdapter<T> {
         @Override
-        default @Nullable T read(Reader reader, TypeRef<? extends T> type, ReadContext context) throws IOException {
-            return mutate(reader, type, null, context);
+        default @Nullable T read(Reader reader, ReadContext context) throws IOException {
+            return mutate(reader, null, context);
         }
 
-        @Contract("_, _, !null, _ -> param3")
-        @Nullable T mutate(Reader reader, TypeRef<? extends T> type, @Nullable T value, ReadContext context) throws IOException;
+        @Contract("_, !null, _ -> param2")
+        @Nullable T mutate(Reader reader, @Nullable T value, ReadContext context) throws IOException;
     }
 
     interface Factory {
-        static Factory predicate(Predicate<? super TypeRef<?>> predicate, TypeAdapter<?> adapter) {
-            return new PredicateTypeAdapterFactory(predicate, adapter);
+        static <T> Factory where(Predicate<? super TypeRef<?>> predicate, TypedFactory<? super T> factory) {
+            return new PredicateTypeAdapterFactory(predicate, factory);
         }
 
-        static <T> Factory polymorphic(Class<? super T> type, TypeAdapter<T> adapter) {
-            return predicate(subtype -> type.isAssignableFrom(subtype.getRawType()), adapter);
+        static <T> Factory polymorphic(Class<T> type, TypedFactory<? super T> factory) {
+            return where(subtype -> type.isAssignableFrom(subtype.getRawType()), factory);
         }
 
-        static <T> Factory polymorphic(TypeRef<? extends T> type, TypeAdapter<T> adapter) {
-            return predicate(subtype -> GenericTypeReflector.isSuperType(type.getType(), subtype.getType()), adapter);
+        static <T> Factory polymorphic(TypeRef<T> type, TypedFactory<? super T> factory) {
+            return where(subtype -> GenericTypeReflector.isSuperType(type.getType(), subtype.getType()), factory);
         }
 
-        static <T> Factory exact(TypeRef<? extends T> type, TypeAdapter<T> adapter) {
-            return predicate(subtype -> type.getType().equals(subtype.getType()), adapter);
+        static <T> Factory exact(TypeAdapter<T> adapter) {
+            return Factory.<T>where(subtype -> adapter.type().getType().equals(subtype.getType()), $ -> adapter);
         }
 
-        static <T> Factory exactRaw(Class<? super T> type, TypeAdapter<T> adapter) {
-            return predicate(subtype -> type.equals(subtype.getRawType()), adapter);
+        static <T> Factory exactRaw(Class<T> type, TypedFactory<? super T> factory) {
+            return where(subtype -> type.equals(subtype.getRawType()), factory);
         }
 
-        <T> @Nullable TypeAdapter<T> create(TypeRef<T> type, TypeAdapters adapters);
+        static Factory composite(Factory... factories) {
+            return new CompositeTypeAdapterFactory(factories);
+        }
+
+        <T> @Nullable TypeAdapter<T> create(TypeRef<T> type);
+    }
+
+    @FunctionalInterface
+    interface TypedFactory<T> {
+        @Nullable TypeAdapter<T> create(TypeRef<T> type);
     }
 }

@@ -1,7 +1,7 @@
 package net.roxymc.jserialize.adapter.object;
 
 import net.roxymc.jserialize.Reader;
-import net.roxymc.jserialize.adapter.KeyAdapter;
+import net.roxymc.jserialize.adapter.KeyDecoder;
 import net.roxymc.jserialize.adapter.ReadContext;
 import net.roxymc.jserialize.adapter.TypeAdapter;
 import net.roxymc.jserialize.creator.InstanceCreator;
@@ -13,7 +13,6 @@ import net.roxymc.jserialize.model.property.meta.PropertyKind;
 import net.roxymc.jserialize.model.property.meta.PropertyMeta;
 import net.roxymc.jserialize.token.TokenTypes;
 import net.roxymc.jserialize.type.TypeRef;
-import net.roxymc.jserialize.util.TypeUtils;
 import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
@@ -58,9 +57,9 @@ final class ObjectReader<T, R> {
             }
 
             TypeRef<?> typeRef = TypeRef.of(type);
-            KeyAdapter<?> adapter = context.typeAdapters().getKeyOrThrow(typeRef);
+            KeyDecoder<?> decoder = context.typeAdapters().getKeyOrThrow(typeRef);
 
-            builder.property(property, adapter.decode(context.key()));
+            builder.property(property, decoder.decode(context.key()));
         });
 
         PropertyModel extrasProperty = classModel.properties().get(PropertyKind.EXTRAS);
@@ -150,13 +149,13 @@ final class ObjectReader<T, R> {
 
         if (!(adapter instanceof TypeAdapter.Mutable)) {
             return parent -> adapter.read(
-                    valueReader, typeRef, context.withParent(parent)
+                    valueReader, context.withParent(parent)
             );
         }
 
         TypeAdapter.Mutable<Object> mutableAdapter = (TypeAdapter.Mutable<Object>) adapter;
         return (PropertyValue.Mutable<?>) (parent, instance) -> mutableAdapter.mutate(
-                valueReader, typeRef, instance, context.withParent(parent)
+                valueReader, instance, context.withParent(parent)
         );
     }
 
@@ -164,14 +163,14 @@ final class ObjectReader<T, R> {
         TypeRef<R> typeRef = TypeRef.of(formatUtils.rawType());
         TypeAdapter<R> adapter = context.typeAdapters().getOrThrow(typeRef);
 
-        return adapter.read(reader, typeRef, context.withParent(null).withKey(null));
+        return adapter.read(reader, context.withParent(null).withKey(null));
     }
 
     private @Nullable AnnotatedType resolveReadType(PropertyModel property) {
         PropertyMeta meta = property.meta();
 
         if (instance == null && property.parameterType() != null) {
-            return TypeUtils.box(resolveType(property.parameterType(), capture(type.getAnnotatedType())));
+            return resolveType(property.parameterType(), capture(type.getAnnotatedType()));
         }
 
         MethodRef method = null;
@@ -186,7 +185,8 @@ final class ObjectReader<T, R> {
             return null;
         }
 
+        // TODO looking at the resolveType/getTypeParameter impl we might not need getExactSuperType
         AnnotatedType supertype = getExactSuperType(capture(type.getAnnotatedType()), method.declaringClass());
-        return TypeUtils.box(resolveType(method.valueType(), supertype));
+        return resolveType(method.valueType(), supertype);
     }
 }
