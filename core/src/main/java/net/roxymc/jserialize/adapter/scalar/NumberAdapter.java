@@ -6,9 +6,16 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
-final class NumberAdapter extends AbstractNumberAdapter<Number> {
-    NumberAdapter() {
+public final class NumberAdapter extends AbstractNumberAdapter<Number> {
+    public static final NumberAdapter INSTANCE = new NumberAdapter();
+    private static final Factory FACTORY = Factory.exact(INSTANCE);
+
+    private NumberAdapter() {
         super(Number.class);
+    }
+
+    public static Factory factory() {
+        return FACTORY;
     }
 
     static Number parseNumber(String value) throws NumberFormatException {

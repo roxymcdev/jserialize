@@ -1,6 +1,5 @@
 package net.roxymc.jserialize.adapter.scalar;
 
-import io.leangen.geantyref.GenericTypeReflector;
 import net.roxymc.jserialize.Reader;
 import net.roxymc.jserialize.Writer;
 import net.roxymc.jserialize.adapter.ReadContext;
@@ -12,32 +11,50 @@ import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
 
-import static net.roxymc.jserialize.util.TypeChecks.checkAssignable;
+public final class BooleanAdapter implements TypeAdapter<Boolean> {
+    public static final TypeAdapter<Boolean> PRIMITIVE = new BooleanAdapter(boolean.class);
+    public static final TypeAdapter<Boolean> BOXED = new BooleanAdapter(Boolean.class);
 
-final class BooleanAdapter implements TypeAdapter<Boolean> {
+    private static final Factory FACTORY = Factory.composite(
+            Factory.exact(PRIMITIVE),
+            Factory.exact(BOXED)
+    );
+
+    private final TypeRef<Boolean> type;
+    private final Class<Boolean> rawType;
+
+    private BooleanAdapter(Class<Boolean> type) {
+        this.type = TypeRef.of(type);
+        this.rawType = type;
+    }
+
+    public static TypeAdapter.Factory factory() {
+        return FACTORY;
+    }
+
     @Override
-    public @Nullable Boolean read(Reader reader, TypeRef<? extends Boolean> type, ReadContext ctx) throws IOException {
-        checkAssignable(Boolean.class, GenericTypeReflector.box(type.getRawType()));
-
+    public @Nullable Boolean read(Reader reader, ReadContext ctx) throws IOException {
         if (reader.peek() == TokenTypes.NULL) {
-            if (type.getRawType().isPrimitive()) {
-                throw new IllegalStateException("Cannot read null into primitive " + type.getRawType());
+            if (rawType.isPrimitive()) {
+                throw new IllegalStateException("Cannot read null into primitive " + rawType.getSimpleName());
             }
 
             reader.readNull();
             return null;
         }
 
+        if (reader.peek() == TokenTypes.STRING) {
+            return Boolean.parseBoolean(reader.readString());
+        }
+
         return reader.readBoolean();
     }
 
     @Override
-    public void write(Writer writer, TypeRef<? extends Boolean> type, @Nullable Boolean value, WriteContext ctx) throws IOException {
-        checkAssignable(Boolean.class, GenericTypeReflector.box(type.getRawType()));
-
+    public void write(Writer writer, @Nullable Boolean value, WriteContext ctx) throws IOException {
         if (value == null) {
-            if (type.getRawType().isPrimitive()) {
-                throw new IllegalStateException("Cannot write null for primitive " + type.getRawType());
+            if (rawType.isPrimitive()) {
+                throw new IllegalStateException("Cannot write null for primitive " + rawType.getSimpleName());
             }
 
             writer.writeNull();
@@ -45,5 +62,10 @@ final class BooleanAdapter implements TypeAdapter<Boolean> {
         }
 
         writer.writeBoolean(value);
+    }
+
+    @Override
+    public TypeRef<? extends Boolean> type() {
+        return type;
     }
 }

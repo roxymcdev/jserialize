@@ -15,40 +15,38 @@ import java.time.temporal.Temporal;
 import java.time.temporal.TemporalQuery;
 
 import static net.roxymc.jserialize.util.ObjectUtils.nonNull;
-import static net.roxymc.jserialize.util.TypeChecks.checkAssignable;
 
-final class TemporalAdapter<T extends Temporal> implements TypeAdapter<T> {
-    private final Class<T> type;
+abstract class AbstractTemporalAdapter<T extends Temporal> implements TypeAdapter<T>, TemporalQuery<T> {
+    private final TypeRef<T> type;
     private final DateTimeFormatter formatter;
-    private final TemporalQuery<T> query;
 
-    TemporalAdapter(Class<T> type, DateTimeFormatter formatter, TemporalQuery<T> query) {
+    protected AbstractTemporalAdapter(TypeRef<T> type, DateTimeFormatter formatter) {
         this.type = nonNull(type, "type");
         this.formatter = nonNull(formatter, "formatter");
-        this.query = nonNull(query, "query");
     }
 
     @Override
-    public @Nullable T read(Reader reader, TypeRef<? extends T> typeRef, ReadContext ctx) throws IOException {
-        checkAssignable(type, typeRef.getRawType());
-
+    public @Nullable T read(Reader reader, ReadContext ctx) throws IOException {
         if (reader.peek() == TokenTypes.NULL) {
             reader.readNull();
             return null;
         }
 
-        return formatter.parse(reader.readString(), query);
+        return formatter.parse(reader.readString(), this);
     }
 
     @Override
-    public void write(Writer writer, TypeRef<? extends T> typeRef, @Nullable T value, WriteContext ctx) throws IOException {
-        checkAssignable(type, typeRef.getRawType());
-
+    public void write(Writer writer, @Nullable T value, WriteContext ctx) throws IOException {
         if (value == null) {
             writer.writeNull();
             return;
         }
 
         writer.writeString(formatter.format(value));
+    }
+
+    @Override
+    public TypeRef<? extends T> type() {
+        return type;
     }
 }

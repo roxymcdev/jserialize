@@ -32,7 +32,7 @@ final class GsonTypeAdapters implements TypeAdapters {
             return ((WrappedTypeAdapter<T>) adapter).typeAdapter;
         }
 
-        return new WrappedGsonTypeAdapter<>(adapter);
+        return new WrappedGsonTypeAdapter<>(type, adapter);
     }
 
     @Override

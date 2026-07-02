@@ -14,36 +14,41 @@ import org.jspecify.annotations.Nullable;
 import java.io.IOException;
 
 public final class ObjectAdapter<T> implements TypeAdapter.Mutable<T> {
-    private static final TypeAdapter.Factory FACTORY = factory(ClassModel.factory());
-    private static final TypeAdapter.Factory ANNOTATED_FACTORY = annotatedFactory(ClassModel.factory());
+    private static final Factory FACTORY = factory(ClassModel.factory());
+    private static final Factory ANNOTATED_FACTORY = annotatedFactory(ClassModel.factory());
 
-    private final ClassModel.Factory factory;
+    private final TypeRef<T> type;
+    private final ClassModel<T> classModel;
 
-    public ObjectAdapter(ClassModel.Factory factory) {
-        this.factory = factory;
+    private ObjectAdapter(TypeRef<T> type, ClassModel<T> classModel) {
+        this.type = type;
+        this.classModel = classModel;
     }
 
-    public static TypeAdapter.Factory factory() {
+    public static Factory factory() {
         return FACTORY;
     }
 
-    public static TypeAdapter.Factory factory(ClassModel.Factory factory) {
-        return TypeAdapter.Factory.predicate(type -> !type.getRawType().isPrimitive(), new ObjectAdapter<>(factory));
+    public static Factory factory(ClassModel.Factory factory) {
+        return Factory.where(
+                type -> !type.getRawType().isPrimitive(),
+                type -> new ObjectAdapter<>(type, factory.create(type))
+        );
     }
 
-    public static TypeAdapter.Factory annotatedFactory() {
+    public static Factory annotatedFactory() {
         return ANNOTATED_FACTORY;
     }
 
-    public static TypeAdapter.Factory annotatedFactory(ClassModel.Factory factory) {
-        return TypeAdapter.Factory.predicate(
+    public static Factory annotatedFactory(ClassModel.Factory factory) {
+        return Factory.where(
                 type -> !type.getRawType().isPrimitive() && type.getAnnotatedType().isAnnotationPresent(JSerializable.class),
-                new ObjectAdapter<>(factory)
+                type -> new ObjectAdapter<>(type, factory.create(type))
         );
     }
 
     @Override
-    public @Nullable T mutate(Reader reader, TypeRef<? extends T> type, @Nullable T value, ReadContext ctx) throws IOException {
+    public @Nullable T mutate(Reader reader, @Nullable T value, ReadContext ctx) throws IOException {
         if (reader.peek() == TokenTypes.NULL) {
             if (value != null) {
                 throw new IllegalStateException("Cannot mutate value with null");
@@ -54,7 +59,6 @@ public final class ObjectAdapter<T> implements TypeAdapter.Mutable<T> {
         }
 
         try {
-            ClassModel<T> classModel = factory.create(type);
             @SuppressWarnings("NullableProblems") // IntelliJ has existential issues
             ObjectReader<T, ?> objectReader = new ObjectReader<>(classModel, type, value, ctx.formatUtils(), ctx);
 
@@ -65,14 +69,13 @@ public final class ObjectAdapter<T> implements TypeAdapter.Mutable<T> {
     }
 
     @Override
-    public void write(Writer writer, TypeRef<? extends T> type, @Nullable T value, WriteContext ctx) throws IOException {
+    public void write(Writer writer, @Nullable T value, WriteContext ctx) throws IOException {
         if (value == null) {
             writer.writeNull();
             return;
         }
 
         try {
-            ClassModel<T> classModel = factory.create(type);
             @SuppressWarnings("NullableProblems") // IntelliJ has existential issues
             ObjectWriter<T, ?> objectWriter = new ObjectWriter<>(classModel, type, value, ctx.formatUtils(), ctx);
 
@@ -80,5 +83,10 @@ public final class ObjectAdapter<T> implements TypeAdapter.Mutable<T> {
         } catch (Throwable e) {
             throw new RuntimeException("Failed to write object of type: " + type.getType(), e);
         }
+    }
+
+    @Override
+    public TypeRef<? extends T> type() {
+        return type;
     }
 }

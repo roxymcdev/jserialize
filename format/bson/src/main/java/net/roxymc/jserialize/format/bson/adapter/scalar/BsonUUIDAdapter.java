@@ -16,10 +16,10 @@ import java.io.IOException;
 import java.util.UUID;
 
 import static net.roxymc.jserialize.util.ObjectUtils.nonNull;
-import static net.roxymc.jserialize.util.TypeChecks.checkAssignable;
 
 public final class BsonUUIDAdapter implements TypeAdapter<UUID> {
-    private static final TypeAdapter.Factory FACTORY = factory(UuidRepresentation.STANDARD);
+    private static final TypeRef<UUID> TYPE = TypeRef.of(UUID.class);
+    private static final Factory FACTORY = factory(UuidRepresentation.STANDARD);
 
     private final UuidRepresentation uuidRepresentation;
 
@@ -27,18 +27,16 @@ public final class BsonUUIDAdapter implements TypeAdapter<UUID> {
         this.uuidRepresentation = nonNull(uuidRepresentation, "uuidRepresentation");
     }
 
-    public static TypeAdapter.Factory factory() {
+    public static Factory factory() {
         return FACTORY;
     }
 
-    public static TypeAdapter.Factory factory(UuidRepresentation uuidRepresentation) {
-        return TypeAdapter.Factory.exactRaw(UUID.class, new BsonUUIDAdapter(uuidRepresentation));
+    public static Factory factory(UuidRepresentation uuidRepresentation) {
+        return Factory.exact(new BsonUUIDAdapter(uuidRepresentation));
     }
 
     @Override
-    public @Nullable UUID read(Reader reader, TypeRef<? extends UUID> type, ReadContext context) throws IOException {
-        checkAssignable(UUID.class, type.getRawType());
-
+    public @Nullable UUID read(Reader reader, ReadContext context) throws IOException {
         if (reader.peek() == TokenTypes.NULL) {
             reader.readNull();
             return null;
@@ -48,14 +46,17 @@ public final class BsonUUIDAdapter implements TypeAdapter<UUID> {
     }
 
     @Override
-    public void write(Writer writer, TypeRef<? extends UUID> type, @Nullable UUID value, WriteContext context) throws IOException {
-        checkAssignable(UUID.class, type.getRawType());
-
+    public void write(Writer writer, @Nullable UUID value, WriteContext context) throws IOException {
         if (value == null) {
             writer.writeNull();
             return;
         }
 
         writer.write(BsonTokenTypes.BINARY, new BsonBinary(value, uuidRepresentation));
+    }
+
+    @Override
+    public TypeRef<? extends UUID> type() {
+        return TYPE;
     }
 }

@@ -31,7 +31,7 @@ final class ConfigurateTypeAdapters implements TypeAdapters {
             return ((TypeAdapterProvider) serializer).adapters.getOrThrow(type);
         }
 
-        return new WrappedTypeSerializer<>(serializer);
+        return new WrappedTypeSerializer<>(type, serializer);
     }
 
     @Override

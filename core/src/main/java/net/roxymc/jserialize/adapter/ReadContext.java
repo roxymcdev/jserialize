@@ -29,7 +29,7 @@ public interface ReadContext {
     }
 
     default <T> @Nullable T read(Reader reader, TypeRef<T> type) throws IOException {
-        return typeAdapters().getOrThrow(type).read(reader, type, this);
+        return typeAdapters().getOrThrow(type).read(reader, this);
     }
 
     @ApiStatus.Internal

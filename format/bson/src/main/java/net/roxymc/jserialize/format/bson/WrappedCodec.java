@@ -15,14 +15,16 @@ import org.jspecify.annotations.Nullable;
 import java.io.IOException;
 
 final class WrappedCodec<T> implements TypeAdapter<T> {
+    private final TypeRef<T> type;
     private final Codec<T> codec;
 
-    WrappedCodec(Codec<T> codec) {
+    WrappedCodec(TypeRef<T> type, Codec<T> codec) {
+        this.type = type;
         this.codec = codec;
     }
 
     @Override
-    public @Nullable T read(Reader reader, TypeRef<? extends T> type, ReadContext context) throws IOException {
+    public @Nullable T read(Reader reader, ReadContext context) throws IOException {
         if (reader.peek() == TokenTypes.NULL) {
             return null;
         }
@@ -37,12 +39,17 @@ final class WrappedCodec<T> implements TypeAdapter<T> {
     }
 
     @Override
-    public void write(Writer writer, TypeRef<? extends T> type, @Nullable T value, WriteContext context) throws IOException {
+    public void write(Writer writer, @Nullable T value, WriteContext context) throws IOException {
         if (value == null) {
             writer.writeNull();
             return;
         }
 
         codec.encode(((BsonWriterAdapter) writer).writer, value, EncoderContext.builder().build());
+    }
+
+    @Override
+    public TypeRef<? extends T> type() {
+        return type;
     }
 }

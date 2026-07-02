@@ -1,6 +1,5 @@
 package net.roxymc.jserialize.adapter.scalar;
 
-import io.leangen.geantyref.GenericTypeReflector;
 import net.roxymc.jserialize.Reader;
 import net.roxymc.jserialize.Writer;
 import net.roxymc.jserialize.adapter.ReadContext;
@@ -13,28 +12,22 @@ import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
 
-import static net.roxymc.jserialize.util.TypeChecks.checkAssignable;
-
 abstract class AbstractNumberAdapter<N extends Number> implements TypeAdapter<N> {
-    protected final Class<N> numberType;
+    protected final TypeRef<N> type;
+    protected final Class<N> rawType;
 
-    protected AbstractNumberAdapter(Class<N> numberType) {
-        if (numberType.isPrimitive()) {
-            throw new IllegalArgumentException("numberType cannot be primitive");
-        }
-
-        this.numberType = numberType;
+    protected AbstractNumberAdapter(Class<N> type) {
+        this.type = TypeRef.of(type);
+        this.rawType = type;
     }
 
     @Override
-    public final @Nullable N read(Reader reader, TypeRef<? extends N> type, ReadContext ctx) throws IOException {
-        checkAssignable(numberType, GenericTypeReflector.box(type.getRawType()));
-
+    public final @Nullable N read(Reader reader, ReadContext ctx) throws IOException {
         TokenType tokenType = reader.peek();
 
         if (tokenType == TokenTypes.NULL) {
-            if (type.getRawType().isPrimitive()) {
-                throw new IllegalStateException("Cannot read null into primitive " + type.getRawType());
+            if (rawType.isPrimitive()) {
+                throw new IllegalStateException("Cannot read null into primitive " + rawType.getSimpleName());
             }
 
             reader.readNull();
@@ -57,7 +50,7 @@ abstract class AbstractNumberAdapter<N extends Number> implements TypeAdapter<N>
             try {
                 return parse(reader.readString());
             } catch (NumberFormatException e) {
-                throw new ArithmeticException("Invalid format for " + numberType.getSimpleName() + ": " + e.getMessage());
+                throw new ArithmeticException("Invalid format for " + rawType.getSimpleName() + ": " + e.getMessage());
             }
         }
 
@@ -66,13 +59,13 @@ abstract class AbstractNumberAdapter<N extends Number> implements TypeAdapter<N>
 
     protected N fromDouble(double value) {
         if (!Double.isFinite(value)) {
-            throw new ArithmeticException(numberType.getSimpleName() + " must be finite: " + value);
+            throw new ArithmeticException(rawType.getSimpleName() + " must be finite: " + value);
         }
 
         long longValue = (long) value;
 
         if (longValue != value) {
-            throw new ArithmeticException(numberType.getSimpleName() + " overflow or loss of precision: " + value);
+            throw new ArithmeticException(rawType.getSimpleName() + " overflow or loss of precision: " + value);
         }
 
         return fromLong(longValue);
@@ -83,12 +76,10 @@ abstract class AbstractNumberAdapter<N extends Number> implements TypeAdapter<N>
     protected abstract N parse(String value) throws NumberFormatException;
 
     @Override
-    public final void write(Writer writer, TypeRef<? extends N> type, @Nullable N value, WriteContext ctx) throws IOException {
-        checkAssignable(numberType, GenericTypeReflector.box(type.getRawType()));
-
+    public final void write(Writer writer, @Nullable N value, WriteContext ctx) throws IOException {
         if (value == null) {
-            if (type.getRawType().isPrimitive()) {
-                throw new IllegalStateException("Cannot write null for primitive " + type.getRawType());
+            if (rawType.isPrimitive()) {
+                throw new IllegalStateException("Cannot write null for primitive " + rawType.getSimpleName());
             }
 
             writer.writeNull();
@@ -99,4 +90,9 @@ abstract class AbstractNumberAdapter<N extends Number> implements TypeAdapter<N>
     }
 
     protected abstract void write(Writer writer, N value) throws IOException;
+
+    @Override
+    public TypeRef<? extends N> type() {
+        return type;
+    }
 }

@@ -1,12 +1,25 @@
 package net.roxymc.jserialize.adapter.scalar;
 
 import net.roxymc.jserialize.Writer;
+import net.roxymc.jserialize.adapter.TypeAdapter;
 
 import java.io.IOException;
 
-final class ByteAdapter extends AbstractNumberAdapter<Byte> {
-    ByteAdapter() {
-        super(Byte.class);
+public final class ByteAdapter extends AbstractNumberAdapter<Byte> {
+    public static final TypeAdapter<Byte> PRIMITIVE = new ByteAdapter(byte.class);
+    public static final TypeAdapter<Byte> BOXED = new ByteAdapter(Byte.class);
+
+    private static final Factory FACTORY = Factory.composite(
+            Factory.exact(PRIMITIVE),
+            Factory.exact(BOXED)
+    );
+
+    private ByteAdapter(Class<Byte> type) {
+        super(type);
+    }
+
+    public static TypeAdapter.Factory factory() {
+        return FACTORY;
     }
 
     @Override
@@ -14,7 +27,7 @@ final class ByteAdapter extends AbstractNumberAdapter<Byte> {
         byte byteValue = (byte) value;
 
         if (byteValue != value) {
-            throw new ArithmeticException(numberType.getSimpleName() + " overflow: " + value);
+            throw new ArithmeticException(rawType.getSimpleName() + " overflow: " + value);
         }
 
         return byteValue;

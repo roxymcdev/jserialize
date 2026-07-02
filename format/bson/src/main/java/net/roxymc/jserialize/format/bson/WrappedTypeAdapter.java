@@ -44,7 +44,7 @@ final class WrappedTypeAdapter<T> implements Codec<T> {
         }
 
         try {
-            return typeAdapter.read(reader, type, readCtx);
+            return typeAdapter.read(reader, readCtx);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
@@ -55,7 +55,7 @@ final class WrappedTypeAdapter<T> implements Codec<T> {
         Writer writer = new BsonWriterAdapter(bsonWriter);
 
         try {
-            typeAdapter.write(writer, type, value, writeCtx);
+            typeAdapter.write(writer, value, writeCtx);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }

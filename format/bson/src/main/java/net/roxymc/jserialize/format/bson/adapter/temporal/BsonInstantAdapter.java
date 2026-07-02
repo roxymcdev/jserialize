@@ -13,13 +13,21 @@ import org.jspecify.annotations.Nullable;
 import java.io.IOException;
 import java.time.Instant;
 
-import static net.roxymc.jserialize.util.TypeChecks.checkAssignable;
+public final class BsonInstantAdapter implements TypeAdapter<Instant> {
+    private static final TypeRef<Instant> TYPE = TypeRef.of(Instant.class);
 
-final class BsonInstantAdapter implements TypeAdapter<Instant> {
+    public static final TypeAdapter<Instant> INSTANCE = new BsonInstantAdapter();
+    private static final Factory FACTORY = Factory.exact(INSTANCE);
+
+    private BsonInstantAdapter() {
+    }
+
+    public static Factory factory() {
+        return FACTORY;
+    }
+
     @Override
-    public @Nullable Instant read(Reader reader, TypeRef<? extends Instant> type, ReadContext ctx) throws IOException {
-        checkAssignable(Instant.class, type.getRawType());
-
+    public @Nullable Instant read(Reader reader, ReadContext ctx) throws IOException {
         if (reader.peek() == TokenTypes.NULL) {
             reader.readNull();
             return null;
@@ -29,14 +37,17 @@ final class BsonInstantAdapter implements TypeAdapter<Instant> {
     }
 
     @Override
-    public void write(Writer writer, TypeRef<? extends Instant> type, @Nullable Instant value, WriteContext ctx) throws IOException {
-        checkAssignable(Instant.class, type.getRawType());
-
+    public void write(Writer writer, @Nullable Instant value, WriteContext ctx) throws IOException {
         if (value == null) {
             writer.writeNull();
             return;
         }
 
         writer.write(BsonTokenTypes.DATE_TIME, value.toEpochMilli());
+    }
+
+    @Override
+    public TypeRef<? extends Instant> type() {
+        return TYPE;
     }
 }

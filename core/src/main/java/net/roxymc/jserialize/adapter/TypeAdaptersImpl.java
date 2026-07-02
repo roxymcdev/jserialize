@@ -1,6 +1,5 @@
 package net.roxymc.jserialize.adapter;
 
-import io.leangen.geantyref.GenericTypeReflector;
 import net.roxymc.jserialize.type.TypeRef;
 import org.jspecify.annotations.Nullable;
 
@@ -37,7 +36,15 @@ final class TypeAdaptersImpl implements TypeAdapters {
 
     @Override
     public @Nullable <T> TypeAdapter<T> create(TypeRef<T> type) {
-        return get(type);
+        for (TypeAdapter.Factory factory : typeAdapters.factories) {
+            TypeAdapter<T> adapter = factory.create(type);
+
+            if (adapter != null) {
+                return adapter;
+            }
+        }
+
+        return null;
     }
 
     @Override

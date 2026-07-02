@@ -9,32 +9,32 @@ import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
 import java.lang.reflect.AnnotatedArrayType;
-import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
-import static net.roxymc.jserialize.adapter.TypeAdapter.Factory.predicate;
-
 public final class ArrayAdapter implements TypeAdapter<Object> {
-    private static final TypeAdapter.Factory FACTORY = predicate(type -> type.getRawType().isArray(), new ArrayAdapter());
+    private static final Factory FACTORY = Factory.where(type -> type.getRawType().isArray(), ArrayAdapter::new);
 
-    public static TypeAdapter.Factory factory() {
+    private final TypeRef<?> arrayType;
+    private final TypeRef<Object> componentType;
+
+    private ArrayAdapter(TypeRef<?> arrayType) {
+        this.arrayType = arrayType;
+        this.componentType = TypeRef.of(((AnnotatedArrayType) arrayType).getAnnotatedGenericComponentType());
+    }
+
+    public static Factory factory() {
         return FACTORY;
     }
 
     @Override
-    public @Nullable Object read(Reader reader, TypeRef<? extends Object> type, ReadContext ctx) throws IOException {
-        if (!type.getRawType().isArray()) {
-            throw new IllegalStateException(type.getRawType() + " is not an array");
-        }
-
+    public @Nullable Object read(Reader reader, ReadContext ctx) throws IOException {
         if (reader.peek() == TokenTypes.NULL) {
             reader.readNull();
             return null;
         }
 
-        TypeRef<Object> componentType = resolveComponentType(type);
         TypeReader<Object> componentReader = ctx.typeAdapters().getOrThrow(componentType);
 
         reader.readArrayStart();
@@ -42,7 +42,7 @@ public final class ArrayAdapter implements TypeAdapter<Object> {
         List<@Nullable Object> buffer = new ArrayList<>();
 
         for (int index = 0; reader.peek() != TokenTypes.ARRAY_END; index++) {
-            buffer.add(componentReader.read(reader, componentType, ctx));
+            buffer.add(componentReader.read(reader, ctx));
         }
 
         reader.readArrayEnd();
@@ -57,17 +57,12 @@ public final class ArrayAdapter implements TypeAdapter<Object> {
     }
 
     @Override
-    public void write(Writer writer, TypeRef<? extends Object> type, @Nullable Object value, WriteContext ctx) throws IOException {
-        if (!type.getRawType().isArray()) {
-            throw new IllegalStateException(type.getRawType() + " is not an array");
-        }
-
+    public void write(Writer writer, @Nullable Object value, WriteContext ctx) throws IOException {
         if (value == null) {
             writer.writeNull();
             return;
         }
 
-        TypeRef<Object> componentType = resolveComponentType(type);
         TypeWriter<Object> componentWriter = ctx.typeAdapters().getOrThrow(componentType);
 
         writer.writeArrayStart();
@@ -75,20 +70,14 @@ public final class ArrayAdapter implements TypeAdapter<Object> {
         int length = Array.getLength(value);
 
         for (int i = 0; i < length; i++) {
-            componentWriter.write(writer, componentType, Array.get(value, i), ctx);
+            componentWriter.write(writer, Array.get(value, i), ctx);
         }
 
         writer.writeArrayEnd();
     }
 
-    private TypeRef<Object> resolveComponentType(TypeRef<?> arrayType) {
-        AnnotatedType type = arrayType.getAnnotatedType();
-        if (!(type instanceof AnnotatedArrayType)) {
-            throw new IllegalStateException(arrayType.getType() + " is not an array type");
-        }
-
-        AnnotatedArrayType atype = (AnnotatedArrayType) type;
-
-        return TypeRef.of(atype.getAnnotatedGenericComponentType());
+    @Override
+    public TypeRef<?> type() {
+        return arrayType;
     }
 }

@@ -12,13 +12,21 @@ import org.jspecify.annotations.Nullable;
 import java.io.IOException;
 import java.util.UUID;
 
-import static net.roxymc.jserialize.util.TypeChecks.checkAssignable;
+public final class UUIDAdapter implements TypeAdapter<UUID> {
+    private static final TypeRef<UUID> TYPE = TypeRef.of(UUID.class);
 
-final class UUIDAdapter implements TypeAdapter<UUID> {
+    public static final TypeAdapter<UUID> INSTANCE = new UUIDAdapter();
+    private static final Factory FACTORY = Factory.exact(INSTANCE);
+
+    private UUIDAdapter() {
+    }
+
+    public static Factory factory() {
+        return FACTORY;
+    }
+
     @Override
-    public @Nullable UUID read(Reader reader, TypeRef<? extends UUID> type, ReadContext context) throws IOException {
-        checkAssignable(UUID.class, type.getRawType());
-
+    public @Nullable UUID read(Reader reader, ReadContext ctx) throws IOException {
         if (reader.peek() == TokenTypes.NULL) {
             reader.readNull();
             return null;
@@ -28,14 +36,17 @@ final class UUIDAdapter implements TypeAdapter<UUID> {
     }
 
     @Override
-    public void write(Writer writer, TypeRef<? extends UUID> type, @Nullable UUID value, WriteContext context) throws IOException {
-        checkAssignable(UUID.class, type.getRawType());
-
+    public void write(Writer writer, @Nullable UUID value, WriteContext ctx) throws IOException {
         if (value == null) {
             writer.writeNull();
             return;
         }
 
         writer.writeString(value.toString());
+    }
+
+    @Override
+    public TypeRef<? extends UUID> type() {
+        return TYPE;
     }
 }

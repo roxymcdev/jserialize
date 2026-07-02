@@ -55,7 +55,7 @@ final class BsonTypeAdapters implements TypeAdapters {
             return ((WrappedTypeAdapter<T>) codec).typeAdapter;
         }
 
-        return new WrappedCodec<>(codec);
+        return new WrappedCodec<>(type, codec);
     }
 
     @Override

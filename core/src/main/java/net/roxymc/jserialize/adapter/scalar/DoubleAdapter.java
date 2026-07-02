@@ -1,12 +1,25 @@
 package net.roxymc.jserialize.adapter.scalar;
 
 import net.roxymc.jserialize.Writer;
+import net.roxymc.jserialize.adapter.TypeAdapter;
 
 import java.io.IOException;
 
-final class DoubleAdapter extends AbstractNumberAdapter<Double> {
-    DoubleAdapter() {
-        super(Double.class);
+public final class DoubleAdapter extends AbstractNumberAdapter<Double> {
+    public static final TypeAdapter<Double> PRIMITIVE = new DoubleAdapter(double.class);
+    public static final TypeAdapter<Double> BOXED = new DoubleAdapter(Double.class);
+
+    private static final Factory FACTORY = Factory.composite(
+            Factory.exact(PRIMITIVE),
+            Factory.exact(BOXED)
+    );
+
+    private DoubleAdapter(Class<Double> type) {
+        super(type);
+    }
+
+    public static Factory factory() {
+        return FACTORY;
     }
 
     @Override
@@ -14,7 +27,7 @@ final class DoubleAdapter extends AbstractNumberAdapter<Double> {
         double doubleValue = (double) value;
 
         if ((long) doubleValue != value) {
-            throw new ArithmeticException(numberType.getSimpleName() + " overflow or loss of precision: " + value);
+            throw new ArithmeticException(rawType.getSimpleName() + " overflow or loss of precision: " + value);
         }
 
         return doubleValue;

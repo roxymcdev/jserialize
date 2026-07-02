@@ -93,7 +93,7 @@ final class ObjectWriter<T, R> {
         for (Map.Entry<String, R> entry : extrasMap.asRawMap().entrySet()) {
             writer.writeName(entry.getKey());
 
-            rawWriter.write(writer, rawType, entry.getValue(), context);
+            rawWriter.write(writer, entry.getValue(), context);
         }
     }
 

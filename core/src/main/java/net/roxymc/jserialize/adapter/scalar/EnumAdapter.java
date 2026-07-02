@@ -12,20 +12,25 @@ import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
 
-import static net.roxymc.jserialize.adapter.TypeAdapter.Factory.predicate;
-import static net.roxymc.jserialize.util.TypeChecks.checkAssignable;
+public final class EnumAdapter<E extends Enum<E>> implements TypeAdapter<E> {
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private static final Factory FACTORY = Factory.<Enum>where(TypeUtils::isEnum, EnumAdapter::new);
 
-public final class EnumAdapter implements TypeAdapter<Enum<?>> {
-    private static final TypeAdapter.Factory FACTORY = predicate(type -> TypeUtils.isEnum(type.getRawType()), new EnumAdapter());
+    private final TypeRef<E> enumType;
+    private final Class<E> enumClass;
 
-    public static TypeAdapter.Factory factory() {
+    @SuppressWarnings("unchecked")
+    public EnumAdapter(TypeRef<E> enumType) {
+        this.enumType = enumType;
+        this.enumClass = (Class<E>) enumType.getRawType();
+    }
+
+    public static Factory factory() {
         return FACTORY;
     }
 
     @Override
-    public @Nullable Enum<?> read(Reader reader, TypeRef<? extends Enum<?>> type, ReadContext ctx) throws IOException {
-        checkAssignable(Enum.class, type.getType());
-
+    public @Nullable E read(Reader reader, ReadContext ctx) throws IOException {
         if (reader.peek() == TokenTypes.NULL) {
             reader.readNull();
             return null;
@@ -33,18 +38,21 @@ public final class EnumAdapter implements TypeAdapter<Enum<?>> {
 
         String name = reader.readString();
 
-        return Enum.valueOf(type.getRawType().asSubclass(Enum.class), name);
+        return Enum.valueOf(enumClass, name);
     }
 
     @Override
-    public void write(Writer writer, TypeRef<? extends Enum<?>> type, @Nullable Enum<?> value, WriteContext ctx) throws IOException {
-        checkAssignable(Enum.class, type.getType());
-
+    public void write(Writer writer, @Nullable E value, WriteContext ctx) throws IOException {
         if (value == null) {
             writer.writeNull();
             return;
         }
 
         writer.writeString(value.name());
+    }
+
+    @Override
+    public TypeRef<? extends E> type() {
+        return enumType;
     }
 }

@@ -8,6 +8,8 @@ import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
+import static net.roxymc.jserialize.util.ObjectUtils.nonNull;
+
 public abstract class TypeRef<T extends @UnknownNullability Object> {
     private final AnnotatedType annotatedType;
     private final Class<? super T> rawType;
@@ -20,7 +22,7 @@ public abstract class TypeRef<T extends @UnknownNullability Object> {
 
     @SuppressWarnings("unchecked")
     private TypeRef(AnnotatedType type) {
-        this.annotatedType = GenericTypeReflector.toCanonical(type);
+        this.annotatedType = GenericTypeReflector.toCanonical(nonNull(type, "type"));
         this.rawType = (Class<? super T>) GenericTypeReflector.erase(getType());
     }
 

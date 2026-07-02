@@ -21,7 +21,7 @@ public interface WriteContext {
     }
 
     default <T> void write(Writer writer, TypeRef<T> type, @Nullable T value) throws IOException {
-        typeAdapters().getOrThrow(type).write(writer, type, value, this);
+        typeAdapters().getOrThrow(type).write(writer, value, this);
     }
 
     @ApiStatus.Internal

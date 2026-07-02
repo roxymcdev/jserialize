@@ -1,6 +1,5 @@
 package net.roxymc.jserialize.adapter.scalar;
 
-import io.leangen.geantyref.GenericTypeReflector;
 import net.roxymc.jserialize.Reader;
 import net.roxymc.jserialize.Writer;
 import net.roxymc.jserialize.adapter.ReadContext;
@@ -12,16 +11,32 @@ import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
 
-import static net.roxymc.jserialize.util.TypeChecks.checkAssignable;
+public final class CharacterAdapter implements TypeAdapter<Character> {
+    public static final TypeAdapter<Character> PRIMITIVE = new CharacterAdapter(char.class);
+    public static final TypeAdapter<Character> BOXED = new CharacterAdapter(Character.class);
 
-final class CharacterAdapter implements TypeAdapter<Character> {
+    private static final Factory FACTORY = Factory.composite(
+            Factory.exact(PRIMITIVE),
+            Factory.exact(BOXED)
+    );
+
+    private final TypeRef<Character> type;
+    private final Class<Character> rawType;
+
+    private CharacterAdapter(Class<Character> type) {
+        this.type = TypeRef.of(type);
+        this.rawType = type;
+    }
+
+    public static Factory factory() {
+        return FACTORY;
+    }
+
     @Override
-    public @Nullable Character read(Reader reader, TypeRef<? extends Character> type, ReadContext ctx) throws IOException {
-        checkAssignable(Character.class, GenericTypeReflector.box(type.getRawType()));
-
+    public @Nullable Character read(Reader reader, ReadContext ctx) throws IOException {
         if (reader.peek() == TokenTypes.NULL) {
-            if (type.getRawType().isPrimitive()) {
-                throw new IllegalStateException("Cannot read null into primitive " + type.getRawType());
+            if (rawType.isPrimitive()) {
+                throw new IllegalStateException("Cannot read null into primitive " + rawType.getSimpleName());
             }
 
             reader.readNull();
@@ -37,12 +52,10 @@ final class CharacterAdapter implements TypeAdapter<Character> {
     }
 
     @Override
-    public void write(Writer writer, TypeRef<? extends Character> type, @Nullable Character value, WriteContext ctx) throws IOException {
-        checkAssignable(Character.class, GenericTypeReflector.box(type.getRawType()));
-
+    public void write(Writer writer, @Nullable Character value, WriteContext ctx) throws IOException {
         if (value == null) {
-            if (type.getRawType().isPrimitive()) {
-                throw new IllegalStateException("Cannot write null for primitive " + type.getRawType());
+            if (rawType.isPrimitive()) {
+                throw new IllegalStateException("Cannot write null for primitive " + rawType.getSimpleName());
             }
 
             writer.writeNull();
@@ -50,5 +63,10 @@ final class CharacterAdapter implements TypeAdapter<Character> {
         }
 
         writer.writeString(value.toString());
+    }
+
+    @Override
+    public TypeRef<? extends Character> type() {
+        return type;
     }
 }

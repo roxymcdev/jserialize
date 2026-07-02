@@ -149,13 +149,13 @@ final class ObjectReader<T, R> {
 
         if (!(adapter instanceof TypeAdapter.Mutable)) {
             return parent -> adapter.read(
-                    valueReader, typeRef, context.withParent(parent)
+                    valueReader, context.withParent(parent)
             );
         }
 
         TypeAdapter.Mutable<Object> mutableAdapter = (TypeAdapter.Mutable<Object>) adapter;
         return (PropertyValue.Mutable<?>) (parent, instance) -> mutableAdapter.mutate(
-                valueReader, typeRef, instance, context.withParent(parent)
+                valueReader, instance, context.withParent(parent)
         );
     }
 
@@ -163,7 +163,7 @@ final class ObjectReader<T, R> {
         TypeRef<R> typeRef = TypeRef.of(formatUtils.rawType());
         TypeAdapter<R> adapter = context.typeAdapters().getOrThrow(typeRef);
 
-        return adapter.read(reader, typeRef, context.withParent(null).withKey(null));
+        return adapter.read(reader, context.withParent(null).withKey(null));
     }
 
     private @Nullable AnnotatedType resolveReadType(PropertyModel property) {
@@ -185,6 +185,7 @@ final class ObjectReader<T, R> {
             return null;
         }
 
+        // TODO looking at the resolveType/getTypeParameter impl we might not need getExactSuperType
         AnnotatedType supertype = getExactSuperType(capture(type.getAnnotatedType()), method.declaringClass());
         return resolveType(method.valueType(), supertype);
     }

@@ -4,9 +4,21 @@ import net.roxymc.jserialize.Writer;
 
 import java.io.IOException;
 
-final class ShortAdapter extends AbstractNumberAdapter<Short> {
-    ShortAdapter() {
-        super(Short.class);
+public final class ShortAdapter extends AbstractNumberAdapter<Short> {
+    public static final ShortAdapter PRIMITIVE = new ShortAdapter(short.class);
+    public static final ShortAdapter BOXED = new ShortAdapter(Short.class);
+
+    private static final Factory FACTORY = Factory.composite(
+            Factory.exact(PRIMITIVE),
+            Factory.exact(BOXED)
+    );
+
+    private ShortAdapter(Class<Short> type) {
+        super(type);
+    }
+
+    public static Factory factory() {
+        return FACTORY;
     }
 
     @Override
@@ -14,7 +26,7 @@ final class ShortAdapter extends AbstractNumberAdapter<Short> {
         short shortValue = (short) value;
 
         if (shortValue != value) {
-            throw new ArithmeticException(numberType.getSimpleName() + " overflow: " + value);
+            throw new ArithmeticException(rawType.getSimpleName() + " overflow: " + value);
         }
 
         return shortValue;

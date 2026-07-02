@@ -1,12 +1,25 @@
 package net.roxymc.jserialize.adapter.scalar;
 
 import net.roxymc.jserialize.Writer;
+import net.roxymc.jserialize.adapter.TypeAdapter;
 
 import java.io.IOException;
 
-final class FloatAdapter extends AbstractNumberAdapter<Float> {
-    FloatAdapter() {
-        super(Float.class);
+public final class FloatAdapter extends AbstractNumberAdapter<Float> {
+    public static final TypeAdapter<Float> PRIMITIVE = new FloatAdapter(float.class);
+    public static final TypeAdapter<Float> BOXED = new FloatAdapter(Float.class);
+
+    private static final Factory FACTORY = Factory.composite(
+            Factory.exact(PRIMITIVE),
+            Factory.exact(BOXED)
+    );
+
+    private FloatAdapter(Class<Float> type) {
+        super(type);
+    }
+
+    public static Factory factory() {
+        return FACTORY;
     }
 
     @Override
@@ -14,7 +27,7 @@ final class FloatAdapter extends AbstractNumberAdapter<Float> {
         float floatValue = (float) value;
 
         if ((long) floatValue != value) {
-            throw new ArithmeticException(numberType.getSimpleName() + " overflow or loss of precision: " + value);
+            throw new ArithmeticException(rawType.getSimpleName() + " overflow or loss of precision: " + value);
         }
 
         return floatValue;
@@ -25,7 +38,7 @@ final class FloatAdapter extends AbstractNumberAdapter<Float> {
         float floatValue = (float) value;
 
         if (Double.isFinite(value) && (Float.isInfinite(floatValue) || (double) floatValue != value)) {
-            throw new ArithmeticException(numberType.getSimpleName() + " overflow or loss of precision: " + value);
+            throw new ArithmeticException(rawType.getSimpleName() + " overflow or loss of precision: " + value);
         }
 
         return floatValue;
