@@ -24,7 +24,7 @@ abstract class AbstractAtomicAdapter<A, V> implements TypeAdapter.Mutable<A> {
     }
 
     protected AbstractAtomicAdapter(TypeRef<A> atomicType) {
-        AnnotatedParameterizedType ptype = TypeUtils.resolveTypeParameters(atomicType.getAnnotatedType(), AtomicReference.class);
+        AnnotatedParameterizedType ptype = TypeUtils.resolveTypeParams(atomicType.getAnnotatedType(), AtomicReference.class);
 
         this.atomicType = atomicType;
         this.valueType = TypeRef.of(ptype.getAnnotatedActualTypeArguments()[0]);

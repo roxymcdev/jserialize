@@ -1,16 +1,13 @@
 package net.roxymc.jserialize.adapter.map;
 
 import net.roxymc.jserialize.type.TypeRef;
+import net.roxymc.jserialize.util.TypeUtils;
 import net.roxymc.jserialize.util.VarHandles;
 import org.jspecify.annotations.Nullable;
 
 import java.lang.invoke.VarHandle;
 import java.lang.reflect.AnnotatedParameterizedType;
-import java.lang.reflect.AnnotatedType;
 import java.util.Map;
-
-import static io.leangen.geantyref.GenericTypeReflector.capture;
-import static io.leangen.geantyref.GenericTypeReflector.getExactSuperType;
 
 final class MapType<K, V> {
     private static final VarHandle MAP_FACTORY_HANDLE = VarHandles.find(MapType.class, "mapFactory", MapFactory.class);
@@ -22,14 +19,9 @@ final class MapType<K, V> {
     private @Nullable MapFactory<K, V> mapFactory;
 
     MapType(TypeRef<? extends Map<K, V>> mapType) {
-        AnnotatedType type = getExactSuperType(capture(mapType.getAnnotatedType()), Map.class);
-        if (!(type instanceof AnnotatedParameterizedType)) {
-            throw new IllegalStateException(mapType.getRawType() + " must be a parameterized Map");
-        }
+        AnnotatedParameterizedType ptype = TypeUtils.resolveTypeParams(mapType.getAnnotatedType(), Map.class);
 
-        AnnotatedParameterizedType ptype = (AnnotatedParameterizedType) type;
-
-        this.mapType = TypeRef.of(ptype);
+        this.mapType = mapType;
         this.keyType = TypeRef.of(ptype.getAnnotatedActualTypeArguments()[0]);
         this.valueType = TypeRef.of(ptype.getAnnotatedActualTypeArguments()[1]);
     }

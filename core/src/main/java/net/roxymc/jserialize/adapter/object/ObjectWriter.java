@@ -9,13 +9,15 @@ import net.roxymc.jserialize.model.property.PropertyModel;
 import net.roxymc.jserialize.model.property.meta.PropertyKind;
 import net.roxymc.jserialize.model.property.meta.PropertyMeta;
 import net.roxymc.jserialize.type.TypeRef;
+import net.roxymc.jserialize.util.TypeUtils;
 
 import java.io.IOException;
 import java.lang.reflect.AnnotatedType;
 import java.util.Map;
 import java.util.Objects;
 
-import static io.leangen.geantyref.GenericTypeReflector.*;
+import static io.leangen.geantyref.GenericTypeReflector.capture;
+import static io.leangen.geantyref.GenericTypeReflector.getExactSuperType;
 import static java.lang.String.format;
 
 final class ObjectWriter<T, R> {
@@ -67,7 +69,7 @@ final class ObjectWriter<T, R> {
         }
 
         AnnotatedType declaringType = getExactSuperType(capture(type.getAnnotatedType()), getter.declaringClass());
-        AnnotatedType type = resolveType(getter.valueType(), declaringType);
+        AnnotatedType type = TypeUtils.resolveDirectType(getter.valueType(), declaringType);
 
         if (meta != null && meta.kind() == PropertyKind.EXTRAS) {
             // if it's an extras property, it never writes null

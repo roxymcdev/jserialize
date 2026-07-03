@@ -13,13 +13,15 @@ import net.roxymc.jserialize.model.property.meta.PropertyKind;
 import net.roxymc.jserialize.model.property.meta.PropertyMeta;
 import net.roxymc.jserialize.token.TokenTypes;
 import net.roxymc.jserialize.type.TypeRef;
+import net.roxymc.jserialize.util.TypeUtils;
 import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
 import java.lang.reflect.AnnotatedType;
 import java.util.Map;
 
-import static io.leangen.geantyref.GenericTypeReflector.*;
+import static io.leangen.geantyref.GenericTypeReflector.capture;
+import static io.leangen.geantyref.GenericTypeReflector.getExactSuperType;
 
 final class ObjectReader<T, R> {
     private final ClassModel<T> classModel;
@@ -170,7 +172,7 @@ final class ObjectReader<T, R> {
         PropertyMeta meta = property.meta();
 
         if (instance == null && property.parameterType() != null) {
-            return resolveType(property.parameterType(), capture(type.getAnnotatedType()));
+            return TypeUtils.resolveDirectType(property.parameterType(), capture(type.getAnnotatedType()));
         }
 
         MethodRef method = null;
@@ -185,8 +187,7 @@ final class ObjectReader<T, R> {
             return null;
         }
 
-        // TODO looking at the resolveType/getTypeParameter impl we might not need getExactSuperType
-        AnnotatedType supertype = getExactSuperType(capture(type.getAnnotatedType()), method.declaringClass());
-        return resolveType(method.valueType(), supertype);
+        AnnotatedType declaringType = getExactSuperType(capture(type.getAnnotatedType()), method.declaringClass());
+        return TypeUtils.resolveDirectType(method.valueType(), declaringType);
     }
 }

@@ -1,14 +1,13 @@
 package net.roxymc.jserialize.adapter.collection;
 
 import net.roxymc.jserialize.type.TypeRef;
+import net.roxymc.jserialize.util.TypeUtils;
 import net.roxymc.jserialize.util.VarHandles;
 import org.jspecify.annotations.Nullable;
 
 import java.lang.invoke.VarHandle;
 import java.lang.reflect.AnnotatedParameterizedType;
 import java.util.Collection;
-
-import static net.roxymc.jserialize.util.TypeUtils.resolveTypeParameters;
 
 final class CollectionType<E> {
     private static final VarHandle COLLECTION_FACTORY_HANDLE = VarHandles.find(CollectionType.class, "collectionFactory", CollectionFactory.class);
@@ -19,7 +18,7 @@ final class CollectionType<E> {
     private @Nullable CollectionFactory<E> collectionFactory;
 
     CollectionType(TypeRef<? extends Collection<E>> collectionType) {
-        AnnotatedParameterizedType ptype = resolveTypeParameters(collectionType.getAnnotatedType(), Collection.class);
+        AnnotatedParameterizedType ptype = TypeUtils.resolveTypeParams(collectionType.getAnnotatedType(), Collection.class);
 
         this.collectionType = collectionType;
         this.elementType = TypeRef.of(ptype.getAnnotatedActualTypeArguments()[0]);
