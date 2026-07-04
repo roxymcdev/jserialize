@@ -11,6 +11,25 @@ import java.io.IOException;
 import java.util.function.Predicate;
 
 public interface TypeAdapter<T> extends TypeReader<T>, TypeWriter<T> {
+    static <T> TypeAdapter<T> of(TypeRef<? extends T> type, TypeReader<? extends T> reader, TypeWriter<? super T> writer) {
+        return new TypeAdapter<>() {
+            @Override
+            public @Nullable T read(Reader reader0, ReadContext context) throws IOException {
+                return reader.read(reader0, context);
+            }
+
+            @Override
+            public void write(Writer writer0, @Nullable T value, WriteContext context) throws IOException {
+                writer.write(writer0, value, context);
+            }
+
+            @Override
+            public TypeRef<? extends T> type() {
+                return type;
+            }
+        };
+    }
+
     @Override
     @Nullable T read(Reader reader, ReadContext context) throws IOException;
 

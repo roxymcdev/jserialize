@@ -7,6 +7,25 @@ import org.jspecify.annotations.Nullable;
 import java.util.function.Predicate;
 
 public interface KeyAdapter<T> extends KeyDecoder<T>, KeyEncoder<T> {
+    static <T> KeyAdapter<T> of(TypeRef<? extends T> type, KeyDecoder<? extends T> decoder, KeyEncoder<? super T> encoder) {
+        return new KeyAdapter<>() {
+            @Override
+            public @Nullable T decode(@Nullable String value) {
+                return decoder.decode(value);
+            }
+
+            @Override
+            public String encode(@Nullable T value) {
+                return encoder.encode(value);
+            }
+
+            @Override
+            public TypeRef<? extends T> type() {
+                return type;
+            }
+        };
+    }
+
     @Override
     @Nullable T decode(@Nullable String value);
 
