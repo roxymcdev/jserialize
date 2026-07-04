@@ -17,12 +17,14 @@ public final class ObjectAdapter<T> implements TypeAdapter.Mutable<T> {
     private static final Factory FACTORY = factory(ClassModel.factory());
     private static final Factory ANNOTATED_FACTORY = annotatedFactory(ClassModel.factory());
 
-    private final TypeRef<T> type;
-    private final ClassModel<T> classModel;
+    final TypeRef<T> type;
+    final ClassModel<T> classModel;
+    final PropertyTypes propertyTypes;
 
     private ObjectAdapter(TypeRef<T> type, ClassModel<T> classModel) {
         this.type = type;
         this.classModel = classModel;
+        this.propertyTypes = new PropertyTypes(type, classModel);
     }
 
     public static Factory factory() {
@@ -48,9 +50,9 @@ public final class ObjectAdapter<T> implements TypeAdapter.Mutable<T> {
     }
 
     @Override
-    public @Nullable T mutate(Reader reader, @Nullable T value, ReadContext ctx) throws IOException {
+    public @Nullable T mutate(Reader reader, @Nullable T instance, ReadContext ctx) throws IOException {
         if (reader.peek() == TokenTypes.NULL) {
-            if (value != null) {
+            if (instance != null) {
                 throw new IllegalStateException("Cannot mutate value with null");
             }
 
@@ -60,7 +62,7 @@ public final class ObjectAdapter<T> implements TypeAdapter.Mutable<T> {
 
         try {
             @SuppressWarnings("NullableProblems") // IntelliJ has existential issues
-            ObjectReader<T, ?> objectReader = new ObjectReader<>(classModel, type, value, ctx.formatUtils(), ctx);
+            ObjectReader<T, ?> objectReader = new ObjectReader<>(this, instance, ctx.formatUtils(), ctx);
 
             return objectReader.read(reader);
         } catch (Throwable e) {
@@ -69,15 +71,15 @@ public final class ObjectAdapter<T> implements TypeAdapter.Mutable<T> {
     }
 
     @Override
-    public void write(Writer writer, @Nullable T value, WriteContext ctx) throws IOException {
-        if (value == null) {
+    public void write(Writer writer, @Nullable T instance, WriteContext ctx) throws IOException {
+        if (instance == null) {
             writer.writeNull();
             return;
         }
 
         try {
             @SuppressWarnings("NullableProblems") // IntelliJ has existential issues
-            ObjectWriter<T, ?> objectWriter = new ObjectWriter<>(classModel, type, value, ctx.formatUtils(), ctx);
+            ObjectWriter<T, ?> objectWriter = new ObjectWriter<>(this, instance, ctx.formatUtils(), ctx);
 
             objectWriter.write(writer);
         } catch (Throwable e) {

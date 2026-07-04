@@ -2,6 +2,7 @@ package net.roxymc.jserialize.util;
 
 import io.leangen.geantyref.AnnotatedCaptureType;
 import io.leangen.geantyref.GenericTypeReflector;
+import net.roxymc.jserialize.model.property.MethodRef;
 import net.roxymc.jserialize.type.TypeRef;
 
 import java.lang.reflect.*;
@@ -29,6 +30,16 @@ public final class TypeUtils {
         }
 
         return (AnnotatedParameterizedType) type;
+    }
+
+    public static AnnotatedType resolveDirectType(AnnotatedType unresolved, TypeRef<?> typeAndParams) {
+        return resolveDirectType(unresolved, typeAndParams.getAnnotatedType());
+    }
+
+    public static AnnotatedType resolveDirectType(MethodRef unresolved, TypeRef<?> typeAndParams) {
+        AnnotatedType declaringType = getExactSuperType(capture(typeAndParams.getAnnotatedType()), unresolved.declaringClass());
+
+        return resolveDirectType(unresolved.valueType(), declaringType);
     }
 
     public static AnnotatedType resolveDirectType(AnnotatedType unresolved, AnnotatedType typeAndParams) {

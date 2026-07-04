@@ -6,39 +6,23 @@ import net.roxymc.jserialize.adapter.ReadContext;
 import net.roxymc.jserialize.adapter.TypeAdapter;
 import net.roxymc.jserialize.creator.InstanceCreator;
 import net.roxymc.jserialize.creator.PropertyValue;
-import net.roxymc.jserialize.model.ClassModel;
-import net.roxymc.jserialize.model.property.MethodRef;
 import net.roxymc.jserialize.model.property.PropertyModel;
 import net.roxymc.jserialize.model.property.meta.PropertyKind;
-import net.roxymc.jserialize.model.property.meta.PropertyMeta;
 import net.roxymc.jserialize.token.TokenTypes;
 import net.roxymc.jserialize.type.TypeRef;
-import net.roxymc.jserialize.util.TypeUtils;
 import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
-import java.lang.reflect.AnnotatedType;
 import java.util.Map;
 
-import static io.leangen.geantyref.GenericTypeReflector.capture;
-import static io.leangen.geantyref.GenericTypeReflector.getExactSuperType;
-
 final class ObjectReader<T, R> {
-    private final ClassModel<T> classModel;
-    private final TypeRef<? extends T> type;
+    private final ObjectAdapter<T> adapter;
     private final @Nullable T instance;
     private final FormatUtils<R> formatUtils;
     private final ReadContext context;
 
-    ObjectReader(
-            ClassModel<T> classModel,
-            TypeRef<? extends T> type,
-            @Nullable T instance,
-            FormatUtils<R> formatUtils,
-            ReadContext context
-    ) {
-        this.classModel = classModel;
-        this.type = type;
+    ObjectReader(ObjectAdapter<T> adapter, @Nullable T instance, FormatUtils<R> formatUtils, ReadContext context) {
+        this.adapter = adapter;
         this.instance = instance;
         this.formatUtils = formatUtils;
         this.context = context;
@@ -47,30 +31,29 @@ final class ObjectReader<T, R> {
     T read(Reader reader) throws Throwable {
         reader.readObjectStart();
 
-        InstanceCreator.Builder<T> builder = InstanceCreator.builder(classModel);
+        InstanceCreator.Builder<T> builder = InstanceCreator.builder(adapter.classModel);
 
-        classModel.properties().getOptional(PropertyKind.PARENT).ifPresent(property ->
+        adapter.classModel.properties().getOptional(PropertyKind.PARENT).ifPresent(property ->
                 builder.property(property, context.parent())
         );
-        classModel.properties().getOptional(PropertyKind.KEY).ifPresent(property -> {
-            AnnotatedType type = resolveReadType(property);
+        adapter.classModel.properties().getOptional(PropertyKind.KEY).ifPresent(property -> {
+            TypeRef<?> type = resolveReadType(property);
             if (type == null) {
                 return;
             }
 
-            TypeRef<?> typeRef = TypeRef.of(type);
-            KeyDecoder<?> decoder = context.typeAdapters().getKeyOrThrow(typeRef);
+            KeyDecoder<?> decoder = context.typeAdapters().getKeyOrThrow(type);
 
             builder.property(property, decoder.decode(context.key()));
         });
 
-        PropertyModel extrasProperty = classModel.properties().get(PropertyKind.EXTRAS);
+        PropertyModel extrasProperty = adapter.classModel.properties().get(PropertyKind.EXTRAS);
         MapLike<R> extrasMap;
 
         if (extrasProperty != null) {
-            AnnotatedType mapType = resolveReadType(extrasProperty);
+            TypeRef<?> mapType = resolveReadType(extrasProperty);
 
-            extrasMap = mapType != null ? formatUtils.createMap(context.typeAdapters(), mapType) : null;
+            extrasMap = mapType != null ? formatUtils.createMap(context.typeAdapters(), mapType.getAnnotatedType()) : null;
         } else {
             extrasMap = null;
         }
@@ -116,30 +99,28 @@ final class ObjectReader<T, R> {
     private @Nullable PropertyModel resolveProperty(String name) {
         String idPropertyName = formatUtils.idPropertyName();
         if (idPropertyName == null) {
-            return classModel.properties().get(name);
+            return adapter.classModel.properties().get(name);
         }
 
         if (name.equals(idPropertyName)) {
-            return classModel.properties().get(PropertyKind.ID);
+            return adapter.classModel.properties().get(PropertyKind.ID);
         }
 
-        PropertyModel property = classModel.properties().get(name);
+        PropertyModel property = adapter.classModel.properties().get(name);
         return property != null && property.kind() != PropertyKind.ID ? property : null;
     }
 
     private @Nullable PropertyValue<?> readProperty(Reader reader, PropertyModel property) throws IOException {
-        PropertyMeta meta = property.meta();
-        if (meta != null && !meta.kind().shouldDeserialize()) {
+        if (!property.kind().shouldDeserialize()) {
             return null;
         }
 
-        AnnotatedType type = resolveReadType(property);
+        TypeRef<Object> type = resolveReadType(property);
         if (type == null) {
             return null;
         }
 
-        TypeRef<Object> typeRef = TypeRef.of(type);
-        TypeAdapter<Object> adapter = context.typeAdapters().getOrThrow(typeRef);
+        TypeAdapter<Object> adapter = context.typeAdapters().getOrThrow(type);
 
         R rawValue = readRawValue(reader);
         if (rawValue == null) {
@@ -168,26 +149,11 @@ final class ObjectReader<T, R> {
         return adapter.read(reader, context.withParent(null).withKey(null));
     }
 
-    private @Nullable AnnotatedType resolveReadType(PropertyModel property) {
-        PropertyMeta meta = property.meta();
-
-        if (instance == null && property.parameterType() != null) {
-            return TypeUtils.resolveDirectType(property.parameterType(), capture(type.getAnnotatedType()));
+    private @Nullable TypeRef<Object> resolveReadType(PropertyModel property) {
+        if (instance == null && property.parameter() != null) {
+            return adapter.propertyTypes.parameterType(property);
         }
 
-        MethodRef method = null;
-
-        if (meta != null && meta.mutate() && property.getter() != null) {
-            method = property.getter();
-        } else if (property.setter() != null) {
-            method = property.setter();
-        }
-
-        if (method == null) {
-            return null;
-        }
-
-        AnnotatedType declaringType = getExactSuperType(capture(type.getAnnotatedType()), method.declaringClass());
-        return TypeUtils.resolveDirectType(method.valueType(), declaringType);
+        return adapter.propertyTypes.readType(property);
     }
 }

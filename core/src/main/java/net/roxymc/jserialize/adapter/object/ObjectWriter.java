@@ -3,39 +3,25 @@ package net.roxymc.jserialize.adapter.object;
 import net.roxymc.jserialize.Writer;
 import net.roxymc.jserialize.adapter.TypeWriter;
 import net.roxymc.jserialize.adapter.WriteContext;
-import net.roxymc.jserialize.model.ClassModel;
-import net.roxymc.jserialize.model.property.GetterRef;
 import net.roxymc.jserialize.model.property.PropertyModel;
 import net.roxymc.jserialize.model.property.meta.PropertyKind;
 import net.roxymc.jserialize.model.property.meta.PropertyMeta;
 import net.roxymc.jserialize.type.TypeRef;
-import net.roxymc.jserialize.util.TypeUtils;
 
 import java.io.IOException;
-import java.lang.reflect.AnnotatedType;
 import java.util.Map;
-import java.util.Objects;
 
-import static io.leangen.geantyref.GenericTypeReflector.capture;
-import static io.leangen.geantyref.GenericTypeReflector.getExactSuperType;
 import static java.lang.String.format;
+import static java.util.Objects.requireNonNull;
 
 final class ObjectWriter<T, R> {
-    private final ClassModel<T> classModel;
-    private final TypeRef<? extends T> type;
+    private final ObjectAdapter<T> adapter;
     private final T instance;
     private final FormatUtils<R> formatUtils;
     private final WriteContext context;
 
-    ObjectWriter(
-            ClassModel<T> classModel,
-            TypeRef<? extends T> type,
-            T instance,
-            FormatUtils<R> formatUtils,
-            WriteContext context
-    ) {
-        this.classModel = classModel;
-        this.type = type;
+    ObjectWriter(ObjectAdapter<T> adapter, T instance, FormatUtils<R> formatUtils, WriteContext context) {
+        this.adapter = adapter;
         this.instance = instance;
         this.formatUtils = formatUtils;
         this.context = context;
@@ -44,7 +30,7 @@ final class ObjectWriter<T, R> {
     void write(Writer writer) throws Throwable {
         writer.writeObjectStart();
 
-        for (PropertyModel property : classModel.properties()) {
+        for (PropertyModel property : adapter.classModel.properties()) {
             try {
                 writeProperty(writer, property);
             } catch (Throwable ex) {
@@ -56,24 +42,21 @@ final class ObjectWriter<T, R> {
     }
 
     private void writeProperty(Writer writer, PropertyModel property) throws Throwable {
-        PropertyMeta meta = property.meta();
-        GetterRef getter = property.getter();
-
-        if (meta != null && !meta.kind().shouldSerialize() || getter == null) {
+        TypeRef<Object> type = adapter.propertyTypes.writeType(property);
+        if (type == null) {
             return;
         }
 
-        Object value = getter.get(instance);
+        PropertyMeta meta = property.meta();
+
+        Object value = requireNonNull(property.getter()).get(instance);
         if (value == null && meta != null && !meta.writeNull()) {
             return;
         }
 
-        AnnotatedType declaringType = getExactSuperType(capture(type.getAnnotatedType()), getter.declaringClass());
-        AnnotatedType type = TypeUtils.resolveDirectType(getter.valueType(), declaringType);
-
         if (meta != null && meta.kind() == PropertyKind.EXTRAS) {
             // if it's an extras property, it never writes null
-            Objects.requireNonNull(value);
+            requireNonNull(value);
 
             writeExtrasProperty(writer, type, value);
             return;
@@ -82,11 +65,11 @@ final class ObjectWriter<T, R> {
         String name = resolveWriteName(property);
         writer.writeName(name);
 
-        context.write(writer, TypeRef.of(type), value);
+        context.write(writer, type, value);
     }
 
-    private void writeExtrasProperty(Writer writer, AnnotatedType type, Object value) throws IOException {
-        MapLike<R> extrasMap = formatUtils.createMap(context.typeAdapters(), type);
+    private void writeExtrasProperty(Writer writer, TypeRef<?> mapType, Object value) throws IOException {
+        MapLike<R> extrasMap = formatUtils.createMap(context.typeAdapters(), mapType.getAnnotatedType());
         extrasMap.putAll((Map<?, ?>) value, context);
 
         TypeRef<R> rawType = TypeRef.of(formatUtils.rawType());
@@ -114,9 +97,6 @@ final class ObjectWriter<T, R> {
             return name;
         }
 
-        throw new IllegalStateException(format(
-                "'%s' property name is restricted for @Id property",
-                idPropertyName
-        ));
+        throw new IllegalStateException(format("'%s' property name is restricted for @Id property", idPropertyName));
     }
 }
