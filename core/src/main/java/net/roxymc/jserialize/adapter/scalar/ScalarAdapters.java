@@ -14,6 +14,9 @@ public final class ScalarAdapters {
             ShortAdapter.factory(),
             NumberAdapter.factory(),
             StringAdapter.factory(),
+            EnumAdapter.factory(),
+            PathAdapter.factory(),
+            FileAdapter.factory(),
             URIAdapter.factory(),
             URLAdapter.factory(),
             UUIDAdapter.factory()

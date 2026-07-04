@@ -10,16 +10,15 @@ import net.roxymc.jserialize.type.TypeRef;
 import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
-import java.net.URI;
-import java.net.URL;
+import java.nio.file.Path;
 
-public final class URLAdapter implements TypeAdapter<URL> {
-    private static final TypeRef<URL> TYPE = TypeRef.of(URL.class);
+public final class PathAdapter implements TypeAdapter<Path> {
+    private static final TypeRef<Path> TYPE = TypeRef.of(Path.class);
 
-    public static final TypeAdapter<URL> INSTANCE = new URLAdapter();
-    private static final TypeAdapter.Factory FACTORY = TypeAdapter.Factory.exact(INSTANCE);
+    public static final TypeAdapter<Path> INSTANCE = new PathAdapter();
+    private static final Factory FACTORY = Factory.exact(INSTANCE);
 
-    private URLAdapter() {
+    private PathAdapter() {
     }
 
     public static Factory factory() {
@@ -27,17 +26,17 @@ public final class URLAdapter implements TypeAdapter<URL> {
     }
 
     @Override
-    public @Nullable URL read(Reader reader, ReadContext ctx) throws IOException {
+    public @Nullable Path read(Reader reader, ReadContext ctx) throws IOException {
         if (reader.peek() == TokenTypes.NULL) {
             reader.readNull();
             return null;
         }
 
-        return URI.create(reader.readString()).toURL();
+        return Path.of(reader.readString());
     }
 
     @Override
-    public void write(Writer writer, @Nullable URL value, WriteContext ctx) throws IOException {
+    public void write(Writer writer, @Nullable Path value, WriteContext ctx) throws IOException {
         if (value == null) {
             writer.writeNull();
             return;
@@ -47,7 +46,7 @@ public final class URLAdapter implements TypeAdapter<URL> {
     }
 
     @Override
-    public TypeRef<? extends URL> type() {
+    public TypeRef<? extends Path> type() {
         return TYPE;
     }
 }

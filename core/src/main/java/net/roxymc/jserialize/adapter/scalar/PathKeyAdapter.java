@@ -4,15 +4,15 @@ import net.roxymc.jserialize.adapter.AbstractKeyAdapter;
 import net.roxymc.jserialize.adapter.KeyAdapter;
 import net.roxymc.jserialize.type.TypeRef;
 
-import java.net.URI;
+import java.nio.file.Path;
 
-public final class URIKeyAdapter extends AbstractKeyAdapter<URI> {
-    private static final TypeRef<URI> TYPE = TypeRef.of(URI.class);
+public final class PathKeyAdapter extends AbstractKeyAdapter<Path> {
+    private static final TypeRef<Path> TYPE = TypeRef.of(Path.class);
 
-    public static final KeyAdapter<URI> INSTANCE = new URIKeyAdapter();
+    public static final KeyAdapter<Path> INSTANCE = new PathKeyAdapter();
     private static final Factory FACTORY = Factory.exact(INSTANCE);
 
-    private URIKeyAdapter() {
+    private PathKeyAdapter() {
     }
 
     public static Factory factory() {
@@ -20,12 +20,12 @@ public final class URIKeyAdapter extends AbstractKeyAdapter<URI> {
     }
 
     @Override
-    protected URI parse(String value) {
-        return URI.create(value);
+    protected Path parse(String value) {
+        return Path.of(value);
     }
 
     @Override
-    public TypeRef<? extends URI> type() {
+    public TypeRef<? extends Path> type() {
         return TYPE;
     }
 }

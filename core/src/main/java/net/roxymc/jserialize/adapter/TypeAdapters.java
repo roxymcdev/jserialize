@@ -19,7 +19,6 @@ import org.jspecify.annotations.Nullable;
 public interface TypeAdapters extends TypeAdapter.Factory, KeyAdapter.Factory {
     TypeAdapters DEFAULT = builder()
             .add(ScalarAdapters.factory())
-            .add(EnumAdapter.factory())
             .add(AtomicAdapters.factory())
             .add(TemporalAdapters.factory())
             .add(ArrayAdapter.factory())
@@ -27,7 +26,6 @@ public interface TypeAdapters extends TypeAdapter.Factory, KeyAdapter.Factory {
             .add(MapAdapter.factory())
             .add(ObjectAdapter.annotatedFactory())
             .addKey(ScalarKeyAdapters.factory())
-            .addKey(EnumKeyAdapter.factory())
             .addKey(TemporalKeyAdapters.factory())
             .build();
 

@@ -14,6 +14,9 @@ public final class ScalarKeyAdapters {
             ShortKeyAdapter.factory(),
             NumberKeyAdapter.factory(),
             StringKeyAdapter.factory(),
+            EnumKeyAdapter.factory(),
+            PathKeyAdapter.factory(),
+            FileKeyAdapter.factory(),
             URIKeyAdapter.factory(),
             URLKeyAdapter.factory(),
             UUIDKeyAdapter.factory()
