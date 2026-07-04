@@ -21,7 +21,7 @@ public final class ArrayAdapter implements TypeAdapter<Object> {
 
     private ArrayAdapter(TypeRef<?> arrayType) {
         this.arrayType = arrayType;
-this.componentType = TypeRef.of(((AnnotatedArrayType) arrayType.getAnnotatedType()).getAnnotatedGenericComponentType());
+        this.componentType = TypeRef.of(((AnnotatedArrayType) arrayType.getAnnotatedType()).getAnnotatedGenericComponentType());
     }
 
     public static Factory factory() {

@@ -48,7 +48,11 @@ public interface KeyAdapter<T> extends KeyDecoder<T>, KeyEncoder<T> {
         }
 
         static <T> Factory exact(KeyAdapter<T> adapter) {
-            return Factory.<T>where(subtype -> adapter.type().getType().equals(subtype.getType()), ($1, $2) -> adapter);
+            return exact(adapter.type(), (TypedFactory<? super T>) ($1, $2) -> adapter);
+        }
+
+        static <T> Factory exact(TypeRef<T> type, TypedFactory<? super T> factory) {
+            return where(subtype -> type.getType().equals(subtype.getType()), factory);
         }
 
         static <T> Factory exactRaw(Class<T> type, TypedFactory<? super T> factory) {

@@ -62,7 +62,11 @@ public interface TypeAdapter<T> extends TypeReader<T>, TypeWriter<T> {
         }
 
         static <T> Factory exact(TypeAdapter<T> adapter) {
-            return Factory.<T>where(subtype -> adapter.type().getType().equals(subtype.getType()), $ -> adapter);
+            return exact(adapter.type(), (TypedFactory<? super T>) $ -> adapter);
+        }
+
+        static <T> Factory exact(TypeRef<T> type, TypedFactory<? super T> factory) {
+            return where(subtype -> type.getType().equals(subtype.getType()), factory);
         }
 
         static <T> Factory exactRaw(Class<T> type, TypedFactory<? super T> factory) {
