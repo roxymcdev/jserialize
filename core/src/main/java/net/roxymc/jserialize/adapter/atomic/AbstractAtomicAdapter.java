@@ -7,12 +7,13 @@ import net.roxymc.jserialize.adapter.TypeAdapter;
 import net.roxymc.jserialize.adapter.WriteContext;
 import net.roxymc.jserialize.token.TokenTypes;
 import net.roxymc.jserialize.type.TypeRef;
-import net.roxymc.jserialize.util.TypeUtils;
 import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
 import java.lang.reflect.AnnotatedParameterizedType;
 import java.util.concurrent.atomic.AtomicReference;
+
+import static net.roxymc.jserialize.util.TypeUtils.resolveTypeParams;
 
 abstract class AbstractAtomicAdapter<A, V> implements TypeAdapter.Mutable<A> {
     private final TypeRef<A> atomicType;
@@ -24,7 +25,7 @@ abstract class AbstractAtomicAdapter<A, V> implements TypeAdapter.Mutable<A> {
     }
 
     protected AbstractAtomicAdapter(TypeRef<A> atomicType) {
-        AnnotatedParameterizedType ptype = TypeUtils.resolveTypeParams(atomicType.getAnnotatedType(), AtomicReference.class);
+        AnnotatedParameterizedType ptype = resolveTypeParams(atomicType, AtomicReference.class);
 
         this.atomicType = atomicType;
         this.valueType = TypeRef.of(ptype.getAnnotatedActualTypeArguments()[0]);

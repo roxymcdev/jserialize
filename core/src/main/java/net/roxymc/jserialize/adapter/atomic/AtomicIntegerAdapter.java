@@ -1,11 +1,12 @@
 package net.roxymc.jserialize.adapter.atomic;
 
+import net.roxymc.jserialize.adapter.TypeAdapter;
 import org.jspecify.annotations.Nullable;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
 public final class AtomicIntegerAdapter extends AbstractAtomicAdapter<AtomicInteger, Integer> {
-    public static final AtomicIntegerAdapter INSTANCE = new AtomicIntegerAdapter();
+    public static final TypeAdapter<AtomicInteger> INSTANCE = new AtomicIntegerAdapter();
     private static final Factory FACTORY = Factory.exact(INSTANCE);
 
     private AtomicIntegerAdapter() {

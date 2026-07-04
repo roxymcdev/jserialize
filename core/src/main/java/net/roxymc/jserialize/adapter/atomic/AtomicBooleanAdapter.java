@@ -1,11 +1,12 @@
 package net.roxymc.jserialize.adapter.atomic;
 
+import net.roxymc.jserialize.adapter.TypeAdapter;
 import org.jspecify.annotations.Nullable;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public final class AtomicBooleanAdapter extends AbstractAtomicAdapter<AtomicBoolean, Boolean> {
-    public static final AtomicBooleanAdapter INSTANCE = new AtomicBooleanAdapter();
+    public static final TypeAdapter<AtomicBoolean> INSTANCE = new AtomicBooleanAdapter();
     private static final Factory FACTORY = Factory.exact(INSTANCE);
 
     private AtomicBooleanAdapter() {

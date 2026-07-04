@@ -5,8 +5,7 @@ import net.roxymc.jserialize.adapter.atomic.AtomicAdapters;
 import net.roxymc.jserialize.adapter.collection.CollectionAdapter;
 import net.roxymc.jserialize.adapter.map.MapAdapter;
 import net.roxymc.jserialize.adapter.object.ObjectAdapter;
-import net.roxymc.jserialize.adapter.scalar.EnumAdapter;
-import net.roxymc.jserialize.adapter.scalar.EnumKeyAdapter;
+import net.roxymc.jserialize.adapter.optional.OptionalAdapters;
 import net.roxymc.jserialize.adapter.scalar.ScalarAdapters;
 import net.roxymc.jserialize.adapter.scalar.ScalarKeyAdapters;
 import net.roxymc.jserialize.adapter.temporal.TemporalAdapters;
@@ -19,6 +18,7 @@ import org.jspecify.annotations.Nullable;
 public interface TypeAdapters extends TypeAdapter.Factory, KeyAdapter.Factory {
     TypeAdapters DEFAULT = builder()
             .add(ScalarAdapters.factory())
+            .add(OptionalAdapters.factory())
             .add(AtomicAdapters.factory())
             .add(TemporalAdapters.factory())
             .add(ArrayAdapter.factory())

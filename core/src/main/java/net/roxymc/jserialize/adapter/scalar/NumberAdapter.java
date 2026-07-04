@@ -1,13 +1,14 @@
 package net.roxymc.jserialize.adapter.scalar;
 
 import net.roxymc.jserialize.Writer;
+import net.roxymc.jserialize.adapter.TypeAdapter;
 
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
 public final class NumberAdapter extends AbstractNumberAdapter<Number> {
-    public static final NumberAdapter INSTANCE = new NumberAdapter();
+    public static final TypeAdapter<Number> INSTANCE = new NumberAdapter();
     private static final Factory FACTORY = Factory.exact(INSTANCE);
 
     private NumberAdapter() {

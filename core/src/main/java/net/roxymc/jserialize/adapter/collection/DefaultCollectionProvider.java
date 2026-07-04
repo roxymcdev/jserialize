@@ -7,7 +7,7 @@ import java.util.*;
 import java.util.concurrent.*;
 
 public final class DefaultCollectionProvider implements CollectionProvider {
-    public static final DefaultCollectionProvider INSTANCE = new DefaultCollectionProvider();
+    public static final CollectionProvider INSTANCE = new DefaultCollectionProvider();
 
     private DefaultCollectionProvider() {
     }

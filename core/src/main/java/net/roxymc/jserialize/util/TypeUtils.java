@@ -23,6 +23,10 @@ public final class TypeUtils {
         return type.isEnum() || (type.getSuperclass() != null && type.getSuperclass().isEnum());
     }
 
+    public static AnnotatedParameterizedType resolveTypeParams(TypeRef<?> type, Class<?> supertype) {
+        return resolveTypeParams(type.getAnnotatedType(), supertype);
+    }
+
     public static AnnotatedParameterizedType resolveTypeParams(AnnotatedType subtype, Class<?> supertype) {
         AnnotatedType type = getExactSuperType(capture(subtype), supertype);
         if (!(type instanceof AnnotatedParameterizedType)) {

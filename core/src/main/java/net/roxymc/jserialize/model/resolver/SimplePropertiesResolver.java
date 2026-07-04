@@ -25,7 +25,7 @@ import static net.roxymc.jserialize.util.StringUtils.decapitalize;
 import static net.roxymc.jserialize.util.StringUtils.hasPrefix;
 
 public class SimplePropertiesResolver implements PropertiesResolver {
-    public static final SimplePropertiesResolver INSTANCE = new SimplePropertiesResolver();
+    public static final PropertiesResolver INSTANCE = new SimplePropertiesResolver();
 
     protected static final Set<MethodSignature> OBJECT_METHODS_SIGNATURES = Arrays.stream(Object.class.getDeclaredMethods())
             .map(MethodSignature::new)

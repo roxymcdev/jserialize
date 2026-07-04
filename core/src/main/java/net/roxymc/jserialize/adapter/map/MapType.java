@@ -1,13 +1,14 @@
 package net.roxymc.jserialize.adapter.map;
 
 import net.roxymc.jserialize.type.TypeRef;
-import net.roxymc.jserialize.util.TypeUtils;
 import net.roxymc.jserialize.util.VarHandles;
 import org.jspecify.annotations.Nullable;
 
 import java.lang.invoke.VarHandle;
 import java.lang.reflect.AnnotatedParameterizedType;
 import java.util.Map;
+
+import static net.roxymc.jserialize.util.TypeUtils.resolveTypeParams;
 
 final class MapType<K, V> {
     private static final VarHandle MAP_FACTORY_HANDLE = VarHandles.find(MapType.class, "mapFactory", MapFactory.class);
@@ -19,7 +20,7 @@ final class MapType<K, V> {
     private @Nullable MapFactory<K, V> mapFactory;
 
     MapType(TypeRef<? extends Map<K, V>> mapType) {
-        AnnotatedParameterizedType ptype = TypeUtils.resolveTypeParams(mapType.getAnnotatedType(), Map.class);
+        AnnotatedParameterizedType ptype = resolveTypeParams(mapType, Map.class);
 
         this.mapType = mapType;
         this.keyType = TypeRef.of(ptype.getAnnotatedActualTypeArguments()[0]);
