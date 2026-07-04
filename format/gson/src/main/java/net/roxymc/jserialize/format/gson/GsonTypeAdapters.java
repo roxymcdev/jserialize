@@ -37,16 +37,16 @@ final class GsonTypeAdapters implements TypeAdapters {
 
     @Override
     public <T> @Nullable KeyAdapter<T> getKey(TypeRef<T> type) {
-        return adapters.getKey(type);
+        return this.adapters.getKey(type);
     }
 
     @Override
-    public @Nullable <T> TypeAdapter<T> create(TypeRef<T> type) {
+    public <T> @Nullable TypeAdapter<T> create(TypeRef<T> type) {
         return get(type);
     }
 
     @Override
-    public @Nullable <T> KeyAdapter<T> createKey(TypeRef<T> type, TypeAdapters adapters) {
-        return adapters.createKey(type, adapters);
+    public <T> @Nullable KeyAdapter<T> createKey(TypeRef<T> type, TypeAdapters adapters) {
+        return this.adapters.createKey(type, adapters);
     }
 }
