@@ -8,6 +8,7 @@ import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
 
+@ApiStatus.NonExtendable
 public interface ReadContext {
     @ApiStatus.Internal
     static ReadContext of(TypeAdapters typeAdapters, FormatUtils<?> formatUtils) {

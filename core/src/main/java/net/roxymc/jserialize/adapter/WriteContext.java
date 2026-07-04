@@ -8,6 +8,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 
+@ApiStatus.NonExtendable
 public interface WriteContext {
     @ApiStatus.Internal
     static WriteContext of(TypeAdapters typeAdapters, FormatUtils<?> formatUtils) {
