@@ -39,7 +39,7 @@ public final class TypeAdapterProvider implements TypeSerializer.Annotated<Objec
         try {
             ReadContext context = ReadContext.of(new ConfigurateTypeAdapters(node.options(), adapters), ConfigurateUtils.INSTANCE);
 
-            return typeAdapter.read(reader, typeRef, context);
+            return typeAdapter.read(reader, context);
         } catch (IOException e) {
             throw new SerializationException(e);
         }
@@ -55,7 +55,7 @@ public final class TypeAdapterProvider implements TypeSerializer.Annotated<Objec
         try {
             WriteContext context = WriteContext.of(new ConfigurateTypeAdapters(node.options(), adapters), ConfigurateUtils.INSTANCE);
 
-            typeAdapter.write(writer, typeRef, obj, context);
+            typeAdapter.write(writer, obj, context);
         } catch (IOException e) {
             throw new SerializationException(e);
         }

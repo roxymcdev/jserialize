@@ -10,7 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 
 public final class DefaultMapProvider implements MapProvider {
-    public static final DefaultMapProvider INSTANCE = new DefaultMapProvider();
+    public static final MapProvider INSTANCE = new DefaultMapProvider();
 
     private DefaultMapProvider() {
     }

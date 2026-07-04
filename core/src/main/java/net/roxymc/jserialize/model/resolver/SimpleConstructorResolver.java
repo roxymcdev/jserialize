@@ -11,7 +11,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class SimpleConstructorResolver implements ConstructorResolver {
-    public static final SimpleConstructorResolver INSTANCE = new SimpleConstructorResolver();
+    public static final ConstructorResolver INSTANCE = new SimpleConstructorResolver();
 
     protected SimpleConstructorResolver() {
     }

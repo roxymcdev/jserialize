@@ -1,6 +1,5 @@
 package net.roxymc.jserialize.adapter;
 
-import io.leangen.geantyref.GenericTypeReflector;
 import net.roxymc.jserialize.type.TypeRef;
 import org.jspecify.annotations.Nullable;
 
@@ -17,8 +16,8 @@ final class TypeAdaptersImpl implements TypeAdapters {
 
     @SuppressWarnings({"NullableProblems", "DataFlowIssue"}) // IntelliJ has existential issues
     private TypeAdaptersImpl(BuilderImpl builder) {
-        this.typeAdapters = new Registry<>(builder.typeAdapters, (factory, type) -> factory.create(type, this));
-        this.keyAdapters = new Registry<>(builder.keyAdapters, (factory, type) -> factory.create(type, this));
+        this.typeAdapters = new Registry<>(builder.typeAdapters, TypeAdapter.Factory::create);
+        this.keyAdapters = new Registry<>(builder.keyAdapters, (factory, type) -> factory.createKey(type, this));
     }
 
     @Override
@@ -35,6 +34,32 @@ final class TypeAdaptersImpl implements TypeAdapters {
         return adapter;
     }
 
+    @Override
+public <T> @Nullable TypeAdapter<T> create(TypeRef<T> type) {
+        for (TypeAdapter.Factory factory : typeAdapters.factories) {
+            TypeAdapter<T> adapter = factory.create(type);
+
+            if (adapter != null) {
+                return adapter;
+            }
+        }
+
+        return null;
+    }
+
+    @Override
+public <T> @Nullable KeyAdapter<T> createKey(TypeRef<T> type, TypeAdapters adapters) {
+        for (KeyAdapter.Factory factory : keyAdapters.factories) {
+            KeyAdapter<T> adapter = factory.createKey(type, adapters);
+
+            if (adapter != null) {
+                return adapter;
+            }
+        }
+
+        return null;
+    }
+
     private static final class Registry<F, A> {
         private final Map<AnnotatedType, Optional<A>> cache = new ConcurrentHashMap<>();
         private final Set<F> factories;
@@ -46,9 +71,7 @@ final class TypeAdaptersImpl implements TypeAdapters {
         }
 
         private Optional<A> get(TypeRef<?> type) {
-            AnnotatedType targetType = GenericTypeReflector.toCanonicalBoxed(type.getAnnotatedType());
-
-            return cache.computeIfAbsent(targetType, $ -> {
+            return cache.computeIfAbsent(type.getAnnotatedType(), $ -> {
                 for (F factory : factories) {
                     A adapter = creator.apply(factory, type);
 
@@ -80,11 +103,10 @@ final class TypeAdaptersImpl implements TypeAdapters {
 
         @Override
         public Builder addAll(TypeAdapters adapters) {
-            TypeAdaptersImpl adaptersImpl = (TypeAdaptersImpl) nonNull(adapters, "adapters");
+            nonNull(adapters, "adapters");
 
-            typeAdapters.addAll(adaptersImpl.typeAdapters.factories);
-            keyAdapters.addAll(adaptersImpl.keyAdapters.factories);
-
+            typeAdapters.add(adapters);
+            keyAdapters.add(adapters);
             return this;
         }
 

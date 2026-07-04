@@ -65,7 +65,7 @@ final class ConfigurateUtils implements FormatUtils<ConfigurationNode> {
             public void putAll(Map<?, ?> map, WriteContext ctx) throws IOException {
                 CommentedConfigurationNode result = CommentedConfigurationNode.root(node.options());
 
-                mapAdapter.write(newWriter0(result), typeRef, map, ctx);
+                mapAdapter.write(newWriter0(result), map, ctx);
 
                 node.mergeFrom(result);
             }
@@ -75,10 +75,10 @@ final class ConfigurateUtils implements FormatUtils<ConfigurationNode> {
                 Reader readerAdapter = newReader0(node);
 
                 if (!(mapAdapter instanceof TypeAdapter.Mutable)) {
-                    return mapAdapter.read(readerAdapter, typeRef, ctx);
+                    return mapAdapter.read(readerAdapter, ctx);
                 }
 
-                return ((TypeAdapter.Mutable<Map<?, ?>>) mapAdapter).mutate(readerAdapter, typeRef, instance, ctx);
+                return ((TypeAdapter.Mutable<Map<?, ?>>) mapAdapter).mutate(readerAdapter, instance, ctx);
             }
 
             @Override

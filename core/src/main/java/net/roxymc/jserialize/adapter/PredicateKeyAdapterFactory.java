@@ -8,18 +8,22 @@ import java.util.function.Predicate;
 import static net.roxymc.jserialize.util.ObjectUtils.nonNull;
 
 final class PredicateKeyAdapterFactory implements KeyAdapter.Factory {
-    private final KeyAdapter<?> adapter;
     private final Predicate<? super TypeRef<?>> predicate;
+    private final KeyAdapter.TypedFactory<?> factory;
 
-    PredicateKeyAdapterFactory(Predicate<? super TypeRef<?>> predicate, KeyAdapter<?> adapter) {
-        this.adapter = nonNull(adapter, "adapter");
+    PredicateKeyAdapterFactory(Predicate<? super TypeRef<?>> predicate, KeyAdapter.TypedFactory<?> factory) {
         this.predicate = nonNull(predicate, "predicate");
+        this.factory = nonNull(factory, "factory");
     }
 
     @Override
-    public <T> @Nullable KeyAdapter<T> create(TypeRef<T> type, TypeAdapters adapters) {
+    public <T> @Nullable KeyAdapter<T> createKey(TypeRef<T> type, TypeAdapters adapters) {
+        if (!predicate.test(type)) {
+            return null;
+        }
+
         @SuppressWarnings("unchecked")
-        KeyAdapter<T> adapter = (KeyAdapter<T>) this.adapter;
-        return predicate.test(type) ? adapter : null;
+        KeyAdapter<T> adapter = ((KeyAdapter.TypedFactory<T>) this.factory).createKey(type, adapters);
+        return adapter;
     }
 }

@@ -73,7 +73,7 @@ final class GsonUtils implements FormatUtils<JsonElement> {
                 JsonObject result;
 
                 try (JsonTreeWriter writer = new JsonTreeWriter()) {
-                    mapAdapter.write(new GsonWriterAdapter(writer), typeRef, map, ctx);
+                    mapAdapter.write(new GsonWriterAdapter(writer), map, ctx);
 
                     result = writer.get().getAsJsonObject();
                 }
@@ -87,10 +87,10 @@ final class GsonUtils implements FormatUtils<JsonElement> {
                     Reader readerAdapter = new GsonReaderAdapter(reader);
 
                     if (!(mapAdapter instanceof TypeAdapter.Mutable)) {
-                        return mapAdapter.read(readerAdapter, typeRef, ctx);
+                        return mapAdapter.read(readerAdapter, ctx);
                     }
 
-                    return ((TypeAdapter.Mutable<Map<?, ?>>) mapAdapter).mutate(readerAdapter, typeRef, instance, ctx);
+                    return ((TypeAdapter.Mutable<Map<?, ?>>) mapAdapter).mutate(readerAdapter, instance, ctx);
                 }
             }
 

@@ -8,7 +8,6 @@ import net.roxymc.jserialize.model.resolver.PropertiesResolver;
 import net.roxymc.jserialize.model.resolver.SimpleConstructorResolver;
 import net.roxymc.jserialize.model.resolver.SimplePropertiesResolver;
 import net.roxymc.jserialize.type.TypeRef;
-import net.roxymc.jserialize.util.TypeUtils;
 
 import java.lang.invoke.MethodHandles;
 import java.util.Map;
@@ -44,7 +43,7 @@ final class ClassModelFactoryImpl implements ClassModel.Factory {
     private <T> ClassModel<T> createUnchecked(Class<?> type) {
         nonNull(type, "type");
 
-        if (TypeUtils.isPrimitive(type)) {
+        if (type.isPrimitive()) {
             throw new IllegalArgumentException("type cannot be primitive");
         }
 
