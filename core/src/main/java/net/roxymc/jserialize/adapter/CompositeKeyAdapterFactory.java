@@ -13,7 +13,7 @@ final class CompositeKeyAdapterFactory implements KeyAdapter.Factory {
     }
 
     @Override
-public <T> @Nullable KeyAdapter<T> createKey(TypeRef<T> type, TypeAdapters adapters) {
+    public <T> @Nullable KeyAdapter<T> createKey(TypeRef<T> type, TypeAdapters adapters) {
         for (KeyAdapter.Factory factory : factories) {
             KeyAdapter<T> adapter = factory.createKey(type, adapters);
 

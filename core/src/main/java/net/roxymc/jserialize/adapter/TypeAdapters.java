@@ -72,10 +72,10 @@ public interface TypeAdapters extends TypeAdapter.Factory, KeyAdapter.Factory {
     }
 
     @Override
-<T> @Nullable TypeAdapter<T> create(TypeRef<T> type);
+    <T> @Nullable TypeAdapter<T> create(TypeRef<T> type);
 
     @Override
-<T> @Nullable KeyAdapter<T> createKey(TypeRef<T> type, TypeAdapters adapters);
+    <T> @Nullable KeyAdapter<T> createKey(TypeRef<T> type, TypeAdapters adapters);
 
     @ApiStatus.NonExtendable
     interface Builder {

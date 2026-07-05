@@ -9,6 +9,7 @@ import java.lang.reflect.AnnotatedParameterizedType;
 import java.util.Map;
 
 import static net.roxymc.jserialize.util.TypeUtils.resolveTypeParams;
+import static net.roxymc.jserialize.util.TypeUtils.resolveUpperBound;
 
 final class MapType<K, V> {
     private static final VarHandle MAP_FACTORY_HANDLE = VarHandles.find(MapType.class, "mapFactory", MapFactory.class);
@@ -20,7 +21,7 @@ final class MapType<K, V> {
     private @Nullable MapFactory<K, V> mapFactory;
 
     MapType(TypeRef<? extends Map<K, V>> mapType) {
-        AnnotatedParameterizedType ptype = resolveTypeParams(mapType, Map.class);
+        AnnotatedParameterizedType ptype = resolveUpperBound(resolveTypeParams(mapType, Map.class));
 
         this.mapType = mapType;
         this.keyType = TypeRef.of(ptype.getAnnotatedActualTypeArguments()[0]);

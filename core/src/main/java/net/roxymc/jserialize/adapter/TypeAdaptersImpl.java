@@ -35,7 +35,7 @@ final class TypeAdaptersImpl implements TypeAdapters {
     }
 
     @Override
-public <T> @Nullable TypeAdapter<T> create(TypeRef<T> type) {
+    public <T> @Nullable TypeAdapter<T> create(TypeRef<T> type) {
         for (TypeAdapter.Factory factory : typeAdapters.factories) {
             TypeAdapter<T> adapter = factory.create(type);
 
@@ -48,7 +48,7 @@ public <T> @Nullable TypeAdapter<T> create(TypeRef<T> type) {
     }
 
     @Override
-public <T> @Nullable KeyAdapter<T> createKey(TypeRef<T> type, TypeAdapters adapters) {
+    public <T> @Nullable KeyAdapter<T> createKey(TypeRef<T> type, TypeAdapters adapters) {
         for (KeyAdapter.Factory factory : keyAdapters.factories) {
             KeyAdapter<T> adapter = factory.createKey(type, adapters);
 

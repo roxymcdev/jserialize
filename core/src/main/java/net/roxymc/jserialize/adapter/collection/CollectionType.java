@@ -9,6 +9,7 @@ import java.lang.reflect.AnnotatedParameterizedType;
 import java.util.Collection;
 
 import static net.roxymc.jserialize.util.TypeUtils.resolveTypeParams;
+import static net.roxymc.jserialize.util.TypeUtils.resolveUpperBound;
 
 final class CollectionType<E> {
     private static final VarHandle COLLECTION_FACTORY_HANDLE = VarHandles.find(CollectionType.class, "collectionFactory", CollectionFactory.class);
@@ -19,7 +20,7 @@ final class CollectionType<E> {
     private @Nullable CollectionFactory<E> collectionFactory;
 
     CollectionType(TypeRef<? extends Collection<E>> collectionType) {
-        AnnotatedParameterizedType ptype = resolveTypeParams(collectionType, Collection.class);
+        AnnotatedParameterizedType ptype = resolveUpperBound(resolveTypeParams(collectionType, Collection.class));
 
         this.collectionType = collectionType;
         this.elementType = TypeRef.of(ptype.getAnnotatedActualTypeArguments()[0]);

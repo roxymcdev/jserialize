@@ -13,7 +13,7 @@ final class CompositeTypeAdapterFactory implements TypeAdapter.Factory {
     }
 
     @Override
-public <T> @Nullable TypeAdapter<T> create(TypeRef<T> type) {
+    public <T> @Nullable TypeAdapter<T> create(TypeRef<T> type) {
         for (TypeAdapter.Factory factory : factories) {
             TypeAdapter<T> adapter = factory.create(type);
 
