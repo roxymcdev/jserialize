@@ -6,8 +6,10 @@ import net.roxymc.jserialize.model.constructor.ParameterModel;
 import net.roxymc.jserialize.model.property.PropertyModel;
 import net.roxymc.jserialize.model.property.meta.PropertyKind;
 import net.roxymc.jserialize.model.property.meta.PropertyMeta;
+import net.roxymc.jserialize.util.PrimitiveUtils;
 import org.jspecify.annotations.Nullable;
 
+import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -57,7 +59,9 @@ public final class InstanceCreator<T> {
         PropertyValue<?> value = getValue(parameter);
         if (value == null) {
             validateValue(name, null, meta);
-            return null;
+
+            Type type = parameter.type().getType();
+            return PrimitiveUtils.isPrimitive(type) ? PrimitiveUtils.defaultValue(type) : null;
         }
 
         // TODO parent should be passed here
