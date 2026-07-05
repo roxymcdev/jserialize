@@ -6,7 +6,6 @@ import net.roxymc.jserialize.util.PropertyUtils;
 import net.roxymc.jserialize.util.RecordUtils;
 
 import java.lang.reflect.*;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -20,7 +19,15 @@ public class SimpleConstructorResolver implements ConstructorResolver {
     public void resolveConstructor(Class<?> clazz, ConstructorModel.Builder constructor) {
         Set<Executable> constructors = new HashSet<>();
 
-        Collections.addAll(constructors, clazz.getDeclaredConstructors());
+        Constructor<?> primaryCtor = null;
+
+        for (Constructor<?> ctor : clazz.getDeclaredConstructors()) {
+            constructors.add(ctor);
+
+            if (RecordUtils.isPrimaryConstructor(ctor)) {
+                primaryCtor = ctor;
+            }
+        }
 
         for (Method method : clazz.getDeclaredMethods()) {
             if (method.isSynthetic() || !Modifier.isStatic(method.getModifiers())) {
@@ -36,14 +43,14 @@ public class SimpleConstructorResolver implements ConstructorResolver {
             throw new IllegalStateException("No constructor found");
         }
 
-        Executable target = null;
+        Executable target = primaryCtor;
 
         for (Executable ctor : constructors) {
-            if (ctor.getDeclaredAnnotation(Creator.class) == null) {
+            if (target == ctor || ctor.getDeclaredAnnotation(Creator.class) == null) {
                 continue;
             }
 
-            if (target != null) {
+            if (target != null && target.getDeclaredAnnotation(Creator.class) != null) {
                 throw new IllegalStateException("Multiple constructors found");
             }
 
@@ -63,15 +70,13 @@ public class SimpleConstructorResolver implements ConstructorResolver {
         processParameters(target, constructor);
     }
 
-    protected void processParameters(Executable executable, ConstructorModel.Builder builder) {
-        Class<?> clazz = executable.getDeclaringClass();
-
+    protected void processParameters(Executable ctor, ConstructorModel.Builder builder) {
         AnnotatedType[] componentTypes = null;
-        if (executable instanceof Constructor && RecordUtils.isRecord(clazz) && RecordUtils.isPrimaryConstructor((Constructor<?>) executable)) {
-            componentTypes = RecordUtils.getComponentTypes(clazz);
+        if (ctor instanceof Constructor && RecordUtils.isPrimaryConstructor((Constructor<?>) ctor)) {
+            componentTypes = RecordUtils.getComponentTypes(ctor.getDeclaringClass());
         }
 
-        Parameter[] parameters = executable.getParameters();
+        Parameter[] parameters = ctor.getParameters();
 
         for (int i = 0; i < parameters.length; i++) {
             Parameter parameter = parameters[i];

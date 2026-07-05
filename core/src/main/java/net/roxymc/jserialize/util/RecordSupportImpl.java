@@ -11,7 +11,7 @@ final class RecordSupportImpl implements RecordUtils.RecordSupport {
 
     @Override
     public boolean isPrimaryConstructor(Constructor<?> constructor) {
-        throw new UnsupportedOperationException();
+        return false;
     }
 
     @Override
