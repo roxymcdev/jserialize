@@ -21,11 +21,11 @@ final class MapType<K, V> {
     private @Nullable MapFactory<K, V> mapFactory;
 
     MapType(TypeRef<? extends Map<K, V>> mapType) {
-        AnnotatedParameterizedType ptype = resolveUpperBound(resolveTypeParams(mapType, Map.class));
+        AnnotatedParameterizedType ptype = resolveTypeParams(mapType, Map.class);
 
         this.mapType = mapType;
-        this.keyType = TypeRef.of(ptype.getAnnotatedActualTypeArguments()[0]);
-        this.valueType = TypeRef.of(ptype.getAnnotatedActualTypeArguments()[1]);
+        this.keyType = TypeRef.of(resolveUpperBound(ptype.getAnnotatedActualTypeArguments()[0]));
+        this.valueType = TypeRef.of(resolveUpperBound(ptype.getAnnotatedActualTypeArguments()[1]));
     }
 
     @SuppressWarnings("unchecked")

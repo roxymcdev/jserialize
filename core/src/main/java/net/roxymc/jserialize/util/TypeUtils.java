@@ -2,7 +2,6 @@ package net.roxymc.jserialize.util;
 
 import io.leangen.geantyref.AnnotatedCaptureType;
 import io.leangen.geantyref.GenericTypeReflector;
-import io.leangen.geantyref.TypeVisitor;
 import net.roxymc.jserialize.model.property.MethodRef;
 import net.roxymc.jserialize.type.TypeRef;
 
@@ -37,77 +36,56 @@ public final class TypeUtils {
         return (AnnotatedParameterizedType) type;
     }
 
-    @SuppressWarnings("unchecked")
-    public static <T extends AnnotatedType> T resolveUpperBound(T type) {
-        return (T) transform(type, new TypeVisitor() {
-            @Override
-            protected AnnotatedType visitParameterizedType(AnnotatedParameterizedType type) {
-                return super.visitParameterizedType(capture(type));
+    public static AnnotatedType resolveUpperBound(AnnotatedType type) {
+        if (type instanceof AnnotatedTypeVariable) {
+            AnnotatedTypeVariable typeVar = (AnnotatedTypeVariable) type;
+
+            return updateAnnotations(resolveUpperBound(typeVar.getAnnotatedBounds()[0]), type.getAnnotations());
+        } else if (type instanceof AnnotatedWildcardType) {
+            AnnotatedWildcardType wtype = (AnnotatedWildcardType) type;
+
+            checkLowerBounds(wtype.getAnnotatedLowerBounds());
+
+            return updateAnnotations(resolveUpperBound(wtype.getAnnotatedUpperBounds()[0]), type.getAnnotations());
+        } else if (type instanceof AnnotatedCaptureType) {
+            AnnotatedCaptureType ctype = (AnnotatedCaptureType) type;
+
+            checkLowerBounds(ctype.getAnnotatedLowerBounds());
+
+            /*
+            CaptureType can sometimes return [Object, MoreMeaningfulType] as upper bounds,
+            that's why we need to skip any Object types and resolve to the first more meaningful type.
+
+            A simple reproduction of this problem can be done with:
+            `GenericTypeReflector.capture(new TypeRef<Collection<? extends Comparable<?>>>() {})`
+
+            where the collection element type then resolves to:
+            `capture of ? extends Comparable<?>
+            for which upper bounds return [Object, Comparable<?>]
+             */
+
+            AnnotatedType[] upperBounds = ctype.getAnnotatedUpperBounds();
+
+            AnnotatedType bound = upperBounds[0];
+            for (int i = 1; i < upperBounds.length && bound.getType() == Object.class; i++) {
+                bound = upperBounds[i];
             }
 
-            @Override
-            protected AnnotatedType visitVariable(final AnnotatedTypeVariable type) {
-                return updateAnnotations(transform(type.getAnnotatedBounds()[0], this), type.getAnnotations());
-            }
+            return updateAnnotations(resolveUpperBound(bound), type.getAnnotations());
+        }
 
-            @Override
-            protected AnnotatedType visitWildcardType(AnnotatedWildcardType type) {
-                checkLowerBounds(type.getAnnotatedLowerBounds());
+        return type;
+    }
 
-                return updateAnnotations(transform(type.getAnnotatedUpperBounds()[0], this), type.getAnnotations());
-            }
+    private static void checkLowerBounds(AnnotatedType[] lowerBounds) {
+        if (lowerBounds.length == 0) {
+            return;
+        }
 
-            @Override
-            protected AnnotatedType visitCaptureType(AnnotatedCaptureType type) {
-                checkLowerBounds(type.getAnnotatedLowerBounds());
-
-                /*
-                CaptureType can sometimes return [Object, MoreMeaningfulType] as upper bounds,
-                that's why we need to skip any Object types and resolve to the first more meaningful type.
-
-                A simple reproduction of this problem can be done with:
-                `GenericTypeReflector.capture(new TypeRef<Collection<? extends Comparable<?>>>() {})`
-
-                where the collection element type then resolves to:
-                `capture of ? extends Comparable<?>
-                for which upper bounds return [Object, Comparable<?>]
-                 */
-
-                AnnotatedType[] upperBounds = type.getAnnotatedUpperBounds();
-
-                AnnotatedType bound = upperBounds[0];
-                for (int i = 1; i < upperBounds.length && bound.getType() == Object.class; i++) {
-                    bound = upperBounds[i];
-                }
-
-                if (bound instanceof AnnotatedParameterizedType) {
-                    bound = capture(bound);
-
-                    AnnotatedType[] typeArgs = ((AnnotatedParameterizedType) bound).getAnnotatedActualTypeArguments();
-
-                    for (AnnotatedType typeArg : typeArgs) {
-                        if (!type.equals(typeArg)) {
-                            continue;
-                        }
-
-                        return annotate(erase(bound.getType()), GenericTypeReflector.merge(type.getAnnotations(), bound.getAnnotations()));
-                    }
-                }
-
-                return updateAnnotations(transform(bound, this), type.getAnnotations());
-            }
-
-            private void checkLowerBounds(AnnotatedType[] lowerBounds) {
-                if (lowerBounds.length == 0) {
-                    return;
-                }
-
-                throw new IllegalArgumentException(format(
-                        "Cannot deserialize lower-bounded wildcard/capture ? super %1$s — use a concrete type %1$s or ? extends %1$s instead",
-                        GenericTypeReflector.getTypeName(lowerBounds[0].getType())
-                ));
-            }
-        });
+        throw new IllegalArgumentException(format(
+                "Cannot resolve lower-bounded wildcard/capture of '? super %1$s' — use '%1$s' or '? extends %1$s' instead",
+                GenericTypeReflector.getTypeName(lowerBounds[0].getType())
+        ));
     }
 
     public static AnnotatedType resolveDirectType(AnnotatedType unresolved, TypeRef<?> typeAndParams) {
@@ -124,10 +102,13 @@ public final class TypeUtils {
         if (unresolved instanceof AnnotatedWildcardType || unresolved instanceof AnnotatedCaptureType) {
             return resolveDirectType(resolveUpperBound(unresolved), typeAndParams);
         } else if (unresolved instanceof AnnotatedTypeVariable) {
-            @SuppressWarnings("unchecked")
-            TypeVariable<? extends Class<?>> typeVar = (TypeVariable<? extends Class<?>>) unresolved.getType();
+            TypeVariable<?> typeVar = (TypeVariable<?>) unresolved.getType();
+            if (!(typeVar.getGenericDeclaration() instanceof Class)) {
+                return unresolved;
+            }
 
-            AnnotatedType type = GenericTypeReflector.getTypeParameter(typeAndParams, typeVar);
+            @SuppressWarnings("unchecked")
+            AnnotatedType type = GenericTypeReflector.getTypeParameter(typeAndParams, (TypeVariable<? extends Class<?>>) typeVar);
             if (type == null) {
                 return unresolved;
             }
