@@ -41,6 +41,11 @@ public final class TypeUtils {
     public static <T extends AnnotatedType> T resolveUpperBound(T type) {
         return (T) transform(type, new TypeVisitor() {
             @Override
+            protected AnnotatedType visitParameterizedType(AnnotatedParameterizedType type) {
+                return super.visitParameterizedType(capture(type));
+            }
+
+            @Override
             protected AnnotatedType visitVariable(final AnnotatedTypeVariable type) {
                 return updateAnnotations(transform(type.getAnnotatedBounds()[0], this), type.getAnnotations());
             }
@@ -56,9 +61,28 @@ public final class TypeUtils {
             protected AnnotatedType visitCaptureType(AnnotatedCaptureType type) {
                 checkLowerBounds(type.getAnnotatedLowerBounds());
 
-                AnnotatedType bound = type.getAnnotatedUpperBounds()[0];
+                /*
+                CaptureType can sometimes return [Object, MoreMeaningfulType] as upper bounds,
+                that's why we need to skip any Object types and resolve to the first more meaningful type.
+
+                A simple reproduction of this problem can be done with:
+                `GenericTypeReflector.capture(new TypeRef<Collection<? extends Comparable<?>>>() {})`
+
+                where the collection element type then resolves to:
+                `capture of ? extends Comparable<?>
+                for which upper bounds return [Object, Comparable<?>]
+                 */
+
+                AnnotatedType[] upperBounds = type.getAnnotatedUpperBounds();
+
+                AnnotatedType bound = upperBounds[0];
+                for (int i = 1; i < upperBounds.length && bound.getType() == Object.class; i++) {
+                    bound = upperBounds[i];
+                }
 
                 if (bound instanceof AnnotatedParameterizedType) {
+                    bound = capture(bound);
+
                     AnnotatedType[] typeArgs = ((AnnotatedParameterizedType) bound).getAnnotatedActualTypeArguments();
 
                     for (AnnotatedType typeArg : typeArgs) {
