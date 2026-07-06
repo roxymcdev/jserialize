@@ -1,10 +1,10 @@
 plugins {
-    id("jserialize.common-conventions")
+    id("jserialize.shadow-conventions")
 }
 
 dependencies {
     api(project(":jserialize-annotations"))
-    api(libs.geantyref)
+    shade("io.leangen.geantyref:geantyref")
 }
 
 sourceSets {
@@ -13,4 +13,8 @@ sourceSets {
             alternateVersions(16)
         }
     }
+}
+
+tasks.shadowJar {
+    relocate("io.leangen.geantyref", "net.roxymc.jserialize.internal.geantyref")
 }

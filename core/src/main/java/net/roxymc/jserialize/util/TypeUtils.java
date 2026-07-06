@@ -9,6 +9,7 @@ import java.lang.reflect.*;
 
 import static io.leangen.geantyref.GenericTypeReflector.*;
 import static java.lang.String.format;
+import static net.roxymc.jserialize.util.ObjectUtils.nonNull;
 
 public final class TypeUtils {
 
@@ -95,7 +96,7 @@ public final class TypeUtils {
     public static AnnotatedType resolveDirectType(MethodRef unresolved, TypeRef<?> typeAndParams) {
         AnnotatedType declaringType = getExactSuperType(capture(typeAndParams.getAnnotatedType()), unresolved.declaringClass());
 
-        return resolveDirectType(unresolved.valueType(), declaringType);
+        return resolveDirectType(unresolved.valueType(), nonNull(declaringType, "declaringType"));
     }
 
     public static AnnotatedType resolveDirectType(AnnotatedType unresolved, AnnotatedType typeAndParams) {
@@ -104,13 +105,13 @@ public final class TypeUtils {
         } else if (unresolved instanceof AnnotatedTypeVariable) {
             TypeVariable<?> typeVar = (TypeVariable<?>) unresolved.getType();
             if (!(typeVar.getGenericDeclaration() instanceof Class)) {
-                return unresolved;
+                return resolveUpperBound(unresolved);
             }
 
             @SuppressWarnings("unchecked")
             AnnotatedType type = GenericTypeReflector.getTypeParameter(typeAndParams, (TypeVariable<? extends Class<?>>) typeVar);
             if (type == null) {
-                return unresolved;
+                return resolveUpperBound(unresolved);
             }
 
             return resolveDirectType(updateAnnotations(type, unresolved.getAnnotations()), typeAndParams);

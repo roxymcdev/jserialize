@@ -1,8 +1,8 @@
 package net.roxymc.jserialize.format.bson;
 
-import io.leangen.geantyref.TypeFactory;
 import net.roxymc.jserialize.adapter.TypeAdapter;
 import net.roxymc.jserialize.adapter.TypeAdapters;
+import net.roxymc.jserialize.internal.geantyref.TypeFactory;
 import net.roxymc.jserialize.type.TypeRef;
 import org.bson.codecs.Codec;
 import org.bson.codecs.configuration.CodecProvider;

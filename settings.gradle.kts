@@ -1,5 +1,7 @@
 pluginManagement {
-    includeBuild("build-logic")
+    includeBuild("build-logic") {
+        name = "jserialize-$name"
+    }
 }
 
 rootProject.name = "jserialize-parent"
@@ -27,4 +29,8 @@ listOf(
     include(":jserialize-format-$module") {
         projectDir = file("format/$module")
     }
+}
+
+includeBuild("vendor") {
+    name = "jserialize-$name"
 }
