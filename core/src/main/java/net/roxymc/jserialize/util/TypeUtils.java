@@ -16,6 +16,20 @@ public final class TypeUtils {
     private TypeUtils() {
     }
 
+    public static String getShortCanonicalName(Class<?> clazz) {
+        String canonicalName = clazz.getCanonicalName();
+        if (canonicalName == null) {
+            throw new IllegalArgumentException("clazz does not have a canonical name");
+        }
+
+        String packageName = clazz.getPackageName();
+        if (packageName.isEmpty()) {
+            return canonicalName;
+        }
+
+        return canonicalName.substring(packageName.length() + 1);
+    }
+
     public static boolean isEnum(TypeRef<?> type) {
         return isEnum(type.getRawType());
     }

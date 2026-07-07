@@ -1,5 +1,6 @@
 package net.roxymc.jserialize.token;
 
+import net.roxymc.jserialize.util.TypeUtils;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.function.Function;
@@ -7,27 +8,28 @@ import java.util.function.Supplier;
 
 import static net.roxymc.jserialize.util.ObjectUtils.nonNull;
 
-@ApiStatus.NonExtendable
 public abstract class TokenType {
+    private final String name;
     private final Kind kind;
 
-    private TokenType(Kind kind) {
+    private TokenType(String name, Kind kind) {
+        this.name = name;
         this.kind = kind;
     }
 
     @ApiStatus.Internal
-    public static NonValued nonValued(Kind kind, Supplier<Token> token) {
-        return new NonValued(kind, token);
+    public static NonValued nonValued(String name, Kind kind, Supplier<Token> token) {
+        return new NonValued(name, kind, token);
     }
 
     @ApiStatus.Internal
-    public static <T> Valued<T> valued(Kind kind, Function<T, ? extends ValuedToken<T>> tokenFactory) {
-        return new Valued<>(kind, tokenFactory);
+    public static <T> Valued<T> valued(String name, Kind kind, Function<T, ? extends ValuedToken<T>> tokenFactory) {
+        return new Valued<>(name, kind, tokenFactory);
     }
 
     @ApiStatus.Internal
-    public static Virtual virtual(Kind kind) {
-        return new Virtual(kind);
+    public static Virtual virtual(String name, Kind kind) {
+        return new Virtual(name, kind);
     }
 
     public Kind kind() {
@@ -38,8 +40,8 @@ public abstract class TokenType {
         private final Supplier<Token> token;
 
         @ApiStatus.Internal
-        private NonValued(Kind kind, Supplier<Token> token) {
-            super(kind);
+        private NonValued(String name, Kind kind, Supplier<Token> token) {
+            super(name, kind);
             this.token = token;
         }
 
@@ -51,8 +53,8 @@ public abstract class TokenType {
     public static final class Valued<T> extends TokenType {
         private final Function<T, ? extends ValuedToken<T>> tokenFactory;
 
-        private Valued(Kind kind, Function<T, ? extends ValuedToken<T>> tokenFactory) {
-            super(kind);
+        private Valued(String name, Kind kind, Function<T, ? extends ValuedToken<T>> tokenFactory) {
+            super(name, kind);
             this.tokenFactory = tokenFactory;
         }
 
@@ -62,9 +64,14 @@ public abstract class TokenType {
     }
 
     public static final class Virtual extends TokenType {
-        private Virtual(Kind kind) {
-            super(kind);
+        private Virtual(String name, Kind kind) {
+            super(name, kind);
         }
+    }
+
+    @Override
+    public String toString() {
+        return TypeUtils.getShortCanonicalName(getClass()) + "[" + name + "]";
     }
 
     public enum Kind {
