@@ -20,14 +20,10 @@ final class CollectionType<E> {
     private @Nullable CollectionFactory<E> collectionFactory;
 
     CollectionType(TypeRef<? extends Collection<E>> collectionType) {
-        System.out.println(collectionType.getType());
         AnnotatedParameterizedType ptype = resolveTypeParams(collectionType, Collection.class);
-        System.out.println(ptype.getType());
 
         this.collectionType = collectionType;
         this.elementType = TypeRef.of(resolveUpperBound(ptype.getAnnotatedActualTypeArguments()[0]));
-
-        System.out.println(elementType.getType());
     }
 
     @SuppressWarnings("unchecked")
