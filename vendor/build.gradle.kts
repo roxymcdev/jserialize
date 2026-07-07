@@ -13,6 +13,7 @@ val vendor = project
 subprojects {
     apply<JavaLibraryPlugin>()
 
+    group = "jserialize.patched"
     version = "patched"
 
     repositories {
@@ -77,8 +78,6 @@ val mavenScopes = mapOf(
 
 fun Project.initPom() {
     val pom = XmlSlurper().parse(projectDir.parentFile.resolve("upstream/pom.xml"))
-
-    group = pom.resolve("groupId").text()
 
     dependencies {
         pom.resolve("dependencies", "dependency").filterIsInstance<GPathResult>().forEach { dependency ->

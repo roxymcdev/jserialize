@@ -4,7 +4,7 @@ plugins {
 
 dependencies {
     api(project(":jserialize-annotations"))
-    shade("io.leangen.geantyref:geantyref")
+    shade("jserialize.patched:geantyref")
 }
 
 sourceSets {

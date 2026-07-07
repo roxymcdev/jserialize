@@ -4,5 +4,7 @@ plugins {
 
 dependencies {
     api(project(":jserialize-core"))
-    api(libs.configurate.core)
+    api(libs.configurate.core) {
+        exclude("io.leangen.geantyref")
+    }
 }
