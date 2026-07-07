@@ -51,6 +51,10 @@ subprojects {
         named<JavaCompile>("compileTestJava") {
             options.release = 17
         }
+
+        withType<ProcessResources>().configureEach {
+            dependsOn(applyPatches)
+        }
     }
 }
 
