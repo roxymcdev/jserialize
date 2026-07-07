@@ -1,0 +1,15 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: GliczDev <67753196+GliczDev@users.noreply.github.com>
+Date: Tue, 7 Jul 2026 18:54:02 +0200
+Subject: [PATCH] Add build/ to .gitignore
+
+
+diff --git a/.gitignore b/.gitignore
+index 31b5da3e653ff5935ba01382970343b6e42a08e0..5c09c07d18aa5405b203fda7755c3592fdaf4588 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -4,3 +4,4 @@ pom.xml.releaseBackup
+ .DS_Store
+ *.iml
+ .idea
++build/
