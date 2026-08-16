@@ -10,7 +10,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Map;
-import java.util.function.UnaryOperator;
+import java.util.function.Consumer;
 
 public final class TokenTypeRegistry<N, R, W> {
     private final Map<TokenType, TokenTypeInfo<R, W>> registry;
@@ -21,8 +21,10 @@ public final class TokenTypeRegistry<N, R, W> {
         this.fromNative = Map.copyOf(builder.fromNative);
     }
 
-    public static <N, R, W> TokenTypeRegistry<N, R, W> create(UnaryOperator<Builder<N, R, W>> builder) {
-        return new TokenTypeRegistry<>(builder.apply(new Builder<>()));
+    public static <N, R, W> TokenTypeRegistry<N, R, W> create(Consumer<? super Builder<N, R, W>> configurator) {
+        Builder<N, R, W> builder = new Builder<>();
+        configurator.accept(builder);
+        return new TokenTypeRegistry<>(builder);
     }
 
     public TokenTypeInfo.@Nullable NonValued<R, W> get(TokenType.NonValued tokenType) {
@@ -30,9 +32,7 @@ public final class TokenTypeRegistry<N, R, W> {
     }
 
     public <T> TokenTypeInfo.@Nullable Valued<R, W, T> get(TokenType.Valued<T> tokenType) {
-        @SuppressWarnings("unchecked")
-        TokenTypeInfo.Valued<R, W, T> info = (TokenTypeInfo.Valued<R, W, T>) registry.get(tokenType);
-        return info;
+        return (TokenTypeInfo.Valued<R, W, T>) registry.get(tokenType);
     }
 
     public TokenType fromNative(N nativeType) {
@@ -68,7 +68,7 @@ public final class TokenTypeRegistry<N, R, W> {
             return this;
         }
 
-        public <T> Builder<N, R, W> bind(TokenType.Virtual tokenType, N nativeType) {
+        public Builder<N, R, W> bind(TokenType.Virtual tokenType, N nativeType) {
             fromNative.put(nativeType, tokenType);
             return this;
         }
