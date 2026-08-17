@@ -1,6 +1,6 @@
 package net.roxymc.jserialize.model.resolver;
 
-import net.roxymc.jserialize.annotation.Creator;
+import net.roxymc.jserialize.annotation.JSerial;
 import net.roxymc.jserialize.model.constructor.ConstructorModel;
 import net.roxymc.jserialize.util.PropertyUtils;
 import net.roxymc.jserialize.util.RecordUtils;
@@ -34,7 +34,7 @@ public class SimpleConstructorResolver implements ConstructorResolver {
                 continue;
             }
 
-            if (method.getDeclaredAnnotation(Creator.class) != null) {
+            if (method.getDeclaredAnnotation(JSerial.Creator.class) != null) {
                 constructors.add(method);
             }
         }
@@ -46,11 +46,11 @@ public class SimpleConstructorResolver implements ConstructorResolver {
         Executable target = primaryCtor;
 
         for (Executable ctor : constructors) {
-            if (target == ctor || ctor.getDeclaredAnnotation(Creator.class) == null) {
+            if (target == ctor || ctor.getDeclaredAnnotation(JSerial.Creator.class) == null) {
                 continue;
             }
 
-            if (target != null && target.getDeclaredAnnotation(Creator.class) != null) {
+            if (target != null && target.getDeclaredAnnotation(JSerial.Creator.class) != null) {
                 throw new IllegalStateException("Multiple constructors found");
             }
 

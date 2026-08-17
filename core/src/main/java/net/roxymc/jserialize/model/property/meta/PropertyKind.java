@@ -1,6 +1,6 @@
 package net.roxymc.jserialize.model.property.meta;
 
-import net.roxymc.jserialize.annotation.*;
+import net.roxymc.jserialize.annotation.JSerial.*;
 import org.jspecify.annotations.Nullable;
 
 import java.lang.annotation.Annotation;
@@ -13,7 +13,7 @@ import static net.roxymc.jserialize.model.property.meta.PropertyKind.Flag.DONT_S
 public final class PropertyKind<A extends Annotation> {
     private static final Map<Class<? extends Annotation>, PropertyKind<?>> PROPERTY_KINDS = new HashMap<>();
 
-    public static final PropertyKind<ExtraProperties> EXTRAS = register(ExtraProperties.class, ExtraProperties::value, ExtrasPropertyMeta::new, DONT_DESERIALIZE);
+    public static final PropertyKind<Extra> EXTRA = register(Extra.class, Extra::value, ExtraPropertyMeta::new, DONT_DESERIALIZE);
     public static final PropertyKind<Id> ID = register(Id.class, Id::value, IdPropertyMeta::new);
     public static final PropertyKind<Key> KEY = register(Key.class, Key::value, KeyPropertyMeta::new, DONT_SERIALIZE);
     public static final PropertyKind<Parent> PARENT = register(Parent.class, Parent::value, ParentPropertyMeta::new, DONT_SERIALIZE);

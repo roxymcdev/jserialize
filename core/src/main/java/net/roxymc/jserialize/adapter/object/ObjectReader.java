@@ -47,7 +47,7 @@ final class ObjectReader<T, R> {
             builder.property(property, decoder.decode(context.key()));
         });
 
-        PropertyModel extrasProperty = adapter.classModel.properties().get(PropertyKind.EXTRAS);
+        PropertyModel extrasProperty = adapter.classModel.properties().get(PropertyKind.EXTRA);
         MapLike<R> extrasMap;
 
         if (extrasProperty != null) {

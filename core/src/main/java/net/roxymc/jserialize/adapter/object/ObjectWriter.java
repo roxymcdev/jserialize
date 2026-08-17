@@ -54,7 +54,7 @@ final class ObjectWriter<T, R> {
             return;
         }
 
-        if (meta != null && meta.kind() == PropertyKind.EXTRAS) {
+        if (meta != null && meta.kind() == PropertyKind.EXTRA) {
             // if it's an extras property, it never writes null
             requireNonNull(value);
 

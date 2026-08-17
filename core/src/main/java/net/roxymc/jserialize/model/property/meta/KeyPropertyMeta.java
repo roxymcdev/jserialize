@@ -1,6 +1,6 @@
 package net.roxymc.jserialize.model.property.meta;
 
-import net.roxymc.jserialize.annotation.Key;
+import net.roxymc.jserialize.annotation.JSerial.Key;
 import org.jspecify.annotations.Nullable;
 
 final class KeyPropertyMeta extends AbstractPropertyMeta<Key> {
@@ -15,7 +15,7 @@ final class KeyPropertyMeta extends AbstractPropertyMeta<Key> {
 
     @Override
     public boolean required() {
-        return get(Key::required, true);
+        return get(Key::required, Key.DEFAULT_REQUIRED);
     }
 
     @Override

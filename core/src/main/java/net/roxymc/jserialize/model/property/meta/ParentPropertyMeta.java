@@ -1,6 +1,6 @@
 package net.roxymc.jserialize.model.property.meta;
 
-import net.roxymc.jserialize.annotation.Parent;
+import net.roxymc.jserialize.annotation.JSerial.Parent;
 import org.jspecify.annotations.Nullable;
 
 final class ParentPropertyMeta extends AbstractPropertyMeta<Parent> {
@@ -15,7 +15,7 @@ final class ParentPropertyMeta extends AbstractPropertyMeta<Parent> {
 
     @Override
     public boolean required() {
-        return get(Parent::required, true);
+        return get(Parent::required, Parent.DEFAULT_REQUIRED);
     }
 
     @Override

@@ -1,9 +1,9 @@
 package net.roxymc.jserialize.model.resolver;
 
+import net.roxymc.jserialize.annotation.JSerial;
 import net.roxymc.jserialize.annotation.JSerializable;
 import net.roxymc.jserialize.annotation.JSerializable.FieldResolution;
 import net.roxymc.jserialize.annotation.JSerializable.MethodResolution;
-import net.roxymc.jserialize.annotation.Transient;
 import net.roxymc.jserialize.model.constructor.ConstructorModel;
 import net.roxymc.jserialize.model.constructor.ParameterModel;
 import net.roxymc.jserialize.model.property.PropertyMap;
@@ -91,7 +91,7 @@ public class SimplePropertiesResolver implements PropertiesResolver {
     }
 
     protected <M extends Member & AnnotatedElement> boolean shouldIgnore(M member) {
-        return member.isSynthetic() || isStatic(member.getModifiers()) || isTransient(member.getModifiers()) || member.isAnnotationPresent(Transient.class);
+        return member.isSynthetic() || isStatic(member.getModifiers()) || isTransient(member.getModifiers()) || member.isAnnotationPresent(JSerial.Transient.class);
     }
 
     protected void processFields(Field[] fields, Context ctx) {

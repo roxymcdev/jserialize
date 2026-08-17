@@ -1,6 +1,6 @@
 package net.roxymc.jserialize.model.property.meta;
 
-import net.roxymc.jserialize.annotation.Id;
+import net.roxymc.jserialize.annotation.JSerial.Id;
 import org.jspecify.annotations.Nullable;
 
 final class IdPropertyMeta extends AbstractPropertyMeta<Id> {
@@ -15,7 +15,7 @@ final class IdPropertyMeta extends AbstractPropertyMeta<Id> {
 
     @Override
     public boolean required() {
-        return get(Id::required, true);
+        return get(Id::required, Id.DEFAULT_REQUIRED);
     }
 
     @Override

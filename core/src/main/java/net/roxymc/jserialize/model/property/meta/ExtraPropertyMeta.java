@@ -1,16 +1,16 @@
 package net.roxymc.jserialize.model.property.meta;
 
-import net.roxymc.jserialize.annotation.ExtraProperties;
+import net.roxymc.jserialize.annotation.JSerial.Extra;
 import org.jspecify.annotations.Nullable;
 
-final class ExtrasPropertyMeta extends AbstractPropertyMeta<ExtraProperties> {
-    ExtrasPropertyMeta(@Nullable ExtraProperties annotation) {
+final class ExtraPropertyMeta extends AbstractPropertyMeta<Extra> {
+    ExtraPropertyMeta(@Nullable Extra annotation) {
         super(annotation);
     }
 
     @Override
-    public PropertyKind<ExtraProperties> kind() {
-        return PropertyKind.EXTRAS;
+    public PropertyKind<Extra> kind() {
+        return PropertyKind.EXTRA;
     }
 
     @Override
@@ -25,6 +25,6 @@ final class ExtrasPropertyMeta extends AbstractPropertyMeta<ExtraProperties> {
 
     @Override
     public boolean mutate() {
-        return get(ExtraProperties::mutate, false);
+        return get(Extra::mutate, Extra.DEFAULT_MUTATE);
     }
 }
