@@ -37,8 +37,8 @@ public final class FloatAdapter extends AbstractNumberAdapter<Float> {
     protected Float fromDouble(double value) {
         float floatValue = (float) value;
 
-        if (Double.isFinite(value) && (Float.isInfinite(floatValue) || (double) floatValue != value)) {
-            throw new ArithmeticException(rawType.getSimpleName() + " overflow or loss of precision: " + value);
+        if (Double.isFinite(value) && Float.isInfinite(floatValue)) {
+            throw new ArithmeticException(rawType.getSimpleName() + " overflow: " + value);
         }
 
         return floatValue;
