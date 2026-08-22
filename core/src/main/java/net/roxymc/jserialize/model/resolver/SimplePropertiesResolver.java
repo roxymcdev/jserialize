@@ -113,7 +113,7 @@ public class SimplePropertiesResolver implements PropertiesResolver {
     }
 
     protected void processField(Field field, Context ctx) {
-        String name = PropertyUtils.getPropertyName(field, field::getName);
+        String name = PropertyUtils.getPropertyName(field, field.getName());
 
         ctx.properties.withProperty(name, property -> property
                 .field(field)

@@ -7,12 +7,13 @@ import net.roxymc.jserialize.model.property.PropertyModel;
 import net.roxymc.jserialize.model.property.meta.PropertyKind;
 import net.roxymc.jserialize.model.property.meta.PropertyMeta;
 import net.roxymc.jserialize.type.TypeRef;
+import net.roxymc.jserialize.util.PropertyUtils;
 
 import java.io.IOException;
 import java.util.Map;
 
-import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
+import static net.roxymc.jserialize.util.ObjectUtils.nonNull;
 
 final class ObjectWriter<T, R> {
     private final ObjectAdapter<T> adapter;
@@ -34,7 +35,7 @@ final class ObjectWriter<T, R> {
             try {
                 writeProperty(writer, property);
             } catch (Throwable ex) {
-                throw new RuntimeException("Failed to write property: " + property.name(), ex);
+                throw new RuntimeException("Failed to write property: " + PropertyUtils.getDebugName(property), ex);
             }
         }
 
@@ -83,20 +84,21 @@ final class ObjectWriter<T, R> {
     }
 
     private String resolveWriteName(PropertyModel property) {
+        String name = nonNull(property.name(), "property.name");
         String idPropertyName = formatUtils.idPropertyName();
+
         if (idPropertyName == null) {
-            return property.name();
+            return name;
         }
 
         if (property.kind() == PropertyKind.ID) {
             return idPropertyName;
         }
 
-        String name = property.name();
-        if (!idPropertyName.equals(name)) {
+        if (!name.equals(idPropertyName)) {
             return name;
         }
 
-        throw new IllegalStateException(format("'%s' property name is restricted for @Id property", idPropertyName));
+        throw new IllegalStateException("Property name restricted for @Id property: " + idPropertyName);
     }
 }

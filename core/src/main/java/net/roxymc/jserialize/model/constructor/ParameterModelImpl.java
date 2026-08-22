@@ -4,19 +4,20 @@ import net.roxymc.jserialize.model.property.meta.PropertyKind;
 import net.roxymc.jserialize.model.property.meta.PropertyMeta;
 import net.roxymc.jserialize.util.ObjectUtils;
 import net.roxymc.jserialize.util.RecordUtils;
+import org.jspecify.annotations.Nullable;
 
 import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
 
 final class ParameterModelImpl implements ParameterModel {
-    private final String name;
+    private final @Nullable String name;
     private final int index;
     private final AnnotatedType type;
     private final boolean implicit;
     private final PropertyMeta meta;
 
-    ParameterModelImpl(String name, int index, Parameter parameter, AnnotatedType type) {
+    ParameterModelImpl(@Nullable String name, int index, Parameter parameter, AnnotatedType type) {
         this.name = name;
         this.index = index;
         this.type = type;
@@ -29,7 +30,7 @@ final class ParameterModelImpl implements ParameterModel {
     }
 
     @Override
-    public String name() {
+    public @Nullable String name() {
         return name;
     }
 

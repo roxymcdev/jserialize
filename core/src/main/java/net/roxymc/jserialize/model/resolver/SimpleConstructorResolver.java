@@ -81,13 +81,7 @@ public class SimpleConstructorResolver implements ConstructorResolver {
         for (int i = 0; i < parameters.length; i++) {
             Parameter parameter = parameters[i];
 
-            String name = PropertyUtils.getPropertyName(parameter, () -> {
-                if (!parameter.isNamePresent()) {
-                    throw new IllegalStateException("Parameter has no name: " + parameter);
-                }
-
-                return parameter.getName();
-            });
+            String name = PropertyUtils.getPropertyName(parameter, parameter.isNamePresent() ? parameter.getName() : null);
 
             AnnotatedType type = componentTypes != null ? componentTypes[i] : parameter.getAnnotatedType();
 

@@ -10,6 +10,7 @@ import net.roxymc.jserialize.model.property.PropertyModel;
 import net.roxymc.jserialize.model.property.meta.PropertyKind;
 import net.roxymc.jserialize.token.TokenTypes;
 import net.roxymc.jserialize.type.TypeRef;
+import net.roxymc.jserialize.util.PropertyUtils;
 import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
@@ -47,23 +48,22 @@ final class ObjectReader<T, R> {
             builder.property(property, decoder.decode(context.key()));
         });
 
-        PropertyModel extrasProperty = adapter.classModel.properties().get(PropertyKind.EXTRA);
-        MapLike<R> extrasMap;
+        PropertyModel extraProperty = adapter.classModel.properties().get(PropertyKind.EXTRA);
+        MapLike<R> extraMap;
 
-        if (extrasProperty != null) {
-            TypeRef<?> mapType = resolveReadType(extrasProperty);
+        if (extraProperty != null) {
+            TypeRef<?> mapType = resolveReadType(extraProperty);
 
-            extrasMap = mapType != null ? formatUtils.createMap(context.typeAdapters(), mapType.getAnnotatedType()) : null;
+            extraMap = mapType != null ? formatUtils.createMap(context.typeAdapters(), mapType.getAnnotatedType()) : null;
         } else {
-            extrasMap = null;
+            extraMap = null;
         }
 
         while (reader.peek() == TokenTypes.NAME) {
             String name = reader.readName();
+            PropertyModel property = resolveProperty(name);
 
             try {
-                PropertyModel property = resolveProperty(name);
-
                 if (property != null) {
                     PropertyValue<?> value = readProperty(reader, property);
 
@@ -73,22 +73,22 @@ final class ObjectReader<T, R> {
                     }
                 }
 
-                if (extrasMap != null) {
-                    extrasMap.put(name, readRawValue(reader));
+                if (extraMap != null) {
+                    extraMap.put(name, readRawValue(reader));
                     continue;
                 }
 
                 reader.skipValue();
             } catch (Throwable ex) {
-                throw new RuntimeException("Failed to read property: " + name, ex);
+                throw new RuntimeException("Failed to read property: " + (property != null ? PropertyUtils.getDebugName(property) : name), ex);
             }
         }
 
         reader.readObjectEnd();
 
-        if (extrasMap != null) {
-            builder.property(extrasProperty, (PropertyValue.Mutable<Map<?, ?>>) (parent, instance) -> extrasMap.asMap(
-                    instance, context.withParent(parent).withKey(extrasProperty.name())
+        if (extraMap != null) {
+            builder.property(extraProperty, (PropertyValue.Mutable<Map<?, ?>>) (parent, instance) -> extraMap.asMap(
+                    instance, context.withParent(parent).withKey(extraProperty.name())
             ));
         }
 

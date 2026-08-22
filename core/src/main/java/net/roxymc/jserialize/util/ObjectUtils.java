@@ -5,6 +5,7 @@ import org.jspecify.annotations.Nullable;
 
 import java.util.Objects;
 import java.util.StringJoiner;
+import java.util.function.Supplier;
 
 public final class ObjectUtils {
     private ObjectUtils() {
@@ -28,6 +29,10 @@ public final class ObjectUtils {
     @Contract("_, !null -> !null")
     public static <T> @Nullable T nonNullOrElse(@Nullable T obj, @Nullable T defaultValue) {
         return obj != null ? obj : defaultValue;
+    }
+
+    public static <T> @Nullable T nonNullOrElse(@Nullable T obj, Supplier<? extends @Nullable T> defaultValue) {
+        return obj != null ? obj : defaultValue.get();
     }
 
     public static StringJoiner toString(Object obj) {

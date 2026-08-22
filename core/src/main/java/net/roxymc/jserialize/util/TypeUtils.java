@@ -73,9 +73,8 @@ public final class TypeUtils {
 
             A simple reproduction of this problem can be done with:
             `GenericTypeReflector.capture(new TypeRef<Collection<? extends Comparable<?>>>() {})`
-
             where the collection element type then resolves to:
-            `capture of ? extends Comparable<?>
+            `capture of ? extends Comparable<?>`
             for which upper bounds return [Object, Comparable<?>]
              */
 

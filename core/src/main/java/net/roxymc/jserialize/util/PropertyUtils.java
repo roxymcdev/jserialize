@@ -1,6 +1,8 @@
 package net.roxymc.jserialize.util;
 
+import net.roxymc.jserialize.model.property.PropertyLikeModel;
 import net.roxymc.jserialize.model.property.meta.PropertyKind;
+import org.jetbrains.annotations.Contract;
 import org.jspecify.annotations.Nullable;
 
 import java.lang.annotation.Annotation;
@@ -8,7 +10,6 @@ import java.lang.reflect.AnnotatedElement;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.StringJoiner;
-import java.util.function.Supplier;
 
 public final class PropertyUtils {
     private PropertyUtils() {
@@ -62,8 +63,17 @@ public final class PropertyUtils {
         return !name.isEmpty() ? name : null;
     }
 
-    public static String getPropertyName(AnnotatedElement element, Supplier<String> defaultName) {
+    @Contract("_, !null -> !null")
+    public static @Nullable String getPropertyName(AnnotatedElement element, @Nullable String fallbackName) {
         String name = getPropertyName(element);
-        return name != null ? name : defaultName.get();
+        return name != null ? name : fallbackName;
+    }
+
+    public static String getDebugName(PropertyLikeModel property) {
+        if (property.name() != null) {
+            return property.name();
+        }
+
+        return "<unnamed @" + property.kind().annotationType().getSimpleName() + ">";
     }
 }

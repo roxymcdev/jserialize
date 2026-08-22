@@ -6,9 +6,7 @@ import org.jspecify.annotations.Nullable;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.*;
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 
 import static net.roxymc.jserialize.util.ObjectUtils.nonNull;
 
@@ -17,7 +15,7 @@ final class ConstructorModelImpl implements ConstructorModel {
     private final ParameterModel[] parameters;
 
     private ConstructorModelImpl(BuilderImpl builder, MethodHandles.Lookup methodLookup) throws IllegalAccessException {
-        this.parameters = builder.parameters.values().toArray(ParameterModel[]::new);
+        this.parameters = builder.parameters.toArray(ParameterModel[]::new);
 
         Executable executable = nonNull(builder.executable, "executable");
         MethodHandle handle;
@@ -49,8 +47,9 @@ final class ConstructorModelImpl implements ConstructorModel {
     }
 
     static final class BuilderImpl implements Builder {
+        private final Set<ParameterModel> parameters = new LinkedHashSet<>();
+        private final Map<String, ParameterModel> nameToParameter = new LinkedHashMap<>();
         private @Nullable Executable executable;
-        private final Map<String, ParameterModel> parameters = new LinkedHashMap<>();
 
         @Override
         public Builder executable(Executable executable) {
@@ -65,15 +64,20 @@ final class ConstructorModelImpl implements ConstructorModel {
         }
 
         @Override
-        public Builder parameter(String name, int index, Parameter parameter, AnnotatedType type) {
-            nonNull(name, "name");
+        public Builder parameter(@Nullable String name, int index, Parameter parameter, AnnotatedType type) {
             nonNull(parameter, "parameter");
 
-            if (parameters.containsKey(name)) {
+            if (nameToParameter.containsKey(name)) {
                 throw new IllegalStateException("Parameter already exists: " + name);
             }
 
-            parameters.put(name, new ParameterModelImpl(name, index, parameter, type));
+            ParameterModelImpl parameterModel = new ParameterModelImpl(name, index, parameter, type);
+
+            if (name != null) {
+                nameToParameter.put(name, parameterModel);
+            }
+
+            parameters.add(parameterModel);
             return this;
         }
 

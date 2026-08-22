@@ -1,5 +1,6 @@
 package net.roxymc.jserialize.model.property;
 
+import net.roxymc.jserialize.model.constructor.ParameterModel;
 import net.roxymc.jserialize.model.property.meta.PropertyKind;
 import org.jetbrains.annotations.ApiStatus;
 import org.jspecify.annotations.Nullable;
@@ -19,6 +20,8 @@ public interface PropertyMap extends Iterable<PropertyModel> {
 
     @Nullable PropertyModel get(String name);
 
+    @Nullable PropertyModel get(ParameterModel parameter);
+
     @Nullable PropertyModel get(PropertyKind<?> kind);
 
     default Optional<PropertyModel> getOptional(PropertyKind<?> kind) {
@@ -27,9 +30,9 @@ public interface PropertyMap extends Iterable<PropertyModel> {
 
     @ApiStatus.NonExtendable
     interface Builder {
-        Builder withProperty(String name, Consumer<PropertyModel.Builder> action);
+        Builder withProperty(String name, Consumer<? super PropertyModel.Builder> action);
 
-        Builder withProperty(PropertyKind<?> kind, @Nullable String fallbackName, Consumer<PropertyModel.Builder> action);
+        Builder withProperty(PropertyKind<?> kind, @Nullable String fallbackName, Consumer<? super PropertyModel.Builder> action);
 
         @ApiStatus.Internal
         PropertyMap build(MethodHandles.Lookup methodLookup) throws IllegalAccessException;

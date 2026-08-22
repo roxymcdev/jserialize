@@ -20,7 +20,7 @@ import static java.lang.String.format;
 import static net.roxymc.jserialize.util.ObjectUtils.nonNull;
 
 final class PropertyModelImpl implements PropertyModel {
-    private final String name;
+    private final @Nullable String name;
     private final @Nullable GetterRef getter;
     private final @Nullable SetterRef setter;
     private final @Nullable ParameterModel parameter;
@@ -86,7 +86,7 @@ final class PropertyModelImpl implements PropertyModel {
     }
 
     @Override
-    public String name() {
+    public @Nullable String name() {
         return name;
     }
 
@@ -122,14 +122,14 @@ final class PropertyModelImpl implements PropertyModel {
     }
 
     static final class BuilderImpl implements Builder {
-        final String name;
+        final @Nullable String name;
         private @Nullable Field field;
         private @Nullable Method getter, setter;
-        private @Nullable ParameterModel parameter;
+        @Nullable ParameterModel parameter;
         @Nullable PropertyKind<?> kind;
 
-        BuilderImpl(String name) {
-            this.name = nonNull(name, "name");
+        BuilderImpl(@Nullable String name) {
+            this.name = name;
         }
 
         private void checkKind(AnnotatedElement element) {

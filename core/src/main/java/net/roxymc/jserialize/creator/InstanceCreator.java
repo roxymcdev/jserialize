@@ -3,10 +3,11 @@ package net.roxymc.jserialize.creator;
 import net.roxymc.jserialize.model.ClassModel;
 import net.roxymc.jserialize.model.constructor.ConstructorModel;
 import net.roxymc.jserialize.model.constructor.ParameterModel;
+import net.roxymc.jserialize.model.property.PropertyLikeModel;
 import net.roxymc.jserialize.model.property.PropertyModel;
-import net.roxymc.jserialize.model.property.meta.PropertyKind;
 import net.roxymc.jserialize.model.property.meta.PropertyMeta;
 import net.roxymc.jserialize.util.PrimitiveUtils;
+import net.roxymc.jserialize.util.PropertyUtils;
 import org.jspecify.annotations.Nullable;
 
 import java.lang.reflect.Type;
@@ -43,7 +44,7 @@ public final class InstanceCreator<T> {
             try {
                 values[parameter.index()] = resolveParameter(parameter);
             } catch (Throwable ex) {
-                throw new RuntimeException("Failed to resolve parameter: " + parameter.name(), ex);
+                throw new RuntimeException("Failed to resolve parameter: " + PropertyUtils.getDebugName(parameter), ex);
             }
         }
 
@@ -53,12 +54,10 @@ public final class InstanceCreator<T> {
     }
 
     private @Nullable Object resolveParameter(ParameterModel parameter) throws Throwable {
-        String name = parameter.name();
-        PropertyMeta meta = parameter.meta();
-
         PropertyValue<?> value = getValue(parameter);
+
         if (value == null) {
-            validateValue(name, null, meta);
+            validateValue(parameter, null);
 
             Type type = parameter.type().getType();
             return PrimitiveUtils.isPrimitive(type) ? PrimitiveUtils.defaultValue(type) : null;
@@ -66,7 +65,7 @@ public final class InstanceCreator<T> {
 
         // TODO parent should be passed here
         Object resolvedValue = value.get(null);
-        validateValue(name, resolvedValue, meta);
+        validateValue(parameter, resolvedValue);
 
         return resolvedValue;
     }
@@ -113,13 +112,13 @@ public final class InstanceCreator<T> {
 
         PropertyValue<?> value = getValue(property);
         if (value == null) {
-            validateValue(name, null, meta);
+            validateValue(property, null);
             return;
         }
 
         if (!canMutate) {
             Object resolvedValue = value.get(instance);
-            validateValue(name, resolvedValue, meta);
+            validateValue(property, resolvedValue);
 
             property.setter().set(instance, resolvedValue);
             return;
@@ -143,25 +142,19 @@ public final class InstanceCreator<T> {
     }
 
     private @Nullable PropertyValue<?> getValue(ParameterModel parameter) {
-        PropertyKind<?> kind = parameter.meta().kind();
-        PropertyModel property;
-
-        if (kind == PropertyKind.PROPERTY) {
-            property = classModel.properties().get(parameter.name());
-        } else {
-            property = classModel.properties().get(kind);
-        }
-
+        PropertyModel property = classModel.properties().get(parameter);
         if (property == null) {
-            throw new IllegalStateException(format("No property of kind %s found", kind));
+            throw new IllegalStateException("No property bound to parameter: " + PropertyUtils.getDebugName(parameter));
         }
 
         return properties.get(property);
     }
 
-    private void validateValue(String name, @Nullable Object value, @Nullable PropertyMeta meta) {
+    private void validateValue(PropertyLikeModel property, @Nullable Object value) {
+        PropertyMeta meta = property.meta();
+
         if (value == null && meta != null && meta.required()) {
-            throw new IllegalStateException("Required property is missing value: " + name);
+            throw new IllegalStateException("Required property is missing value: " + PropertyUtils.getDebugName(property));
         }
     }
 

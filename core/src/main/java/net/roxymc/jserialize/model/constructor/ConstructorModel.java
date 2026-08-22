@@ -23,7 +23,7 @@ public interface ConstructorModel {
     interface Builder {
         Builder executable(Executable executable);
 
-        Builder parameter(String name, int index, Parameter parameter, AnnotatedType type);
+        Builder parameter(@Nullable String name, int index, Parameter parameter, AnnotatedType type);
 
         @ApiStatus.Internal
         ConstructorModel build(MethodHandles.Lookup methodLookup) throws IllegalAccessException;

@@ -1,5 +1,6 @@
 package net.roxymc.jserialize.model.property;
 
+import net.roxymc.jserialize.model.constructor.ParameterModel;
 import net.roxymc.jserialize.model.property.meta.PropertyKind;
 import org.jspecify.annotations.Nullable;
 
@@ -13,23 +14,28 @@ import static net.roxymc.jserialize.util.ObjectUtils.nonNull;
 import static net.roxymc.jserialize.util.ObjectUtils.nonNullOrElse;
 
 final class PropertyMapImpl implements PropertyMap {
-    private final Map<@Nullable String, PropertyModel> nameToProperty;
+    private final Set<PropertyModel> properties;
+    private final Map<String, PropertyModel> nameToProperty;
+    private final Map<ParameterModel, PropertyModel> parameterToProperty;
     private final Map<PropertyKind<?>, PropertyModel> kindToProperty;
 
     PropertyMapImpl(BuilderImpl builder, MethodHandles.Lookup methodLookup) throws IllegalAccessException {
-        Map<@Nullable String, PropertyModel> nameToProperty = new LinkedHashMap<>();
+        Map<Integer, PropertyModel> properties = new LinkedHashMap<>(builder.properties.size());
 
-        for (Map.Entry<@Nullable String, PropertyModelImpl.BuilderImpl> entry : builder.nameToProperty.entrySet()) {
-            String name = entry.getKey();
-            PropertyModel property = entry.getValue().build(methodLookup);
-
-            nameToProperty.put(name, property);
+        for (Map.Entry<Integer, PropertyModelImpl.BuilderImpl> entry : builder.properties.entrySet()) {
+            properties.put(entry.getKey(), entry.getValue().build(methodLookup));
         }
 
-        this.nameToProperty = Collections.unmodifiableMap(nameToProperty);
-        this.kindToProperty = builder.kindToName.entrySet().stream().collect(Collectors.toMap(
-                Map.Entry::getKey,
-                entry -> this.nameToProperty.get(entry.getValue())
+        this.properties = Collections.unmodifiableSet(new LinkedHashSet<>(properties.values()));
+
+        this.nameToProperty = builder.nameToId.entrySet().stream().collect(Collectors.toMap(
+                Map.Entry::getKey, entry -> properties.get(entry.getValue())
+        ));
+        this.parameterToProperty = builder.parameterToId.entrySet().stream().collect(Collectors.toMap(
+                Map.Entry::getKey, entry -> properties.get(entry.getValue())
+        ));
+        this.kindToProperty = builder.kindToId.entrySet().stream().collect(Collectors.toMap(
+                Map.Entry::getKey, entry -> properties.get(entry.getValue())
         ));
     }
 
@@ -44,64 +50,107 @@ final class PropertyMapImpl implements PropertyMap {
     }
 
     @Override
+    public @Nullable PropertyModel get(ParameterModel parameter) {
+        return parameterToProperty.get(parameter);
+    }
+
+    @Override
     public @Nullable PropertyModel get(PropertyKind<?> kind) {
         return kindToProperty.get(kind);
     }
 
     @Override
     public Iterator<PropertyModel> iterator() {
-        return nameToProperty.values().iterator();
+        return properties.iterator();
     }
 
     @Override
     public String toString() {
-        return nameToProperty.toString();
+        return properties.toString();
     }
 
     static final class BuilderImpl implements Builder {
-        private final Map<@Nullable String, PropertyModelImpl.BuilderImpl> nameToProperty = new LinkedHashMap<>();
-        private final Map<PropertyKind<?>, @Nullable String> kindToName = new HashMap<>();
+        private final Map<Integer, PropertyModelImpl.BuilderImpl> properties = new LinkedHashMap<>();
+        private final Map<String, Integer> nameToId = new HashMap<>();
+        private final Map<ParameterModel, Integer> parameterToId = new HashMap<>();
+        private final Map<PropertyKind<?>, Integer> kindToId = new HashMap<>();
 
         @Override
-        public Builder withProperty(String name, Consumer<PropertyModel.Builder> action) {
-            return withProperty0(nonNull(name, "name"), nonNull(action, "action"));
+        public Builder withProperty(String name, Consumer<? super PropertyModel.Builder> action) {
+            nonNull(name, "name");
+            nonNull(action, "action");
+
+            int id = nameToId.getOrDefault(name, properties.size());
+            return withProperty0(id, name, action);
         }
 
         @Override
-        public Builder withProperty(PropertyKind<?> kind, @Nullable String fallbackName, Consumer<PropertyModel.Builder> action) {
+        public Builder withProperty(PropertyKind<?> kind, @Nullable String fallbackName, Consumer<? super PropertyModel.Builder> action) {
             nonNull(kind, "kind");
             nonNull(action, "action");
 
-            String name = kindToName.getOrDefault(kind, fallbackName);
-            if (name == null && (kind.shouldSerialize() || kind.shouldDeserialize())) {
-                throw new IllegalStateException("Serializable property must have a name");
-            }
+            int id = nonNullOrElse(kindToId.get(kind), () -> nonNullOrElse(nameToId.get(fallbackName), properties.size()));
 
-            PropertyModelImpl.BuilderImpl builder = nameToProperty.computeIfAbsent(name, $ ->
-                    new PropertyModelImpl.BuilderImpl(nonNullOrElse(name, "<implicit>"))
-            );
-            builder.checkKind(kind);
+            PropertyModelImpl.BuilderImpl builder = properties.compute(id, ($, builder0) -> {
+                String name = builder0 != null ? builder0.name : fallbackName;
 
-            return withProperty0(name, action);
-        }
-
-        private Builder withProperty0(@Nullable String name, Consumer<PropertyModel.Builder> action) {
-            PropertyModelImpl.BuilderImpl builder = nameToProperty.computeIfAbsent(name, $ ->
-                    new PropertyModelImpl.BuilderImpl(nonNull(name, "name"))
-            );
-            action.accept(builder);
-
-            if (builder.kind != null && builder.kind != PropertyKind.PROPERTY) {
-                String previousName = kindToName.get(builder.kind);
-
-                if (kindToName.containsKey(builder.kind) && !Objects.equals(previousName, name)) {
-                    throw new IllegalStateException(format(
-                            "Multiple properties of kind %s found: %s, %s",
-                            builder.kind, nameToProperty.get(previousName).name, builder.name
-                    ));
+                if (name == null && kind.shouldDeserialize()) {
+                    throw new IllegalStateException("Deserializable property must have a name");
                 }
 
-                kindToName.put(builder.kind, name);
+                if (builder0 == null) {
+                    builder0 = new PropertyModelImpl.BuilderImpl(name);
+                }
+
+                builder0.checkKind(kind);
+                return builder0;
+            });
+
+            return withProperty0(id, builder.name, action);
+        }
+
+        private Builder withProperty0(int id, @Nullable String name, Consumer<? super PropertyModel.Builder> action) {
+            if (name != null && nonNullOrElse(nameToId.get(name), id) != id) {
+                throw new IllegalStateException(format("Property already exists: %s", name));
+            }
+
+            PropertyModelImpl.BuilderImpl builder = properties.compute(id, ($, builder0) -> {
+                if (builder0 == null) {
+                    builder0 = new PropertyModelImpl.BuilderImpl(nonNull(name, "name"));
+                }
+
+                action.accept(builder0);
+                return builder0;
+            });
+
+            if (name != null) {
+                nameToId.put(name, id);
+            }
+
+            if (builder.parameter != null) {
+                parameterToId.compute(builder.parameter, (parameter, boundId) -> {
+                    if (boundId == null || boundId == id) {
+                        return id;
+                    }
+
+                    throw new IllegalStateException(format(
+                            "Multiple properties of parameter %s found: %s, %s",
+                            parameter, properties.get(boundId).name, builder.name
+                    ));
+                });
+            }
+
+            if (builder.kind != null && builder.kind != PropertyKind.PROPERTY) {
+                kindToId.compute(builder.kind, (kind, boundId) -> {
+                    if (boundId == null || boundId == id) {
+                        return id;
+                    }
+
+                    throw new IllegalStateException(format(
+                            "Multiple properties of kind %s found: %s, %s",
+                            kind, properties.get(boundId).name, builder.name
+                    ));
+                });
             }
 
             return this;
