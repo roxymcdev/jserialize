@@ -7,25 +7,25 @@ plugins {
     alias(libs.plugins.gitpatcher)
 }
 
-val vendor = project
+val rootVendor = project
 
-@Suppress("AvoidApplyPluginMethod")
 subprojects {
+    @Suppress("AvoidApplyPluginMethod")
     apply<JavaLibraryPlugin>()
 
-    group = "jserialize.patched"
+    group = "jserialize.vendor"
     version = "patched"
 
     repositories {
         mavenCentral()
     }
 
-    val repoDetails = vendor.the<GitPatcherExtension>().patchedRepos.create(name) {
-        val path = projectDir.parentFile.toRelativeString(vendor.projectDir)
+    val repoDetails = rootVendor.the<GitPatcherExtension>().patchedRepos.create(name) {
+        val path = projectDir.parentFile.toRelativeString(rootVendor.projectDir)
 
         submodule = "$path/upstream"
         target = projectDir
-        patches = vendor.file("$path/patches")
+        patches = rootVendor.file("$path/patches")
     }
 
     the<JavaPluginExtension>().toolchain {
@@ -33,7 +33,7 @@ subprojects {
     }
 
     tasks {
-        val applyPatches = vendor.tasks.named("apply${Utils.capitalize(repoDetails.name)}Patches")
+        val applyPatches = rootVendor.tasks.named("apply${Utils.capitalize(repoDetails.name)}Patches")
 
         withType<AbstractArchiveTask>().configureEach {
             isPreserveFileTimestamps = false
