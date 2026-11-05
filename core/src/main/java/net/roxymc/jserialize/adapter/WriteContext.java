@@ -4,7 +4,7 @@ import net.roxymc.jserialize.Writer;
 import net.roxymc.jserialize.adapter.object.FormatUtils;
 import net.roxymc.jserialize.type.TypeRef;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
 

@@ -37,7 +37,7 @@ public final class MapAdapter<K extends @Nullable Object, V extends @Nullable Ob
     }
 
     @Override
-    public @Nullable Map<@Nullable K, @Nullable V> mutate(Reader reader, @Nullable Map<@Nullable K, @Nullable V> map, ReadContext ctx) throws IOException {
+    public @Nullable Map<K, V> mutate(Reader reader, @Nullable Map<K, V> map, ReadContext ctx) throws IOException {
         if (reader.peek() == TokenTypes.NULL) {
             reader.readNull();
 
@@ -72,7 +72,7 @@ public final class MapAdapter<K extends @Nullable Object, V extends @Nullable Ob
     }
 
     @Override
-    public void write(Writer writer, @Nullable Map<@Nullable K, @Nullable V> map, WriteContext ctx) throws IOException {
+    public void write(Writer writer, @Nullable Map<K, V> map, WriteContext ctx) throws IOException {
         if (map == null) {
             writer.writeNull();
             return;

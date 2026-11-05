@@ -37,7 +37,7 @@ public final class CollectionAdapter<E extends @Nullable Object> implements Type
     }
 
     @Override
-    public @Nullable Collection<@Nullable E> mutate(Reader reader, @Nullable Collection<@Nullable E> collection, ReadContext ctx) throws IOException {
+    public @Nullable Collection<E> mutate(Reader reader, @Nullable Collection<E> collection, ReadContext ctx) throws IOException {
         if (reader.peek() == TokenTypes.NULL) {
             reader.readNull();
 
@@ -68,7 +68,7 @@ public final class CollectionAdapter<E extends @Nullable Object> implements Type
     }
 
     @Override
-    public void write(Writer writer, @Nullable Collection<@Nullable E> collection, WriteContext ctx) throws IOException {
+    public void write(Writer writer, @Nullable Collection<E> collection, WriteContext ctx) throws IOException {
         if (collection == null) {
             writer.writeNull();
             return;
