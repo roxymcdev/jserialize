@@ -47,7 +47,7 @@ public final class URLAdapter implements TypeAdapter<URL> {
     }
 
     @Override
-    public TypeRef<? extends URL> type() {
+    public TypeRef<? extends @Nullable URL> type() {
         return TYPE;
     }
 }

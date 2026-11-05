@@ -12,7 +12,6 @@ import static java.lang.String.format;
 import static net.roxymc.jserialize.util.ObjectUtils.nonNull;
 
 public final class TypeUtils {
-
     private TypeUtils() {
     }
 

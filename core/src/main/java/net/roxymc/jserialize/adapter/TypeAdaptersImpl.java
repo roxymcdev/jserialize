@@ -14,28 +14,27 @@ final class TypeAdaptersImpl implements TypeAdapters {
     private final Registry<TypeAdapter.Factory, TypeAdapter<?>> typeAdapters;
     private final Registry<KeyAdapter.Factory, KeyAdapter<?>> keyAdapters;
 
-    @SuppressWarnings({"NullableProblems", "DataFlowIssue"}) // IntelliJ has existential issues
     private TypeAdaptersImpl(BuilderImpl builder) {
         this.typeAdapters = new Registry<>(builder.typeAdapters, TypeAdapter.Factory::create);
         this.keyAdapters = new Registry<>(builder.keyAdapters, (factory, type) -> factory.createKey(type, this));
     }
 
     @Override
-    public <T> @Nullable TypeAdapter<T> get(TypeRef<T> type) {
+    public <T> @Nullable TypeAdapter<T> get(TypeRef<@Nullable T> type) {
         @SuppressWarnings("unchecked")
         TypeAdapter<T> adapter = (TypeAdapter<T>) typeAdapters.get(nonNull(type, "type")).orElse(null);
         return adapter;
     }
 
     @Override
-    public <T> @Nullable KeyAdapter<T> getKey(TypeRef<T> type) {
+    public <T> @Nullable KeyAdapter<T> getKey(TypeRef<@Nullable T> type) {
         @SuppressWarnings("unchecked")
         KeyAdapter<T> adapter = (KeyAdapter<T>) keyAdapters.get(nonNull(type, "type")).orElse(null);
         return adapter;
     }
 
     @Override
-    public <T> @Nullable TypeAdapter<T> create(TypeRef<T> type) {
+    public <T> @Nullable TypeAdapter<T> create(TypeRef<@Nullable T> type) {
         for (TypeAdapter.Factory factory : typeAdapters.factories) {
             TypeAdapter<T> adapter = factory.create(type);
 
@@ -48,7 +47,7 @@ final class TypeAdaptersImpl implements TypeAdapters {
     }
 
     @Override
-    public <T> @Nullable KeyAdapter<T> createKey(TypeRef<T> type, TypeAdapters adapters) {
+    public <T> @Nullable KeyAdapter<T> createKey(TypeRef<@Nullable T> type, TypeAdapters adapters) {
         for (KeyAdapter.Factory factory : keyAdapters.factories) {
             KeyAdapter<T> adapter = factory.createKey(type, adapters);
 

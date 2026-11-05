@@ -3,6 +3,7 @@ package net.roxymc.jserialize.adapter.scalar;
 import net.roxymc.jserialize.adapter.AbstractKeyAdapter;
 import net.roxymc.jserialize.adapter.KeyAdapter;
 import net.roxymc.jserialize.type.TypeRef;
+import org.jspecify.annotations.Nullable;
 
 import java.net.URI;
 
@@ -25,7 +26,7 @@ public final class URIKeyAdapter extends AbstractKeyAdapter<URI> {
     }
 
     @Override
-    public TypeRef<? extends URI> type() {
+    public TypeRef<? extends @Nullable URI> type() {
         return TYPE;
     }
 }

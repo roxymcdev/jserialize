@@ -39,7 +39,7 @@ public final class FileKeyAdapter implements KeyAdapter<File> {
     }
 
     @Override
-    public TypeRef<? extends File> type() {
+    public TypeRef<? extends @Nullable File> type() {
         return TYPE;
     }
 }

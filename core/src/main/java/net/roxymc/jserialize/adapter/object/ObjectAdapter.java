@@ -17,11 +17,11 @@ public final class ObjectAdapter<T> implements TypeAdapter.Mutable<T> {
     private static final Factory FACTORY = factory(ClassModel.factory());
     private static final Factory ANNOTATED_FACTORY = annotatedFactory(ClassModel.factory());
 
-    final TypeRef<T> type;
+    final TypeRef<@Nullable T> type;
     final ClassModel<T> classModel;
     final PropertyTypes propertyTypes;
 
-    private ObjectAdapter(TypeRef<T> type, ClassModel<T> classModel) {
+    private ObjectAdapter(TypeRef<@Nullable T> type, ClassModel<T> classModel) {
         this.type = type;
         this.classModel = classModel;
         this.propertyTypes = new PropertyTypes(type, classModel);
@@ -61,7 +61,6 @@ public final class ObjectAdapter<T> implements TypeAdapter.Mutable<T> {
         }
 
         try {
-            @SuppressWarnings("NullableProblems") // IntelliJ has existential issues
             ObjectReader<T, ?> objectReader = new ObjectReader<>(this, instance, ctx.formatUtils(), ctx);
 
             return objectReader.read(reader);
@@ -88,7 +87,7 @@ public final class ObjectAdapter<T> implements TypeAdapter.Mutable<T> {
     }
 
     @Override
-    public TypeRef<? extends T> type() {
+    public TypeRef<? extends @Nullable T> type() {
         return type;
     }
 }

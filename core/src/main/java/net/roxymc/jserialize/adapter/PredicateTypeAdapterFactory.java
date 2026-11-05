@@ -17,7 +17,7 @@ final class PredicateTypeAdapterFactory implements TypeAdapter.Factory {
     }
 
     @Override
-    public <T> @Nullable TypeAdapter<T> create(TypeRef<T> type) {
+    public <T> @Nullable TypeAdapter<T> create(TypeRef<@Nullable T> type) {
         if (!predicate.test(type)) {
             return null;
         }

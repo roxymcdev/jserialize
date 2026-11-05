@@ -17,7 +17,7 @@ final class PropertyTypes {
     private final Map<PropertyModel, TypeRef<?>> readTypes;
     private final Map<PropertyModel, TypeRef<?>> writeTypes;
 
-    <T> PropertyTypes(TypeRef<T> type, ClassModel<T> classModel) {
+    <T> PropertyTypes(TypeRef<@Nullable T> type, ClassModel<T> classModel) {
         Map<PropertyModel, TypeRef<?>> parameterTypes = new HashMap<>();
         Map<PropertyModel, TypeRef<?>> readTypes = new HashMap<>();
         Map<PropertyModel, TypeRef<?>> writeTypes = new HashMap<>();

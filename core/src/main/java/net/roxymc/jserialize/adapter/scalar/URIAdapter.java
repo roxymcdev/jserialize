@@ -46,7 +46,7 @@ public final class URIAdapter implements TypeAdapter<URI> {
     }
 
     @Override
-    public TypeRef<? extends URI> type() {
+    public TypeRef<? extends @Nullable URI> type() {
         return TYPE;
     }
 }

@@ -39,7 +39,7 @@ public final class DateKeyAdapter implements KeyAdapter<Date> {
     }
 
     @Override
-    public TypeRef<? extends Date> type() {
+    public TypeRef<? extends @Nullable Date> type() {
         return TYPE;
     }
 }

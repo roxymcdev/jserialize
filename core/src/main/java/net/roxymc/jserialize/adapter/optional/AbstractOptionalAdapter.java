@@ -15,7 +15,7 @@ import java.util.Optional;
 import static net.roxymc.jserialize.util.TypeUtils.resolveTypeParams;
 
 abstract class AbstractOptionalAdapter<O, V> implements TypeAdapter<O> {
-    private final TypeRef<O> optionalType;
+    private final TypeRef<@Nullable O> optionalType;
     private final TypeRef<V> valueType;
 
     protected AbstractOptionalAdapter(Class<O> optionalType, Class<V> valueType) {
@@ -23,7 +23,7 @@ abstract class AbstractOptionalAdapter<O, V> implements TypeAdapter<O> {
         this.valueType = TypeRef.of(valueType);
     }
 
-    protected AbstractOptionalAdapter(TypeRef<O> optionalType) {
+    protected AbstractOptionalAdapter(TypeRef<@Nullable O> optionalType) {
         AnnotatedParameterizedType ptype = resolveTypeParams(optionalType, Optional.class);
 
         this.optionalType = optionalType;
@@ -49,7 +49,7 @@ abstract class AbstractOptionalAdapter<O, V> implements TypeAdapter<O> {
     }
 
     @Override
-    public TypeRef<? extends O> type() {
+    public TypeRef<? extends @Nullable O> type() {
         return optionalType;
     }
 }

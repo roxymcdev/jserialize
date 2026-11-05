@@ -5,6 +5,7 @@ import net.roxymc.jserialize.Writer;
 import net.roxymc.jserialize.adapter.*;
 import net.roxymc.jserialize.token.TokenTypes;
 import net.roxymc.jserialize.type.TypeRef;
+import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
@@ -12,13 +13,13 @@ import java.util.Map;
 
 import static net.roxymc.jserialize.util.ObjectUtils.nonNull;
 
-public final class MapAdapter<K, V> implements TypeAdapter.Mutable<Map<@Nullable K, @Nullable V>> {
+public final class MapAdapter<K extends @Nullable Object, V extends @Nullable Object> implements TypeAdapter.Mutable<Map<K, V>> {
     private static final Factory FACTORY = factory(DefaultMapProvider.INSTANCE);
 
     private final MapType<K, V> mapType;
     private final MapProvider[] providers;
 
-    public MapAdapter(TypeRef<? extends Map<K, V>> mapType, MapProvider[] providers) {
+    public MapAdapter(TypeRef<? extends @Nullable Map<K, V>> mapType, MapProvider[] providers) {
         this.mapType = new MapType<>(mapType);
         this.providers = providers;
     }
@@ -51,8 +52,8 @@ public final class MapAdapter<K, V> implements TypeAdapter.Mutable<Map<@Nullable
             map = mapType.createMap(providers);
         }
 
-        KeyDecoder<K> keyDecoder = ctx.typeAdapters().getKeyOrThrow(mapType.keyType);
-        TypeReader<V> valueReader = ctx.typeAdapters().getOrThrow(mapType.valueType);
+        KeyDecoder<@NonNull K> keyDecoder = ctx.typeAdapters().getKeyOrThrow(mapType.keyType);
+        TypeReader<@NonNull V> valueReader = ctx.typeAdapters().getOrThrow(mapType.valueType);
 
         reader.readObjectStart();
 
@@ -77,8 +78,8 @@ public final class MapAdapter<K, V> implements TypeAdapter.Mutable<Map<@Nullable
             return;
         }
 
-        KeyEncoder<K> keyEncoder = ctx.typeAdapters().getKeyOrThrow(mapType.keyType);
-        TypeWriter<V> valueWriter = ctx.typeAdapters().getOrThrow(mapType.valueType);
+        KeyEncoder<@NonNull K> keyEncoder = ctx.typeAdapters().getKeyOrThrow(mapType.keyType);
+        TypeWriter<@NonNull V> valueWriter = ctx.typeAdapters().getOrThrow(mapType.valueType);
 
         writer.writeObjectStart();
 
@@ -93,7 +94,7 @@ public final class MapAdapter<K, V> implements TypeAdapter.Mutable<Map<@Nullable
     }
 
     @Override
-    public TypeRef<? extends Map<@Nullable K, @Nullable V>> type() {
+    public TypeRef<? extends @Nullable Map<K, V>> type() {
         return mapType.mapType;
     }
 }

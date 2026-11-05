@@ -3,6 +3,7 @@ package net.roxymc.jserialize.adapter.scalar;
 import net.roxymc.jserialize.adapter.AbstractKeyAdapter;
 import net.roxymc.jserialize.adapter.KeyAdapter;
 import net.roxymc.jserialize.type.TypeRef;
+import org.jspecify.annotations.Nullable;
 
 public final class ShortKeyAdapter extends AbstractKeyAdapter<Short> {
     private static final TypeRef<Short> TYPE = TypeRef.of(Short.class);
@@ -23,7 +24,7 @@ public final class ShortKeyAdapter extends AbstractKeyAdapter<Short> {
     }
 
     @Override
-    public TypeRef<? extends Short> type() {
+    public TypeRef<? extends @Nullable Short> type() {
         return TYPE;
     }
 }

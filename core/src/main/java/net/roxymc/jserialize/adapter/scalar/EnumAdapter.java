@@ -13,7 +13,7 @@ import org.jspecify.annotations.Nullable;
 import java.io.IOException;
 
 public final class EnumAdapter<E extends Enum<E>> implements TypeAdapter<E> {
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings("rawtypes")
     private static final Factory FACTORY = Factory.<Enum>where(TypeUtils::isEnum, EnumAdapter::new);
 
     private final TypeRef<E> enumType;

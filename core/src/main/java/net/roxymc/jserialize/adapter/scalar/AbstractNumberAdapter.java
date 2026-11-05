@@ -92,7 +92,7 @@ abstract class AbstractNumberAdapter<N extends Number> implements TypeAdapter<N>
     protected abstract void write(Writer writer, N value) throws IOException;
 
     @Override
-    public TypeRef<? extends N> type() {
+    public TypeRef<? extends @Nullable N> type() {
         return type;
     }
 }

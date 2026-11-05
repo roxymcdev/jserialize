@@ -5,11 +5,11 @@ import org.jspecify.annotations.Nullable;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-public final class AtomicReferenceAdapter<V> extends AbstractAtomicAdapter<AtomicReference<@Nullable V>, V> {
+public final class AtomicReferenceAdapter<V extends @Nullable Object> extends AbstractAtomicAdapter<AtomicReference<V>, V> {
     @SuppressWarnings({"unchecked", "rawtypes"})
     private static final Factory FACTORY = Factory.exactRaw(AtomicReference.class, type -> new AtomicReferenceAdapter(type));
 
-    private AtomicReferenceAdapter(TypeRef<AtomicReference<@Nullable V>> atomicType) {
+    private AtomicReferenceAdapter(TypeRef<@Nullable AtomicReference<V>> atomicType) {
         super(atomicType);
     }
 
@@ -18,17 +18,17 @@ public final class AtomicReferenceAdapter<V> extends AbstractAtomicAdapter<Atomi
     }
 
     @Override
-    protected AtomicReference<@Nullable V> createAtomic() {
+    protected AtomicReference<V> createAtomic() {
         return new AtomicReference<>();
     }
 
     @Override
-    protected @Nullable V getAtomic(AtomicReference<@Nullable V> atomic) {
+    protected V getAtomic(AtomicReference<V> atomic) {
         return atomic.get();
     }
 
     @Override
-    protected void setAtomic(AtomicReference<@Nullable V> atomic, @Nullable V value) {
+    protected void setAtomic(AtomicReference<V> atomic, @Nullable V value) {
         atomic.set(value);
     }
 }

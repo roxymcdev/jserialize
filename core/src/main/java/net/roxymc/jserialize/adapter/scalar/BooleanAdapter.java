@@ -65,7 +65,7 @@ public final class BooleanAdapter implements TypeAdapter<Boolean> {
     }
 
     @Override
-    public TypeRef<? extends Boolean> type() {
+    public TypeRef<? extends @Nullable Boolean> type() {
         return type;
     }
 }

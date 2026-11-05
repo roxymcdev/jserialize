@@ -1,7 +1,8 @@
 package net.roxymc.jserialize.type;
 
 import io.leangen.geantyref.GenericTypeReflector;
-import org.jetbrains.annotations.UnknownNullability;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.lang.reflect.AnnotatedParameterizedType;
 import java.lang.reflect.AnnotatedType;
@@ -10,9 +11,9 @@ import java.lang.reflect.Type;
 
 import static net.roxymc.jserialize.util.ObjectUtils.nonNull;
 
-public abstract class TypeRef<T extends @UnknownNullability Object> {
+public abstract class TypeRef<T extends @Nullable Object> {
     private final AnnotatedType annotatedType;
-    private final Class<? super T> rawType;
+    private final Class<? super @NonNull T> rawType;
 
     @SuppressWarnings("unchecked")
     protected TypeRef() {
@@ -26,15 +27,15 @@ public abstract class TypeRef<T extends @UnknownNullability Object> {
         this.rawType = (Class<? super T>) GenericTypeReflector.erase(getType());
     }
 
-    public static <T extends @UnknownNullability Object> TypeRef<T> of(Class<T> type) {
+    public static <T extends @Nullable Object> TypeRef<T> of(Class<T> type) {
         return of((Type) type);
     }
 
-    public static <T extends @UnknownNullability Object> TypeRef<T> of(Type type) {
+    public static <T extends @Nullable Object> TypeRef<T> of(Type type) {
         return of(GenericTypeReflector.annotate(type));
     }
 
-    public static <T extends @UnknownNullability Object> TypeRef<T> of(AnnotatedType type) {
+    public static <T extends @Nullable Object> TypeRef<T> of(AnnotatedType type) {
         return new TypeRef<>(type) {
         };
     }
@@ -47,7 +48,7 @@ public abstract class TypeRef<T extends @UnknownNullability Object> {
         return annotatedType;
     }
 
-    public final Class<? super T> getRawType() {
+    public final Class<? super @NonNull T> getRawType() {
         return rawType;
     }
 

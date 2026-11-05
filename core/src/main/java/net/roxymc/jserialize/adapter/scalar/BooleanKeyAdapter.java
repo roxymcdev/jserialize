@@ -3,6 +3,7 @@ package net.roxymc.jserialize.adapter.scalar;
 import net.roxymc.jserialize.adapter.AbstractKeyAdapter;
 import net.roxymc.jserialize.adapter.KeyAdapter;
 import net.roxymc.jserialize.type.TypeRef;
+import org.jspecify.annotations.Nullable;
 
 public final class BooleanKeyAdapter extends AbstractKeyAdapter<Boolean> {
     private static final TypeRef<Boolean> TYPE = TypeRef.of(Boolean.class);
@@ -23,7 +24,7 @@ public final class BooleanKeyAdapter extends AbstractKeyAdapter<Boolean> {
     }
 
     @Override
-    public TypeRef<? extends Boolean> type() {
+    public TypeRef<? extends @Nullable Boolean> type() {
         return TYPE;
     }
 }

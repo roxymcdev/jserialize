@@ -38,7 +38,7 @@ public final class FileAdapter implements TypeAdapter<File> {
     }
 
     @Override
-    public TypeRef<? extends File> type() {
+    public TypeRef<? extends @Nullable File> type() {
         return TYPE;
     }
 }

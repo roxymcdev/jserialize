@@ -3,6 +3,7 @@ package net.roxymc.jserialize.adapter.scalar;
 import net.roxymc.jserialize.adapter.AbstractKeyAdapter;
 import net.roxymc.jserialize.adapter.KeyAdapter;
 import net.roxymc.jserialize.type.TypeRef;
+import org.jspecify.annotations.Nullable;
 
 import java.util.UUID;
 
@@ -25,7 +26,7 @@ public final class UUIDKeyAdapter extends AbstractKeyAdapter<UUID> {
     }
 
     @Override
-    public TypeRef<? extends UUID> type() {
+    public TypeRef<? extends @Nullable UUID> type() {
         return TYPE;
     }
 }

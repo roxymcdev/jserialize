@@ -39,7 +39,6 @@ public abstract class TokenType {
     public static final class NonValued extends TokenType {
         private final Supplier<Token> token;
 
-        @ApiStatus.Internal
         private NonValued(String name, Kind kind, Supplier<Token> token) {
             super(name, kind);
             this.token = token;

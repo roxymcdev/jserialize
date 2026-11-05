@@ -11,11 +11,13 @@ public final class ObjectUtils {
     private ObjectUtils() {
     }
 
+    @Contract("null, _ -> fail")
     public static <T> T nonNull(@Nullable T obj, String name) {
         return Objects.requireNonNull(obj, name + " == null");
     }
 
     @SuppressWarnings("NullableProblems")
+    @Contract("null, _ -> fail")
     public static <T> T[] nonNull(@Nullable T @Nullable [] array, String name) {
         nonNull((Object) array, name);
 

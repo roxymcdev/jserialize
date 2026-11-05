@@ -46,7 +46,7 @@ public final class UUIDAdapter implements TypeAdapter<UUID> {
     }
 
     @Override
-    public TypeRef<? extends UUID> type() {
+    public TypeRef<? extends @Nullable UUID> type() {
         return TYPE;
     }
 }

@@ -9,7 +9,7 @@ public final class OptionalAdapter<V> extends AbstractOptionalAdapter<Optional<V
     @SuppressWarnings({"unchecked", "rawtypes"})
     private static final Factory FACTORY = Factory.exactRaw(Optional.class, type -> new OptionalAdapter(type));
 
-    private OptionalAdapter(TypeRef<Optional<V>> optionalType) {
+    private OptionalAdapter(TypeRef<@Nullable Optional<V>> optionalType) {
         super(optionalType);
     }
 

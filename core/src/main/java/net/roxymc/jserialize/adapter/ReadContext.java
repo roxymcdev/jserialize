@@ -29,7 +29,7 @@ public interface ReadContext {
         return read(reader, TypeRef.of(type));
     }
 
-    default <T> @Nullable T read(Reader reader, TypeRef<T> type) throws IOException {
+    default <T> @Nullable T read(Reader reader, TypeRef<@Nullable T> type) throws IOException {
         return typeAdapters().getOrThrow(type).read(reader, this);
     }
 

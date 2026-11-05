@@ -64,7 +64,7 @@ public final class StringAdapter implements TypeAdapter<String> {
     }
 
     @Override
-    public TypeRef<? extends String> type() {
+    public TypeRef<? extends @Nullable String> type() {
         return TYPE;
     }
 }

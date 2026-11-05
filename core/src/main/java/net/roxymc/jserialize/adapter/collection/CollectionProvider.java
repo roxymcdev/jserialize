@@ -6,5 +6,5 @@ import org.jspecify.annotations.Nullable;
 import java.util.Collection;
 
 public interface CollectionProvider {
-    <E extends @Nullable Object> @Nullable CollectionFactory<E> resolve(TypeRef<? extends Collection<E>> type);
+    <E extends @Nullable Object> @Nullable CollectionFactory<E> resolve(TypeRef<? extends @Nullable Collection<E>> type);
 }

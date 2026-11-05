@@ -7,6 +7,7 @@ import net.roxymc.jserialize.adapter.TypeAdapter;
 import net.roxymc.jserialize.adapter.WriteContext;
 import net.roxymc.jserialize.token.TokenTypes;
 import net.roxymc.jserialize.type.TypeRef;
+import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
@@ -15,8 +16,8 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static net.roxymc.jserialize.util.TypeUtils.resolveTypeParams;
 
-abstract class AbstractAtomicAdapter<A, V> implements TypeAdapter.Mutable<A> {
-    private final TypeRef<A> atomicType;
+abstract class AbstractAtomicAdapter<A, V extends @Nullable Object> implements TypeAdapter.Mutable<A> {
+    private final TypeRef<@Nullable A> atomicType;
     private final TypeRef<V> valueType;
 
     protected AbstractAtomicAdapter(Class<A> atomicType, Class<V> valueType) {
@@ -24,7 +25,7 @@ abstract class AbstractAtomicAdapter<A, V> implements TypeAdapter.Mutable<A> {
         this.valueType = TypeRef.of(valueType);
     }
 
-    protected AbstractAtomicAdapter(TypeRef<A> atomicType) {
+    protected AbstractAtomicAdapter(TypeRef<@Nullable A> atomicType) {
         AnnotatedParameterizedType ptype = resolveTypeParams(atomicType, AtomicReference.class);
 
         this.atomicType = atomicType;
@@ -33,20 +34,20 @@ abstract class AbstractAtomicAdapter<A, V> implements TypeAdapter.Mutable<A> {
 
     protected abstract A createAtomic();
 
-    protected abstract @Nullable V getAtomic(A atomic);
+    protected abstract V getAtomic(A atomic);
 
     protected abstract void setAtomic(A atomic, @Nullable V value);
 
     @Override
     public @Nullable A mutate(Reader reader, @Nullable A atomic, ReadContext ctx) throws IOException {
-        TypeAdapter<V> valueAdapter = ctx.typeAdapters().getOrThrow(valueType);
+        TypeAdapter<@NonNull V> valueAdapter = ctx.typeAdapters().getOrThrow(valueType);
 
         V value;
 
         if (valueAdapter instanceof TypeAdapter.Mutable && reader.peek() != TokenTypes.NULL) {
             V oldValue = atomic != null ? getAtomic(atomic) : null;
 
-            value = ((TypeAdapter.Mutable<V>) valueAdapter).mutate(reader, oldValue, ctx);
+            value = ((TypeAdapter.Mutable<@NonNull V>) valueAdapter).mutate(reader, oldValue, ctx);
         } else {
             value = valueAdapter.read(reader, ctx);
         }
@@ -70,7 +71,7 @@ abstract class AbstractAtomicAdapter<A, V> implements TypeAdapter.Mutable<A> {
     }
 
     @Override
-    public TypeRef<? extends A> type() {
+    public TypeRef<? extends @Nullable A> type() {
         return atomicType;
     }
 }

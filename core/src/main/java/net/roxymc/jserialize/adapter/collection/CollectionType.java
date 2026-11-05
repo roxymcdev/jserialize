@@ -11,15 +11,16 @@ import java.util.Collection;
 import static net.roxymc.jserialize.util.TypeUtils.resolveTypeParams;
 import static net.roxymc.jserialize.util.TypeUtils.resolveUpperBound;
 
-final class CollectionType<E> {
+final class CollectionType<E extends @Nullable Object> {
     private static final VarHandle COLLECTION_FACTORY_HANDLE = VarHandles.find(CollectionType.class, "collectionFactory", CollectionFactory.class);
 
-    final TypeRef<? extends Collection<E>> collectionType;
+    final TypeRef<? extends @Nullable Collection<E>> collectionType;
     final TypeRef<E> elementType;
 
+    @SuppressWarnings("unused")
     private @Nullable CollectionFactory<E> collectionFactory;
 
-    CollectionType(TypeRef<? extends Collection<E>> collectionType) {
+    CollectionType(TypeRef<? extends @Nullable Collection<E>> collectionType) {
         AnnotatedParameterizedType ptype = resolveTypeParams(collectionType, Collection.class);
 
         this.collectionType = collectionType;

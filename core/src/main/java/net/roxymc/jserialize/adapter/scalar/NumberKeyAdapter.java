@@ -3,6 +3,7 @@ package net.roxymc.jserialize.adapter.scalar;
 import net.roxymc.jserialize.adapter.AbstractKeyAdapter;
 import net.roxymc.jserialize.adapter.KeyAdapter;
 import net.roxymc.jserialize.type.TypeRef;
+import org.jspecify.annotations.Nullable;
 
 public final class NumberKeyAdapter extends AbstractKeyAdapter<Number> {
     private static final TypeRef<Number> TYPE = TypeRef.of(Number.class);
@@ -23,7 +24,7 @@ public final class NumberKeyAdapter extends AbstractKeyAdapter<Number> {
     }
 
     @Override
-    public TypeRef<? extends Number> type() {
+    public TypeRef<? extends @Nullable Number> type() {
         return TYPE;
     }
 }

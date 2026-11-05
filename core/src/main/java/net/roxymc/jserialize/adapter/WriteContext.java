@@ -21,7 +21,7 @@ public interface WriteContext {
         write(writer, TypeRef.of(type), value);
     }
 
-    default <T> void write(Writer writer, TypeRef<T> type, @Nullable T value) throws IOException {
+    default <T> void write(Writer writer, TypeRef<@Nullable T> type, @Nullable T value) throws IOException {
         typeAdapters().getOrThrow(type).write(writer, value, this);
     }
 

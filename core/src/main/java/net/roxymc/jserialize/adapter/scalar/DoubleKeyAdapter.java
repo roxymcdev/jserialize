@@ -3,6 +3,7 @@ package net.roxymc.jserialize.adapter.scalar;
 import net.roxymc.jserialize.adapter.AbstractKeyAdapter;
 import net.roxymc.jserialize.adapter.KeyAdapter;
 import net.roxymc.jserialize.type.TypeRef;
+import org.jspecify.annotations.Nullable;
 
 public final class DoubleKeyAdapter extends AbstractKeyAdapter<Double> {
     private static final TypeRef<Double> TYPE = TypeRef.of(Double.class);
@@ -23,7 +24,7 @@ public final class DoubleKeyAdapter extends AbstractKeyAdapter<Double> {
     }
 
     @Override
-    public TypeRef<? extends Double> type() {
+    public TypeRef<? extends @Nullable Double> type() {
         return TYPE;
     }
 }

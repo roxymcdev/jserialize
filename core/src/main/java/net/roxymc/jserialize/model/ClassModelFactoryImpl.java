@@ -8,6 +8,7 @@ import net.roxymc.jserialize.model.resolver.PropertiesResolver;
 import net.roxymc.jserialize.model.resolver.SimpleConstructorResolver;
 import net.roxymc.jserialize.model.resolver.SimplePropertiesResolver;
 import net.roxymc.jserialize.type.TypeRef;
+import org.jspecify.annotations.Nullable;
 
 import java.lang.invoke.MethodHandles;
 import java.util.Map;
@@ -31,7 +32,7 @@ final class ClassModelFactoryImpl implements ClassModel.Factory {
     }
 
     @Override
-    public <T> ClassModel<T> create(TypeRef<? extends T> type) {
+    public <T> ClassModel<T> create(TypeRef<? extends @Nullable T> type) {
         return createUnchecked(type.getRawType());
     }
 

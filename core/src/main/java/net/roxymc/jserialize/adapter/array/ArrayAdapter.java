@@ -17,7 +17,7 @@ public final class ArrayAdapter implements TypeAdapter<Object> {
     private static final Factory FACTORY = Factory.where(type -> type.getRawType().isArray(), ArrayAdapter::new);
 
     private final TypeRef<?> arrayType;
-    private final TypeRef<Object> componentType;
+    private final TypeRef<@Nullable Object> componentType;
 
     private ArrayAdapter(TypeRef<?> arrayType) {
         this.arrayType = arrayType;
@@ -41,7 +41,7 @@ public final class ArrayAdapter implements TypeAdapter<Object> {
 
         List<@Nullable Object> buffer = new ArrayList<>();
 
-        for (int index = 0; reader.peek() != TokenTypes.ARRAY_END; index++) {
+        while (reader.peek() != TokenTypes.ARRAY_END) {
             buffer.add(componentReader.read(reader, ctx));
         }
 

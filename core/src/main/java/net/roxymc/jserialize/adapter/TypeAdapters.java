@@ -37,13 +37,13 @@ public interface TypeAdapters extends TypeAdapter.Factory, KeyAdapter.Factory {
         return get(TypeRef.of(type));
     }
 
-    <T> @Nullable TypeAdapter<T> get(TypeRef<T> type);
+    <T> @Nullable TypeAdapter<T> get(TypeRef<@Nullable T> type);
 
     default <T> TypeAdapter<T> getOrThrow(Class<T> type) {
         return getOrThrow(TypeRef.of(type));
     }
 
-    default <T> TypeAdapter<T> getOrThrow(TypeRef<T> type) {
+    default <T> TypeAdapter<T> getOrThrow(TypeRef<@Nullable T> type) {
         TypeAdapter<T> adapter = get(type);
         if (adapter != null) {
             return adapter;
@@ -56,13 +56,13 @@ public interface TypeAdapters extends TypeAdapter.Factory, KeyAdapter.Factory {
         return getKey(TypeRef.of(type));
     }
 
-    <T> @Nullable KeyAdapter<T> getKey(TypeRef<T> type);
+    <T> @Nullable KeyAdapter<T> getKey(TypeRef<@Nullable T> type);
 
     default <T> KeyAdapter<T> getKeyOrThrow(Class<T> type) {
         return getKeyOrThrow(TypeRef.of(type));
     }
 
-    default <T> KeyAdapter<T> getKeyOrThrow(TypeRef<T> type) {
+    default <T> KeyAdapter<T> getKeyOrThrow(TypeRef<@Nullable T> type) {
         KeyAdapter<T> adapter = getKey(type);
         if (adapter != null) {
             return adapter;
@@ -72,10 +72,10 @@ public interface TypeAdapters extends TypeAdapter.Factory, KeyAdapter.Factory {
     }
 
     @Override
-    <T> @Nullable TypeAdapter<T> create(TypeRef<T> type);
+    <T> @Nullable TypeAdapter<T> create(TypeRef<@Nullable T> type);
 
     @Override
-    <T> @Nullable KeyAdapter<T> createKey(TypeRef<T> type, TypeAdapters adapters);
+    <T> @Nullable KeyAdapter<T> createKey(TypeRef<@Nullable T> type, TypeAdapters adapters);
 
     @ApiStatus.NonExtendable
     interface Builder {

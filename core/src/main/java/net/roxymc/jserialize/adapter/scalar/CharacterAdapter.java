@@ -66,7 +66,7 @@ public final class CharacterAdapter implements TypeAdapter<Character> {
     }
 
     @Override
-    public TypeRef<? extends Character> type() {
+    public TypeRef<? extends @Nullable Character> type() {
         return type;
     }
 }

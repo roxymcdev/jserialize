@@ -4,6 +4,7 @@ import net.roxymc.jserialize.adapter.AbstractKeyAdapter;
 import net.roxymc.jserialize.adapter.KeyAdapter;
 import net.roxymc.jserialize.type.TypeRef;
 import net.roxymc.jserialize.util.TypeUtils;
+import org.jspecify.annotations.Nullable;
 
 public final class EnumKeyAdapter<E extends Enum<E>> extends AbstractKeyAdapter<E> {
     @SuppressWarnings({"unchecked", "rawtypes"})
@@ -28,7 +29,7 @@ public final class EnumKeyAdapter<E extends Enum<E>> extends AbstractKeyAdapter<
     }
 
     @Override
-    public TypeRef<? extends E> type() {
+    public TypeRef<? extends @Nullable E> type() {
         return enumType;
     }
 }

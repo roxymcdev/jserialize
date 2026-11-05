@@ -38,7 +38,7 @@ public final class DateAdapter implements TypeAdapter<Date> {
     }
 
     @Override
-    public TypeRef<? extends Date> type() {
+    public TypeRef<? extends @Nullable Date> type() {
         return TYPE;
     }
 }

@@ -13,7 +13,7 @@ public final class DefaultCollectionProvider implements CollectionProvider {
     }
 
     @Override
-    public <E extends @Nullable Object> @Nullable CollectionFactory<E> resolve(TypeRef<? extends Collection<E>> type) {
+    public <E extends @Nullable Object> @Nullable CollectionFactory<E> resolve(TypeRef<? extends @Nullable Collection<E>> type) {
         Class<?> rawType = type.getRawType();
 
         if (rawType.isAssignableFrom(ArrayList.class)) {

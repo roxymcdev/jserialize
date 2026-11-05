@@ -30,7 +30,7 @@ abstract class AbstractTemporalKeyAdapter<T extends Temporal> implements KeyAdap
     }
 
     @Override
-    public TypeRef<? extends T> type() {
+    public TypeRef<? extends @Nullable T> type() {
         return type;
     }
 }

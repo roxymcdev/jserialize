@@ -3,6 +3,7 @@ package net.roxymc.jserialize.adapter.scalar;
 import net.roxymc.jserialize.adapter.AbstractKeyAdapter;
 import net.roxymc.jserialize.adapter.KeyAdapter;
 import net.roxymc.jserialize.type.TypeRef;
+import org.jspecify.annotations.Nullable;
 
 import java.nio.file.Path;
 
@@ -25,7 +26,7 @@ public final class PathKeyAdapter extends AbstractKeyAdapter<Path> {
     }
 
     @Override
-    public TypeRef<? extends Path> type() {
+    public TypeRef<? extends @Nullable Path> type() {
         return TYPE;
     }
 }

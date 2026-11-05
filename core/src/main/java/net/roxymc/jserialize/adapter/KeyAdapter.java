@@ -7,7 +7,7 @@ import org.jspecify.annotations.Nullable;
 import java.util.function.Predicate;
 
 public interface KeyAdapter<T> extends KeyDecoder<T>, KeyEncoder<T> {
-    static <T> KeyAdapter<T> of(TypeRef<? extends T> type, KeyDecoder<? extends T> decoder, KeyEncoder<? super T> encoder) {
+    static <T> KeyAdapter<T> of(TypeRef<? extends @Nullable T> type, KeyDecoder<? extends T> decoder, KeyEncoder<? super T> encoder) {
         return new KeyAdapter<>() {
             @Override
             public @Nullable T decode(@Nullable String value) {
@@ -20,7 +20,7 @@ public interface KeyAdapter<T> extends KeyDecoder<T>, KeyEncoder<T> {
             }
 
             @Override
-            public TypeRef<? extends T> type() {
+            public TypeRef<? extends @Nullable T> type() {
                 return type;
             }
         };
@@ -32,7 +32,7 @@ public interface KeyAdapter<T> extends KeyDecoder<T>, KeyEncoder<T> {
     @Override
     String encode(@Nullable T value);
 
-    TypeRef<? extends T> type();
+    TypeRef<? extends @Nullable T> type();
 
     interface Factory {
         static <T> Factory where(Predicate<? super TypeRef<?>> predicate, TypedFactory<? super T> factory) {
@@ -43,7 +43,7 @@ public interface KeyAdapter<T> extends KeyDecoder<T>, KeyEncoder<T> {
             return where(subtype -> type.isAssignableFrom(subtype.getRawType()), factory);
         }
 
-        static <T> Factory polymorphic(TypeRef<T> type, TypedFactory<? super T> factory) {
+        static <T> Factory polymorphic(TypeRef<@Nullable T> type, TypedFactory<? super T> factory) {
             return where(subtype -> GenericTypeReflector.isSuperType(type.getType(), subtype.getType()), factory);
         }
 
@@ -51,7 +51,7 @@ public interface KeyAdapter<T> extends KeyDecoder<T>, KeyEncoder<T> {
             return exact(adapter.type(), (TypedFactory<? super T>) ($1, $2) -> adapter);
         }
 
-        static <T> Factory exact(TypeRef<T> type, TypedFactory<? super T> factory) {
+        static <T> Factory exact(TypeRef<@Nullable T> type, TypedFactory<? super T> factory) {
             return where(subtype -> type.getType().equals(subtype.getType()), factory);
         }
 
@@ -59,7 +59,7 @@ public interface KeyAdapter<T> extends KeyDecoder<T>, KeyEncoder<T> {
             return exactRaw(TypeRef.of(type), factory);
         }
 
-        static <T> Factory exactRaw(TypeRef<T> type, TypedFactory<? super T> factory) {
+        static <T> Factory exactRaw(TypeRef<@Nullable T> type, TypedFactory<? super T> factory) {
             return where(subtype -> type.getRawType().equals(subtype.getRawType()), factory);
         }
 
@@ -67,11 +67,11 @@ public interface KeyAdapter<T> extends KeyDecoder<T>, KeyEncoder<T> {
             return new CompositeKeyAdapterFactory(factories);
         }
 
-        <T> @Nullable KeyAdapter<T> createKey(TypeRef<T> type, TypeAdapters adapters);
+        <T> @Nullable KeyAdapter<T> createKey(TypeRef<@Nullable T> type, TypeAdapters adapters);
     }
 
     @FunctionalInterface
     interface TypedFactory<T> {
-        @Nullable KeyAdapter<T> createKey(TypeRef<T> type, TypeAdapters adapters);
+        @Nullable KeyAdapter<T> createKey(TypeRef<@Nullable T> type, TypeAdapters adapters);
     }
 }

@@ -46,7 +46,7 @@ public final class PathAdapter implements TypeAdapter<Path> {
     }
 
     @Override
-    public TypeRef<? extends Path> type() {
+    public TypeRef<? extends @Nullable Path> type() {
         return TYPE;
     }
 }

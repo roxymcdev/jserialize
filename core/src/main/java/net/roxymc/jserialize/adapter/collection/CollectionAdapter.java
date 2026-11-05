@@ -5,6 +5,7 @@ import net.roxymc.jserialize.Writer;
 import net.roxymc.jserialize.adapter.*;
 import net.roxymc.jserialize.token.TokenTypes;
 import net.roxymc.jserialize.type.TypeRef;
+import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
@@ -12,13 +13,13 @@ import java.util.Collection;
 
 import static net.roxymc.jserialize.util.ObjectUtils.nonNull;
 
-public final class CollectionAdapter<E> implements TypeAdapter.Mutable<Collection<@Nullable E>> {
+public final class CollectionAdapter<E extends @Nullable Object> implements TypeAdapter.Mutable<Collection<E>> {
     private static final Factory FACTORY = factory(DefaultCollectionProvider.INSTANCE);
 
     private final CollectionType<E> collectionType;
     private final CollectionProvider[] providers;
 
-    private CollectionAdapter(TypeRef<? extends Collection<E>> collectionType, CollectionProvider[] providers) {
+    private CollectionAdapter(TypeRef<? extends @Nullable Collection<E>> collectionType, CollectionProvider[] providers) {
         this.collectionType = new CollectionType<>(collectionType);
         this.providers = providers;
     }
@@ -51,11 +52,11 @@ public final class CollectionAdapter<E> implements TypeAdapter.Mutable<Collectio
             collection = collectionType.createCollection(providers);
         }
 
-        TypeReader<E> elementReader = ctx.typeAdapters().getOrThrow(collectionType.elementType);
+        TypeReader<@NonNull E> elementReader = ctx.typeAdapters().getOrThrow(collectionType.elementType);
 
         reader.readArrayStart();
 
-        for (int index = 0; reader.peek() != TokenTypes.ARRAY_END; index++) {
+        while (reader.peek() != TokenTypes.ARRAY_END) {
             E element = elementReader.read(reader, ctx);
 
             collection.add(element);
@@ -73,7 +74,7 @@ public final class CollectionAdapter<E> implements TypeAdapter.Mutable<Collectio
             return;
         }
 
-        TypeWriter<E> elementWriter = ctx.typeAdapters().getOrThrow(collectionType.elementType);
+        TypeWriter<@NonNull E> elementWriter = ctx.typeAdapters().getOrThrow(collectionType.elementType);
 
         writer.writeArrayStart();
 
@@ -85,7 +86,7 @@ public final class CollectionAdapter<E> implements TypeAdapter.Mutable<Collectio
     }
 
     @Override
-    public TypeRef<? extends Collection<@Nullable E>> type() {
+    public TypeRef<? extends @Nullable Collection<E>> type() {
         return collectionType.collectionType;
     }
 }

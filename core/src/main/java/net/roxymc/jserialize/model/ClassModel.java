@@ -28,7 +28,7 @@ public interface ClassModel<T> {
 
     @ApiStatus.NonExtendable
     interface Factory {
-        <T> ClassModel<T> create(TypeRef<? extends T> type);
+        <T> ClassModel<T> create(TypeRef<? extends @Nullable T> type);
 
         <T> ClassModel<T> create(Class<T> type);
 

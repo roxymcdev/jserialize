@@ -11,16 +11,17 @@ import java.util.Map;
 import static net.roxymc.jserialize.util.TypeUtils.resolveTypeParams;
 import static net.roxymc.jserialize.util.TypeUtils.resolveUpperBound;
 
-final class MapType<K, V> {
+final class MapType<K extends @Nullable Object, V extends @Nullable Object> {
     private static final VarHandle MAP_FACTORY_HANDLE = VarHandles.find(MapType.class, "mapFactory", MapFactory.class);
 
-    final TypeRef<? extends Map<K, V>> mapType;
+    final TypeRef<? extends @Nullable Map<K, V>> mapType;
     final TypeRef<K> keyType;
     final TypeRef<V> valueType;
 
+    @SuppressWarnings("unused")
     private @Nullable MapFactory<K, V> mapFactory;
 
-    MapType(TypeRef<? extends Map<K, V>> mapType) {
+    MapType(TypeRef<? extends @Nullable Map<K, V>> mapType) {
         AnnotatedParameterizedType ptype = resolveTypeParams(mapType, Map.class);
 
         this.mapType = mapType;
