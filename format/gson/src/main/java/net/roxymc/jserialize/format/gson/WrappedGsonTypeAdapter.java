@@ -11,10 +11,10 @@ import org.jspecify.annotations.Nullable;
 import java.io.IOException;
 
 final class WrappedGsonTypeAdapter<T> implements TypeAdapter<T> {
-    private final TypeRef<T> type;
+    private final TypeRef<@Nullable T> type;
     private final com.google.gson.TypeAdapter<T> adapter;
 
-    WrappedGsonTypeAdapter(TypeRef<T> type, com.google.gson.TypeAdapter<T> adapter) {
+    WrappedGsonTypeAdapter(TypeRef<@Nullable T> type, com.google.gson.TypeAdapter<T> adapter) {
         this.type = type;
         this.adapter = adapter;
     }
@@ -31,7 +31,7 @@ final class WrappedGsonTypeAdapter<T> implements TypeAdapter<T> {
     }
 
     @Override
-    public TypeRef<? extends T> type() {
+    public TypeRef<? extends @Nullable T> type() {
         return type;
     }
 }

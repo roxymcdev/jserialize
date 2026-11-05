@@ -15,10 +15,10 @@ import org.jspecify.annotations.Nullable;
 import java.io.IOException;
 
 final class WrappedCodec<T> implements TypeAdapter<T> {
-    private final TypeRef<T> type;
+    private final TypeRef<@Nullable T> type;
     private final Codec<T> codec;
 
-    WrappedCodec(TypeRef<T> type, Codec<T> codec) {
+    WrappedCodec(TypeRef<@Nullable T> type, Codec<T> codec) {
         this.type = type;
         this.codec = codec;
     }
@@ -49,7 +49,7 @@ final class WrappedCodec<T> implements TypeAdapter<T> {
     }
 
     @Override
-    public TypeRef<? extends T> type() {
+    public TypeRef<? extends @Nullable T> type() {
         return type;
     }
 }

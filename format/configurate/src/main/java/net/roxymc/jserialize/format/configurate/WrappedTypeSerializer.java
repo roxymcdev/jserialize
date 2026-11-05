@@ -15,10 +15,10 @@ import org.spongepowered.configurate.serialize.TypeSerializer;
 import java.io.IOException;
 
 final class WrappedTypeSerializer<T> implements TypeAdapter<T> {
-    private final TypeRef<T> type;
+    private final TypeRef<@Nullable T> type;
     private final TypeSerializer<T> serializer;
 
-    WrappedTypeSerializer(TypeRef<T> type, TypeSerializer<T> serializer) {
+    WrappedTypeSerializer(TypeRef<@Nullable T> type, TypeSerializer<T> serializer) {
         this.type = type;
         this.serializer = serializer;
     }
@@ -38,7 +38,7 @@ final class WrappedTypeSerializer<T> implements TypeAdapter<T> {
     }
 
     @Override
-    public TypeRef<? extends T> type() {
+    public TypeRef<? extends @Nullable T> type() {
         return type;
     }
 }

@@ -22,7 +22,7 @@ final class BsonTypeAdapters implements TypeAdapters {
         this.adapters = adapters;
     }
 
-    private <T> @Nullable Codec<T> getCodec(TypeRef<? extends T> typeRef) {
+    private <T> @Nullable Codec<T> getCodec(TypeRef<? extends @Nullable T> typeRef) {
         Type type = typeRef.getType();
         Class<?> rawType = typeRef.getRawType();
 
@@ -44,7 +44,7 @@ final class BsonTypeAdapters implements TypeAdapters {
     }
 
     @Override
-    public <T> @Nullable TypeAdapter<T> get(TypeRef<T> type) {
+    public <T> @Nullable TypeAdapter<T> get(TypeRef<@Nullable T> type) {
         Codec<T> codec = getCodec(type);
 
         if (codec == null) {
@@ -59,17 +59,17 @@ final class BsonTypeAdapters implements TypeAdapters {
     }
 
     @Override
-    public <T> @Nullable KeyAdapter<T> getKey(TypeRef<T> type) {
+    public <T> @Nullable KeyAdapter<T> getKey(TypeRef<@Nullable T> type) {
         return this.adapters.getKey(type);
     }
 
     @Override
-    public <T> @Nullable TypeAdapter<T> create(TypeRef<T> type) {
+    public <T> @Nullable TypeAdapter<T> create(TypeRef<@Nullable T> type) {
         return get(type);
     }
 
     @Override
-    public <T> @Nullable KeyAdapter<T> createKey(TypeRef<T> type, TypeAdapters adapters) {
+    public <T> @Nullable KeyAdapter<T> createKey(TypeRef<@Nullable T> type, TypeAdapters adapters) {
         return this.adapters.createKey(type, adapters);
     }
 }

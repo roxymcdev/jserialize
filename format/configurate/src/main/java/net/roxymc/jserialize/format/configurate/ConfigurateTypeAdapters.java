@@ -19,7 +19,7 @@ final class ConfigurateTypeAdapters implements TypeAdapters {
     }
 
     @Override
-    public <T> @Nullable TypeAdapter<T> get(TypeRef<T> type) {
+    public <T> @Nullable TypeAdapter<T> get(TypeRef<@Nullable T> type) {
         @SuppressWarnings("unchecked")
         TypeSerializer<T> serializer = (TypeSerializer<T>) options.serializers().get(type.getAnnotatedType());
 
@@ -35,17 +35,17 @@ final class ConfigurateTypeAdapters implements TypeAdapters {
     }
 
     @Override
-    public <T> @Nullable KeyAdapter<T> getKey(TypeRef<T> type) {
+    public <T> @Nullable KeyAdapter<T> getKey(TypeRef<@Nullable T> type) {
         return this.adapters.getKey(type);
     }
 
     @Override
-    public <T> @Nullable TypeAdapter<T> create(TypeRef<T> type) {
+    public <T> @Nullable TypeAdapter<T> create(TypeRef<@Nullable T> type) {
         return get(type);
     }
 
     @Override
-    public <T> @Nullable KeyAdapter<T> createKey(TypeRef<T> type, TypeAdapters adapters) {
+    public <T> @Nullable KeyAdapter<T> createKey(TypeRef<@Nullable T> type, TypeAdapters adapters) {
         return this.adapters.createKey(type, adapters);
     }
 }
